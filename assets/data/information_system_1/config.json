@@ -113,7 +113,7 @@
             "elementClass": [
                 "stats-supervisors"
             ],
-            "round": 2,
+            "round": 1,
             "is_editable": false,
             "error-components": [
                 {
@@ -139,7 +139,7 @@
                 "table-form-účastníci-alergeny"
             ],
             "is_editable": false,
-            "round": 1,
+            "round": 2,
             "error-components": [
                 {
                     "id": "table-form-účastníci-alergeny",
@@ -160,7 +160,7 @@
             "answer": "opt == cop1:Komponenta místo počtu vedoucích zobrazovala počet alergenů.;wop2:Komponenta zobrazovala počet účastníků.;wop3:Komponenta zobrazovala počet jídel.",
             "elementClass": "stats-supervisors",
             "is_editable": false,
-            "round": 4,
+            "round": 3,
             "error-components": [
                 {
                     "id": "stats-supervisors",

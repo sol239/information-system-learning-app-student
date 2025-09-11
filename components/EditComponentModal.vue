@@ -295,7 +295,10 @@ function onApplyChanges(event: MouseEvent) {
       sql: updateSection(currentComponent.sql, sectionEntries.value.sql || {}),
       additionals: updateSection(currentComponent.additionals, sectionEntries.value.additionals || {})
     }
-
+    
+    console.log("Updated Component to be saved:", updatedComponent
+      
+    )
     componentCodeStore.updateComponent(highlightStore.selectedComponentId ?? '', updatedComponent)
 
      toast.add({

@@ -1,16 +1,18 @@
 <template>
   <div class="highlightable" id="dashboard-table-count-badge"
     @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('dashboard-table-count-badge', $event)">
-     <div class="badge-wrapper">
-      <!-- Rendered HTML -->
-      <div v-html="renderedHtml" class="badge-content"></div>
+    <div class="badge-wrapper">
+      <div class="badge-content-wrapper">
+        <!-- Rendered HTML -->
+        <div v-html="renderedHtml" class="badge-content"></div>
 
-      <!-- Edit button positioned absolutely -->
-      <EditComponentModalOpenButton
-        v-if="highlightStore.isEditModeActive"
-        :componentId="componentId"
-        class="edit-button"
-      />
+        <!-- Edit button positioned absolutely -->
+        <EditComponentModalOpenButton
+          v-if="highlightStore.isEditModeActive"
+          :componentId="componentId"
+          class="edit-button"
+        />
+      </div>
     </div>
   </div>
   <EditComponentModal v-if="highlightStore.isEditModeActive && highlightStore.selectedComponentId" />
@@ -71,19 +73,18 @@ useHighlightWatchers(highlightStore.highlightHandler, highlightStore);
 
 <style>
 .badge-wrapper {
-  position: relative; /* Needed for absolute positioning of the button */
   display: inline-block;
 }
 
-.badge-content {
-  /* Optional: add padding so button doesn't overlap content */
-  padding: 0.5rem;
+.badge-content-wrapper {
+  position: relative; /* This will be the reference for the button */
+  display: inline-block; /* Shrink to content size */
 }
 
 .edit-button {
   position: absolute;
-  top: 0.25rem;   /* Adjust distance from top */
-  right: 0.25rem; /* Adjust distance from right */
+  top: 0;
+  right: 0;
   z-index: 10;
 }
 </style>
