@@ -277,7 +277,7 @@
 
             <!-- Participants Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="participant in paginatedParticipants" :key="participant.id" class="participant-card">
+            <div v-for="participant in filteredParticipants" :key="participant.id" class="participant-card">
                 <div class="highlightable" :id="'participants-card-' + participant.id"
                     @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-card-' + participant.id, $event)">
                     <div class="component-wrapper">

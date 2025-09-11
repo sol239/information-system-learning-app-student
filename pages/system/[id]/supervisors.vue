@@ -235,7 +235,7 @@
 
             <!-- Supervisors Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="supervisor in paginatedParticipants" :key="supervisor.id" class="participant-card">
+                <div v-for="supervisor in filteredParticipants" :key="supervisor.id" class="participant-card">
                     <div class="highlightable" :id="'supervisors-card-' + supervisor.id"
                         @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-card-' + supervisor.id, $event)">
                         <div class="component-wrapper">
