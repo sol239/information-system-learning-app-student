@@ -40,11 +40,8 @@
                             <!-- Meal Actions -->
                             <div class="meal-actions mt-6 pt-4 border-t border-gray-200">
                                 <div class="flex gap-2 justify-end">
-                                    <UButton size="sm" color="green" variant="outline">
-                                        {{ t('view_details') }}
-                                    </UButton>
                                     <UButton size="sm" color="yellow" variant="outline" @click="editMeal(meal)">
-                                        {{ t('edit') }}
+                                        {{ t('view_details') }}
                                     </UButton>
                                     <DeleteMealButton :mealId="meal.id" />
 

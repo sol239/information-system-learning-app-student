@@ -39,6 +39,7 @@
                         <!-- Session Actions -->
                         <div class="session-actions mt-6 pt-4 border-t border-gray-200">
                             <div class="flex gap-2">
+                                <!--
                                 <div>
                                     <UButton size="sm" variant="outline" @click="viewSessionDetails(session)"
                                         class="flex-1" :id="'sessions-view-' + session.id">
@@ -51,14 +52,18 @@
                                         TO-DO
                                     </UButton>
                                 </div>
+                                -->
                                 <div>
-                                    <UButton size="sm" color="sky" variant="solid" @click="editSession(session)"
-                                        class="flex-1" :id="'sessions-edit-' + session.id">
-                                        <UIcon name="i-heroicons-pencil" class="w-4 h-4 mr-1" />
-                                        {{ t('edit') }}
-                                    </UButton>
+                                    <button @click="editSession(session)"
+                                        class="delete-button flex-1"
+                                        :id="'sessions-edit-' + session.id">
+                                        <span class="delete-icon">✏️</span>
+                                        <span class="delete-text">{{ t('view_details') }}</span>
+                                    </button>
                                 </div>
-                                <SessionDeleteButton :sessionId="session.id" />
+                                <div class="flex-1">
+                                    <SessionDeleteButton :sessionId="session.id" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -327,4 +332,31 @@ onMounted(() => {
         padding: 1rem;
     }
 }
+
+.delete-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #ffc919;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .delete-button:hover {
+    background-color: #ecbc21;
+  }
+
+  .delete-icon {
+    font-size: 1rem;
+  }
+
+  .delete-text {
+    white-space: nowrap;
+  }
 </style>

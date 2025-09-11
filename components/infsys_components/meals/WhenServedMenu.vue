@@ -11,7 +11,6 @@
             </option>
         </select>
         
-        <!-- USelect (commented out for debugging) -->
         <!-- <USelect
             id="when-served-select"
             v-model="selectedValue"
@@ -19,6 +18,7 @@
             :placeholder="t('all_meals')"
             :key="optionsKey"
             class="w-64"
+            :items="whenServedOptions"
         /> -->
     </div>
 </template>
@@ -143,5 +143,9 @@ const selectedValue = computed({
 .when-served-menu {
     display: flex;
     flex-direction: column;
+}
+
+select option {
+    background-color: gray;
 }
 </style>

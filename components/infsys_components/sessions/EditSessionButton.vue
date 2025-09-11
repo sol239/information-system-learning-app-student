@@ -8,7 +8,7 @@
     :id="'sessions-edit-button-' + sessionId"
   >
     <UIcon name="i-heroicons-pencil" class="w-4 h-4 mr-1" />
-    {{ t('edit') }}
+    {{ t('view_details') }}
   </UButton>
 </template>
 

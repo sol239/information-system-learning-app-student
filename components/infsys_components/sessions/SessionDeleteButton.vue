@@ -110,10 +110,6 @@ const handleDelete = async () => {
   display: inline-block;
 }
 
-.delete-button-content {
-  /* Optional: add padding so button doesn't overlap content */
-  padding: 0.25rem;
-}
 
 .edit-button {
   position: absolute;
