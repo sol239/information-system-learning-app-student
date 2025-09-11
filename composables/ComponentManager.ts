@@ -417,6 +417,40 @@ navigateTo({
       additionals: {}
     });
 
+    const sessionSupervisorsListComponent = new Component({
+      id: "session-supervisors-list",
+      name: "Session Supervisors List",
+      description: `Component showing the list of supervisors for a session with avatars and contact details.`,
+      html: {
+        "html": ``
+      },
+      css: {
+        "css": ``
+      },
+      js: { "js": `` },
+      sql: {
+        "sql-1": `SELECT s.* FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')} s JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_supervisors')} ss ON s.supervisor_id = ss.supervisor_id WHERE ss.session_id = ?`,
+      },
+      additionals: {}
+    });
+
+    const sessionSupervisorsCountComponent = new Component({
+      id: "session-supervisors-count",
+      name: "Session Supervisors Count",
+      description: `Component showing the count of supervisors for a session.`,
+      html: {
+        "html": ``
+      },
+      css: {
+        "css": ``
+      },
+      js: { "js": `` },
+      sql: {
+        "sql-1": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')} s JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_supervisors')} ss ON s.supervisor_id = ss.supervisor_id WHERE ss.session_id = ?`,
+      },
+      additionals: {}
+    });
+
     const sessionDeleteButtonComponent = new Component({
       id: "session-delete-button",
       name: "Session Delete Button",
@@ -1664,6 +1698,9 @@ navigateTo({
     componentCodeStore.updateDefaultComponent(whenServedComponent);
     componentCodeStore.updateDefaultComponent(mealPlanComponent);
     componentCodeStore.updateActualComponent(sessionParticipantsListComponent);
+    componentCodeStore.updateActualComponent(sessionSupervisorsListComponent);
+    componentCodeStore.updateActualComponent(sessionSupervisorsCountComponent);
+
 
 
     // Reset to defaults so they are available
@@ -1762,6 +1799,8 @@ navigateTo({
     componentCodeStore.resetComponent("meal-plan");
     componentCodeStore.resetComponent("session-participants-count");
     componentCodeStore.resetComponent("session-participants-list");
+    componentCodeStore.resetComponent("session-supervisors-list");
+    componentCodeStore.resetComponent("session-supervisors-count");
   }
 
   public static areComponentsInitialized(): boolean {

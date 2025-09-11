@@ -37,7 +37,9 @@
                         <SessionParticipantsList :sessionId="session.id" />
 
                         <!-- Supervisors Section -->
-                        <SessionSupervisorsSection :sessionId="session.id" />
+                        <!--<SessionSupervisorsSection :sessionId="session.id" />-->
+                        <SessionSupervisorsCount :sessionId="session.id" />
+                        <SessionSupervisorsList :sessionId="session.id" />
 
                         <!-- Session Actions -->
                         <div class="session-actions mt-6 pt-4 border-t border-gray-200">
@@ -108,6 +110,8 @@ import SessionParticipantsSection from '~/components/infsys_components/sessions/
 import SessionParticipantsList from '~/components/infsys_components/sessions/SessionParticipantsList.vue'
 import SessionParticipantsCount from '~/components/infsys_components/sessions/SessionParticipantsCount.vue'
 import SessionSupervisorsSection from '~/components/infsys_components/sessions/SessionSupervisorsSection.vue'
+import SessionSupervisorsList from '~/components/infsys_components/sessions/SessionSupervisorsList.vue'
+import SessionSupervisorsCount from '~/components/infsys_components/sessions/SessionSupervisorsCount.vue'   
 import SessionDeleteButton from '~/components/infsys_components/sessions/SessionDeleteButton.vue'
 import AddSessionButton from '~/components/infsys_components/sessions/AddSessionButton.vue'
 import EditSessionModal from '~/components/infsys_components/sessions/EditSessionModal.vue'
