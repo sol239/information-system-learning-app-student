@@ -219,11 +219,11 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
-                                    <UButton type="submit" color="sky" :loading="isSubmitting"
+                                    <UButton type="submit" color="violet" :loading="isSubmitting"
                                         :disabled="hasValidationErrors">
                                         {{ t('add') }}
                                     </UButton>
-                                    <UButton variant="outline" color="sky" @click="resetForm">
+                                    <UButton variant="outline" color="violet" @click="resetForm">
                                         {{ t('cancel') }}
                                     </UButton>
                                 </div>
@@ -245,7 +245,7 @@
                                     <h3 class="text-xl font-semibold text-gray-900">
                                         {{ supervisor.name }}
                                     </h3>
-                                    <UBadge size="lg" color="sky" variant="soft">
+                                    <UBadge size="lg" color="violet" variant="soft">
                                         {{ t('age') }}: {{ supervisor.age }}
                                     </UBadge>
                                 </div>
@@ -303,7 +303,7 @@
                         <div class="flex gap-2">
                             <!-- Edit Participant Button only -->
                             <div class="ml-auto">
-                                <UButton size="sm" color="sky" variant="solid"
+                                <UButton size="sm" color="violet" variant="solid"
                                     @click="viewParticipantDetails(supervisor)" class="flex-1">
                                     {{ t('view_details') }}
                                 </UButton>
@@ -332,7 +332,7 @@
                 <UIcon name="i-heroicons-user-x-mark" class="empty-icon" />
                 <h3 class="empty-title">{{ t('no_supervisors') }}</h3>
                 <p class="empty-description">{{ t('no_participants_description') }}</p>
-                <UButton color="sky" @click="createNewParticipant" class="mt-4">
+                <UButton color="violet" @click="createNewParticipant" class="mt-4">
                     {{ t('add_supervisor') }}
                 </UButton>
             </div>
@@ -486,11 +486,11 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
-                                    <UButton type="submit" color="sky" :loading="isSubmitting"
+                                    <UButton type="submit" color="violet" :loading="isSubmitting"
                                         :disabled="hasValidationErrors">
                                         {{ t('add') }}
                                     </UButton>
-                                    <UButton variant="outline" color="sky" @click="resetForm">
+                                    <UButton variant="outline" color="violet" @click="resetForm">
                                         {{ t('cancel') }}
                                     </UButton>
                                 </div>
@@ -638,10 +638,10 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
-                                    <UButton type="submit" color="sky" :loading="isSubmitting">
+                                    <UButton type="submit" color="violet" :loading="isSubmitting">
                                         {{ t('save_changes') }}
                                     </UButton>
-                                    <UButton variant="outline" color="sky" @click="resetForm">
+                                    <UButton variant="outline" color="violet" @click="resetForm">
                                         {{ t('cancel') }}
                                     </UButton>
                                 </div>

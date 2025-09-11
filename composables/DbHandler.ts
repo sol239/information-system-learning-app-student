@@ -642,6 +642,10 @@ export default class DbHandler {
         if (params && params.length > 0 && sql.includes('?')) {
             // Use prepared statement when parameters are provided and SQL has placeholders
             const stmt = this.db.prepare(sql);
+
+            // if there are more ?'s than params, fill the param array with the last param to match count of ?'s
+            
+
             stmt.run(params);
             stmt.free();
             console.log("EXEC SQL WITH PARAMS: ", sql, params);

@@ -1,139 +1,77 @@
 <template>
     <div>
         <LocalNavbar />
-
+        
         <div class="container mx-auto px-4 py-8">
-            <!-- Filter Section -->
-            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-4">
-                    <UIcon name="i-heroicons-funnel" class="w-5 h-5 text-gray-600" />
-                    <h2 class="text-lg font-medium text-gray-900">{{ t('filter') }}</h2>
-                    <UButton 
-                        v-if="hasActiveFilters"
-                        variant="ghost" 
-                        color="red" 
-                        size="sm"
-                        @click="clearFilters"
-                        class="ml-auto"
-                    >
-                        {{ t('clear_filters') }}
-                    </UButton>
+            <!-- Meals Controls -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-4">
+                    <WhenServedMenu v-model:selectedWhenServed="selectedWhenServed" />
                 </div>
-                
-                <div class="max-w-md">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('search_meals') }}</label>
-                    <UInput 
-                        v-model="filters.search"
-                        :placeholder="t('search_placeholder')"
-                        icon="i-heroicons-magnifying-glass"
-                        class="w-full"
-                    />
-                </div>
+                <AddMealButton />
             </div>
 
-            <!-- Loading State -->
-            <div v-if="isLoading" class="flex justify-center items-center py-12">
-                <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 animate-spin text-gray-400" />
-                <span class="ml-2 text-gray-600">{{ t('loading') }}</span>
-            </div>
-
-            <!-- Error State -->
-            <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
-                    <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-red-400 mr-2" />
-                    <span class="text-red-800">{{ error }}</span>
-                </div>
-            </div>
-
-            <!-- Meals by Date -->
-            <div v-else-if="mealsByDate && Object.keys(mealsByDate).length > 0" class="space-y-8">
-                <div 
-                    v-for="(meals, date) in mealsByDate" 
-                    :key="date"
-                    class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-                >
-                    <!-- Date Header -->
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900 highlightable" 
-                            :id="`meals-date-${date}`"
-                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`meals-date-${date}`, $event)">
-                            {{ formatDate(date) }}
-                        </h2>
-                        <p class="text-sm text-gray-600 mt-1">
-                            {{ meals.length }} {{ meals.length === 1 ? t('meal') : t('meals') }}
-                            <span v-if="hasActiveFilters" class="text-blue-600">
-                                ({{ t('filtered') }})
-                            </span>
-                        </p>
-                    </div>
-
-                    <!-- Meals Grid -->
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div 
-                                v-for="meal in meals" 
-                                :key="`${date}-${meal.meal_id}`"
-                                class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow duration-200"
-                            >
-                                <!-- Meal Name -->
-                                <h3 class="font-semibold text-gray-900 mb-2 highlightable" 
-                                    :id="`meal-name-${meal.meal_id}-${date}`"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`meal-name-${meal.meal_id}-${date}`, $event)">
-                                    {{ meal.name }}
-                                </h3>
-
-                                <!-- When Served -->
-                                <div class="flex items-center gap-2 mb-3">
-                                    <UIcon name="i-heroicons-clock" class="w-4 h-4 text-gray-500" />
-                                    <span class="text-sm text-gray-600 highlightable" 
-                                          :id="`meal-when-${meal.meal_id}-${date}`"
-                                          @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`meal-when-${meal.meal_id}-${date}`, $event)">
-                                        {{ meal.when_served }}
-                                    </span>
-                                </div>
-
-                                <!-- Allergens -->
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2">
-                                        <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-amber-500" />
-                                        <span class="text-sm font-medium text-gray-700">{{ t('allergens') }}:</span>
-                                    </div>
-                                    
-                                    <div v-if="meal.allergens && meal.allergens.length > 0" 
-                                         class="flex flex-wrap gap-1">
-                                        <UBadge 
-                                            v-for="allergen in meal.allergens" 
-                                            :key="allergen.allergen_id"
-                                            color="yellow" 
-                                            variant="soft" 
-                                            size="sm"
-                                            class="highlightable"
-                                            :id="`allergen-${allergen.allergen_id}-${meal.meal_id}-${date}`"
-                                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`allergen-${allergen.allergen_id}-${meal.meal_id}-${date}`, $event)"
-                                        >
-                                            {{ allergen.name }}
-                                        </UBadge>
-                                    </div>
-                                    
-                                    <div v-else class="text-sm text-gray-500 italic highlightable"
-                                         :id="`no-allergens-${meal.meal_id}-${date}`"
-                                         @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`no-allergens-${meal.meal_id}-${date}`, $event)">
-                                        {{ t('no_allergens') }}
-                                    </div>
+            <!-- Meals Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="meal in filteredMeals" :key="meal.id" class="meal-card">
+                    <div class="highlightable" :id="'meal-card-' + meal.id"
+                        @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meal-card-' + meal.id, $event)">
+                        <div class="component-wrapper">
+                            <!-- Meal Header -->
+                            <div class="meal-header">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-semibold text-gray-900">
+                                        {{ meal.title }}
+                                    </h3>
+                                    <UBadge size="lg" color="green" variant="soft">
+                                        {{ meal.description }}
+                                    </UBadge>
                                 </div>
                             </div>
+
+                            <!-- Allergens Section -->
+                            <div class="allergens-section mb-4">
+                                <p class="text-sm font-medium text-gray-700"> {{ t('allergens') }}: </p>
+                                <AllergensList :mealId="meal.id" />
+                            </div>
+
+                            
+
+                            <!-- Meal Actions -->
+                            <div class="meal-actions mt-6 pt-4 border-t border-gray-200">
+                                <div class="flex gap-2 justify-end">
+                                    <UButton size="sm" color="green" variant="outline">
+                                        {{ t('view_details') }}
+                                    </UButton>
+                                    <UButton size="sm" color="yellow" variant="outline" @click="editMeal(meal)">
+                                        {{ t('edit') }}
+                                    </UButton>
+                                    <DeleteMealButton :mealId="meal.id" />
+
+                                    
+                                </div>
+                            </div>
+                            
+                            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                :componentId="'meals-list'" class="edit-button" />
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Empty State -->
-            <div v-else class="text-center py-12">
-                <UIcon name="i-heroicons-square-3-stack-3d" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ t('no_meals_found') }}</h3>
-                <p class="text-gray-600">{{ t('no_meals_description') }}</p>
+            <div v-if="filteredMeals.length === 0" class="empty-state">
+                <UIcon name="i-heroicons-cake" class="empty-icon" />
+                <h3 class="empty-title">{{ t('no_meals') }}</h3>
+                <p class="empty-description">{{ t('no_meals_description') }}</p>
+                <UButton color="green" class="mt-4" @click="openAddMealModal">
+                    {{ t('add_meal') }}
+                </UButton>
             </div>
         </div>
+
+        <!-- Edit Meal Modal -->
+        <EditMealModal :meal="selectedMealForEdit" v-model:editModalOpen="editModalOpen" />
     </div>
 </template>
 
@@ -143,196 +81,145 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSelectedSystemStore } from '~/stores/useSelectedSystemStore'
 import { useHighlightStore } from '~/stores/useHighlightStore'
+import { useComponentCodeStore } from '#imports'
+import { Component } from '~/model/Component'
+import { ComponentHandler } from '~/composables/ComponentHandler'
+import AllergensList from '~/components/infsys_components/meals/AllergensList.vue'
+import DeleteMealButton from '~/components/infsys_components/meals/DeleteMealButton.vue'
+import WhenServedMenu from '~/components/infsys_components/meals/WhenServedMenu.vue'
+import AddMealButton from '~/components/infsys_components/meals/AddMealButton.vue'
+import EditMealModal from '~/components/infsys_components/meals/EditMealModal.vue'
 
 const route = useRoute()
 const { t } = useI18n()
 const systemStore = useSelectedSystemStore()
 const highlightStore = useHighlightStore()
+const componentCodeStore = useComponentCodeStore()
+const selectedSystemStore = useSelectedSystemStore()
 
-// Reactive data
-const isLoading = ref(true)
-const error = ref<string | null>(null)
-const allMealsData = ref<Record<string, any[]>>({})
-const mealsByDate = ref<Record<string, any[]>>({})
-const dateRange = ref<{ start: string; end: string } | null>(null)
+const componentId = 'meals'
 
-// Filter state
-const filters = ref({
-    search: ''
+const system = selectedSystemStore.selectedSystem
+
+// Reactive variables for filtering and modals
+const selectedWhenServed = ref('')
+const editModalOpen = ref(false)
+const selectedMealForEdit = ref(null)
+
+const mealsComponent = computed(() => componentCodeStore.getComponentById(componentId) || componentCodeStore.getDefaultComponent(componentId))
+
+
+const correctSqlQuery = computed(() => mealsComponent.value?.sql?.['sql'] || '')
+
+const sqlQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql', correctSqlQuery.value))
+
+const meals = computed(() => {
+
+    const _ = selectedSystemStore.dbNumber;
+
+    if (!system?.db || typeof system?.db?.query !== "function") {
+        return []
+    }
+    const queryResult = system?.db.query(sqlQuery.value)
+    if (queryResult?.success && queryResult.results.length > 0) {
+        console.log(queryResult.results);
+        return queryResult.results.map(row => ({
+            id: row.meal_id,
+            title: row.name,
+            description: row.when_served
+        }))
+    }
+    return []
 })
 
-// Filter options
-// Removed - using unified search instead
-
-// Computed properties
-const systemId = computed(() => parseInt(route.params.id as string))
-
-const hasActiveFilters = computed(() => {
-    return filters.value.search !== ''
+// Filtered meals based on selected when_served
+const filteredMeals = computed(() => {
+    if (!selectedWhenServed.value) {
+        return meals.value
+    }
+    return meals.value.filter(meal => meal.description === selectedWhenServed.value)
 })
 
-// Methods
-const loadMeals = async () => {
-    try {
-        isLoading.value = true
-        error.value = null
-
-        if (!systemStore.selectedSystem?.db) {
-            error.value = t('database_not_initialized')
-            return
-        }
-
-        // Query to get meals grouped by date with allergens
-        const query = `
-            SELECT 
-                mb.date,
-                m.meal_id,
-                m.name,
-                m.when_served,
-                GROUP_CONCAT(a.allergen_id || ':' || a.name, '|') as allergens_data
-            FROM ${systemStore.selectedSystem.db.getTableName('meals_book')} mb
-            JOIN ${systemStore.selectedSystem.db.getTableName('meals')} m ON mb.meal_id = m.meal_id
-            LEFT JOIN ${systemStore.selectedSystem.db.getTableName('allergens_meals')} am ON m.meal_id = am.meal_id
-            LEFT JOIN ${systemStore.selectedSystem.db.getTableName('allergens')} a ON am.allergen_id = a.allergen_id
-            GROUP BY mb.date, m.meal_id, m.name, m.when_served
-            ORDER BY mb.date ASC, m.meal_id ASC
-        `
-
-        const result = systemStore.selectedSystem.db.query(query)
-        
-        if (!result.success) {
-            error.value = t('failed_to_load_meals')
-            return
-        }
-
-        // Process the results and group by date
-        const grouped: Record<string, any[]> = {}
-        let minDate: string | null = null
-        let maxDate: string | null = null
-
-        result.results.forEach((row: any) => {
-            const date = row.date
-            
-            if (!minDate || date < minDate) minDate = date
-            if (!maxDate || date > maxDate) maxDate = date
-
-            if (!grouped[date]) {
-                grouped[date] = []
-            }
-
-            // Parse allergens data
-            const allergens: any[] = []
-            if (row.allergens_data) {
-                const allergenItems = row.allergens_data.split('|')
-                allergenItems.forEach((item: string) => {
-                    const [allergen_id, name] = item.split(':')
-                    if (allergen_id && name) {
-                        allergens.push({
-                            allergen_id: parseInt(allergen_id),
-                            name: name
-                        })
-                    }
-                })
-            }
-
-            grouped[date].push({
-                meal_id: row.meal_id,
-                name: row.name,
-                when_served: row.when_served,
-                allergens: allergens
-            })
-        })
-
-        allMealsData.value = grouped
-        mealsByDate.value = grouped
-        
-        if (minDate && maxDate) {
-            dateRange.value = { start: minDate, end: maxDate }
-        }
-
-        // Build filter options - not needed for unified search
-        // buildFilterOptions()
-
-    } catch (err) {
-        console.error('Error loading meals:', err)
-        error.value = t('error_loading_data')
-    } finally {
-        isLoading.value = false
-    }
+// Functions for handling meal operations
+const editMeal = (meal: any) => {
+    selectedMealForEdit.value = meal
+    editModalOpen.value = true
 }
 
-const applyFilters = () => {
-    if (!hasActiveFilters.value) {
-        mealsByDate.value = { ...allMealsData.value }
-        return
-    }
-
-    const searchTerm = filters.value.search.toLowerCase()
-    const filtered: Record<string, any[]> = {}
-
-    Object.keys(allMealsData.value).forEach(date => {
-        const filteredMeals = allMealsData.value[date].filter(meal => {
-            // Search in meal name
-            if (meal.name.toLowerCase().includes(searchTerm)) {
-                return true
-            }
-
-            // Search in when served
-            if (meal.when_served.toLowerCase().includes(searchTerm)) {
-                return true
-            }
-
-            // Search in allergens
-            if (meal.allergens.some((allergen: any) => 
-                allergen.name.toLowerCase().includes(searchTerm)
-            )) {
-                return true
-            }
-
-            // Search in date (formatted)
-            if (formatDate(date).toLowerCase().includes(searchTerm)) {
-                return true
-            }
-
-            return false
-        })
-
-        if (filteredMeals.length > 0) {
-            filtered[date] = filteredMeals
-        }
-    })
-
-    mealsByDate.value = filtered
+const openAddMealModal = () => {
+    // This will be handled by the AddMealButton component
 }
 
-const clearFilters = () => {
-    filters.value = {
-        search: ''
-    }
-}
-
-const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('cs-CZ', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    })
-}
-
-// Watch for filter changes
-watch(filters, () => {
-    applyFilters()
-}, { deep: true })
-
-// Lifecycle
-onMounted(async () => {
-    if (systemStore.selectedSystem) {
-        await loadMeals()
-    } else {
-        error.value = t('system_not_selected')
-        isLoading.value = false
-    }
-})
 </script>
+
+<style scoped>
+.meal-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border: 4px solid #10b981;
+    padding: 1.5rem;
+    display: block;
+}
+
+.meal-header {
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.meal-info {
+    margin-bottom: 1.5rem;
+}
+
+.meal-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.empty-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: #9ca3af;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.empty-description {
+    color: #4b5563;
+    max-width: 28rem;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .meal-card {
+        padding: 1rem;
+    }
+}
+
+.component-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.edit-button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    z-index: 10;
+}
+</style>

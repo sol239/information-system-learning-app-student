@@ -227,12 +227,18 @@ const localItems = ref<NavigationMenuItem[]>([
         to: `/system/${selectedSystemStore.selectedId}/meals`,
         data_target: 'system-meals',
     },
+     {
+        label: t('meal_plan'),
+        to: `/system/${selectedSystemStore.selectedId}/meal-plan`,
+        data_target: 'system-meal-plan',
+    },
     {
         label: t('database'),
         icon: 'i-heroicons-table-cells',
         to: `/system/${selectedSystemStore.selectedId}/database`,
         data_target: 'system-table',
-    }
+    },
+
 ])
 
 /* 9. Computed */
