@@ -1580,6 +1580,23 @@ navigateTo({
       additionals: {}
     });
 
+    const mealPlanComponent = new Component({
+      id: "meal-plan",
+      name: "Meal Plan",
+      description: `Component for getting meal plan information.`,
+      html: { "html": "" },
+      css: { "css": "" },
+      js: { "js": "" },
+      sql: {
+        "sql-1": `SELECT DISTINCT date_served FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_participants')} ORDER BY date_served;`,
+        "sql-2": `SELECT * FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_supervisors')} ORDER BY date_served;`,
+        "sql-3": `SELECT * FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} ORDER BY date_served;`
+
+
+      },
+      additionals: {}
+    });
+
     // Register defaults for supervisors
     componentCodeStore.updateDefaultComponent(supervisorsCapacityCountComponent);
     componentCodeStore.updateDefaultComponent(supervisorsCapacityPercentageComponent);
@@ -1610,6 +1627,7 @@ navigateTo({
     componentCodeStore.updateDefaultComponent(addMealComponent);
     componentCodeStore.updateDefaultComponent(editMealComponent);
     componentCodeStore.updateDefaultComponent(whenServedComponent);
+    componentCodeStore.updateDefaultComponent(mealPlanComponent);
 
     // Reset to defaults so they are available
     componentCodeStore.resetComponent("supervisors-capacity-count");
@@ -1704,6 +1722,7 @@ navigateTo({
     componentCodeStore.resetComponent("meals-add");
     componentCodeStore.resetComponent("meals-edit");
     componentCodeStore.resetComponent("meals-when-served");
+    componentCodeStore.resetComponent("meal-plan");
   }
 
   public static areComponentsInitialized(): boolean {
