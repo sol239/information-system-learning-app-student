@@ -7,21 +7,6 @@
         <UIcon name="i-heroicons-users" />
         {{ t('participants') }} ({{ participantCount }})
       </h4>
-      <div v-if="participantCount > 0" class="participants-list space-y-2">
-        <div v-for="participant in participantsData" :key="participant.id" class="participant-item">
-          <div class="participant-avatar">
-            {{ getInitials(participant.name) }}
-          </div>
-          <div class="participant-info">
-            <div class="participant-name">{{ participant.name }}</div>
-            <div class="participant-details">{{ t('age') }}: {{ participant.age }}</div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="text-sm text-gray-500 italic">
-        {{ t('no_participants') }}
-      </div>
-
       <!-- Edit button positioned absolutely -->
       <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="componentId"
         class="edit-button" />
@@ -51,27 +36,17 @@ const selectedSystemStore = useSelectedSystemStore()
 const componentCodeStore = useComponentCodeStore()
 
 // Constants
-const componentId = 'session-participants-section'
+const componentId = 'session-participants-count'
 const system = selectedSystemStore.selectedSystem
 
 // Component code from store
 const sessionParticipantsComponent = computed(() => componentCodeStore.getComponentById(componentId) || componentCodeStore.getDefaultComponent(componentId))
 
-const correctSqlQuery = computed(() => sessionParticipantsComponent.value?.sql?.['sql-1'] || ``)
+const correctCountQuery = computed(() => sessionParticipantsComponent.value?.sql?.['sql-1'] || ``)
 
-const correctCountQuery = computed(() => sessionParticipantsComponent.value?.sql?.['sql-2'] || ``)
-
-const sqlQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-1', correctSqlQuery.value))
-const countQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-2', correctCountQuery.value))
+const countQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-1', correctCountQuery.value))
 
 // Computed participants fetched with SQL query
-const participantsData = computed(() => {
-  if (!system?.db || typeof system?.db?.query !== "function") {
-    return []
-  }
-  const result = system?.db.query(sqlQuery.value, [props.sessionId])?.results || []
-  return result
-})
 
 // Computed participant count using sql-2 query
 const participantCount = computed(() => {

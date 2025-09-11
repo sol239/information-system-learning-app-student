@@ -3,11 +3,7 @@
     @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(componentId, $event)">
     <div class="participants-wrapper">
       <!-- Rendered HTML -->
-      <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-        <UIcon name="i-heroicons-users" />
-        {{ t('participants') }} ({{ participantCount }})
-      </h4>
-      <div v-if="participantCount > 0" class="participants-list space-y-2">
+      <div v-if="participantsData.length > 0" class="participants-list space-y-2">
         <div v-for="participant in participantsData" :key="participant.id" class="participant-item">
           <div class="participant-avatar">
             {{ getInitials(participant.name) }}
@@ -51,7 +47,7 @@ const selectedSystemStore = useSelectedSystemStore()
 const componentCodeStore = useComponentCodeStore()
 
 // Constants
-const componentId = 'session-participants-section'
+const componentId = 'session-participants-list'
 const system = selectedSystemStore.selectedSystem
 
 // Component code from store
@@ -59,10 +55,8 @@ const sessionParticipantsComponent = computed(() => componentCodeStore.getCompon
 
 const correctSqlQuery = computed(() => sessionParticipantsComponent.value?.sql?.['sql-1'] || ``)
 
-const correctCountQuery = computed(() => sessionParticipantsComponent.value?.sql?.['sql-2'] || ``)
 
 const sqlQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-1', correctSqlQuery.value))
-const countQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-2', correctCountQuery.value))
 
 // Computed participants fetched with SQL query
 const participantsData = computed(() => {
@@ -72,16 +66,6 @@ const participantsData = computed(() => {
   const result = system?.db.query(sqlQuery.value, [props.sessionId])?.results || []
   return result
 })
-
-// Computed participant count using sql-2 query
-const participantCount = computed(() => {
-  if (!system?.db || typeof system?.db?.query !== "function") {
-    return 0
-  }
-  const result = system?.db.query(countQuery.value, [props.sessionId])?.results?.[0]?.count || 0
-  return result
-})
-
 
 // Watchers
 useHighlightWatchers(highlightStore.highlightHandler, highlightStore)

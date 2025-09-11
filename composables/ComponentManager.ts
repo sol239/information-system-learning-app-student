@@ -365,6 +365,40 @@ navigateTo({
       additionals: {}
     });
 
+    const sessionParticipantsListComponent = new Component({
+      id: "session-participants-list",
+      name: "Session Participants List",
+      description: `Component showing the list of participants for a session with avatars and details.`,
+      html: {
+        "html": ``
+      },
+      css: {
+        "css": ``
+      },
+      js: { "js": `` },
+      sql: {
+        "sql-1": `SELECT p.* FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} p JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} sp ON p.participant_id = sp.participant_id WHERE sp.session_id = ?`,
+      },
+      additionals: {}
+    });
+
+    const sessionParticipantsCountComponent = new Component({
+      id: "session-participants-count",
+      name: "Session Participants Count",
+      description: `Component showing the count of participants for a session.`,
+      html: {
+        "html": ``
+      },
+      css: {
+        "css": ``
+      },
+      js: { "js": `` },
+      sql: {
+        "sql-1": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} p JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} sp ON p.participant_id = sp.participant_id WHERE sp.session_id = ?`
+      },
+      additionals: {}
+    });
+
     const sessionSupervisorsSectionComponent = new Component({
       id: "session-supervisors-section",
       name: "Session Supervisors Section",
@@ -1193,6 +1227,7 @@ navigateTo({
     componentCodeStore.updateDefaultComponent(validationPersonalNumberComponent);
     componentCodeStore.updateDefaultComponent(validationPhoneComponent);
     componentCodeStore.updateDefaultComponent(validationDateRangeComponent);
+    componentCodeStore.updateActualComponent(sessionParticipantsCountComponent);
 
     // Supervisors page components (mirroring participants)
     const supervisorsCapacityCountComponent = new Component({
@@ -1628,6 +1663,8 @@ navigateTo({
     componentCodeStore.updateDefaultComponent(editMealComponent);
     componentCodeStore.updateDefaultComponent(whenServedComponent);
     componentCodeStore.updateDefaultComponent(mealPlanComponent);
+    componentCodeStore.updateActualComponent(sessionParticipantsListComponent);
+
 
     // Reset to defaults so they are available
     componentCodeStore.resetComponent("supervisors-capacity-count");
@@ -1723,6 +1760,8 @@ navigateTo({
     componentCodeStore.resetComponent("meals-edit");
     componentCodeStore.resetComponent("meals-when-served");
     componentCodeStore.resetComponent("meal-plan");
+    componentCodeStore.resetComponent("session-participants-count");
+    componentCodeStore.resetComponent("session-participants-list");
   }
 
   public static areComponentsInitialized(): boolean {

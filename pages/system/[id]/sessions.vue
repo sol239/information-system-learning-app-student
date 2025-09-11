@@ -31,7 +31,10 @@
                         <SessionCapacitySection :sessionId="session.id" />
 
                         <!-- Participants Section -->
-                        <SessionParticipantsSection :sessionId="session.id" />
+                        <!--<SessionParticipantsSection :sessionId="session.id" />-->
+
+                        <SessionParticipantsCount :sessionId="session.id" />
+                        <SessionParticipantsList :sessionId="session.id" />
 
                         <!-- Supervisors Section -->
                         <SessionSupervisorsSection :sessionId="session.id" />
@@ -102,6 +105,8 @@ import SessionDateRange from '~/components/infsys_components/sessions/SessionDat
 import SessionDayCountBadge from '~/components/infsys_components/sessions/SessionDayCountBadge.vue'
 import SessionCapacitySection from '~/components/infsys_components/sessions/SessionCapacitySection.vue'
 import SessionParticipantsSection from '~/components/infsys_components/sessions/SessionParticipantsSection.vue'
+import SessionParticipantsList from '~/components/infsys_components/sessions/SessionParticipantsList.vue'
+import SessionParticipantsCount from '~/components/infsys_components/sessions/SessionParticipantsCount.vue'
 import SessionSupervisorsSection from '~/components/infsys_components/sessions/SessionSupervisorsSection.vue'
 import SessionDeleteButton from '~/components/infsys_components/sessions/SessionDeleteButton.vue'
 import AddSessionButton from '~/components/infsys_components/sessions/AddSessionButton.vue'
