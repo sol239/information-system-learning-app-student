@@ -211,5 +211,6 @@
     "meal_edit_error": "Error updating meal",
     "filter_by_when_served": "Filter by When Served",
     "all_meals": "All Meals",
-    "snack": "Snack"
+    "snack": "Snack",
+    "meal_count": "Počet jídel"
 }

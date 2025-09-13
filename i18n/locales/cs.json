@@ -217,5 +217,6 @@
     "meal_edit_error": "Chyba při aktualizování jídla",
     "filter_by_when_served": "Filtrovat podle kdy se podává",
     "all_meals": "Všechna jídla",
-    "snack": "Svačina"
+    "snack": "Svačina",
+    "meal_count": "Počet jídel"
 }

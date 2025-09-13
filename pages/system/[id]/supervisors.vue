@@ -1302,6 +1302,9 @@ const createNewParticipant = () => {
 }
 
 const handleAddParticipant = async (data: any) => {
+    console.log('handleAddParticipant called with data:', data)
+    console.log('Allergens data:', data.allergens)
+
     // Check for validation errors before submitting
     if (hasValidationErrors.value) {
         toast.add({
@@ -1326,7 +1329,8 @@ const handleAddParticipant = async (data: any) => {
         if (result.success) {
             // Get the inserted participant ID
             const getIdQuery = componentCodeStore.getComponentCodeByType('supervisor-get-id', 'sql', 'sql') || ``;
-            const participantId = selectedSystemStore.selectedSystem.db.query(getIdQuery, [data.name, data.email]).results[0]?.participant_id
+            const participantId = selectedSystemStore.selectedSystem.db.query(getIdQuery, [data.name, data.email]).results[0]?.supervisor_id
+            console.log('Inserted supervisor ID:', participantId)
 
             if (participantId) {
                 // Add session associations
@@ -1336,7 +1340,10 @@ const handleAddParticipant = async (data: any) => {
 
                 // Add allergen associations
                 if (data.allergens && data.allergens.length > 0) {
+                    console.log('Calling addParticipantAllergens with:', participantId, data.allergens)
                     await addParticipantAllergens(participantId, data.allergens)
+                } else {
+                    console.log('No allergens to add')
                 }
             }
 
@@ -1583,11 +1590,17 @@ const getParticipantAllergenIds = async (participantId: number): Promise<number[
 const addParticipantAllergens = async (participantId: number, allergenIds: number[]): Promise<void> => {
     if (!selectedSystemStore.selectedSystem?.db) return
 
+    console.log('Adding allergens for participant', participantId, 'allergens:', allergenIds)
+
     for (const allergenId of allergenIds) {
         try {
             const insertQuery = componentCodeStore.getComponentCodeByType('supervisor-allergen-insert', 'sql', 'sql') || ``;
+            console.log('Insert query:', insertQuery)
             if (insertQuery) {
-                selectedSystemStore.selectedSystem.db.query(insertQuery, [participantId, allergenId])
+                const result = selectedSystemStore.selectedSystem.db.query(insertQuery, [participantId, allergenId])
+                console.log('Insert result:', result)
+            } else {
+                console.error('No insert query found for supervisor-allergen-insert')
             }
         } catch (error) {
             console.error(`Error adding allergen ${allergenId} to participant ${participantId}:`, error)

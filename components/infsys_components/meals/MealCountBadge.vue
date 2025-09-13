@@ -86,10 +86,7 @@ const mealsCount = computed(() => {
 })
 
 const getLabel = () => {
-  if (!props.selectedWhenServed || props.selectedWhenServed === 'all') {
-    return t('all_meals')
-  }
-  return `${t('meals')} (${props.selectedWhenServed})`
+  return t('meal_count')
 }
 
 useHighlightWatchers(highlightStore.highlightHandler, highlightStore);
