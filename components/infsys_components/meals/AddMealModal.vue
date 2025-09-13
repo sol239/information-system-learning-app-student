@@ -12,36 +12,55 @@
                         <div class="highlightable" id="meals-add-name"
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-add-name', $event)">
                             <div class="component-wrapper">
-                                <label for="name" class="block text-sm font-medium text-white mb-1">{{ t('meal_name') }}</label>
-                                <UInput
-                                    :class="[{ 'border-red-500': !newMealNameComputed, 'border-green-500': newMealNameComputed }]"
+                                <label for="name" class="block text-sm font-medium text-white mb-1">{{ t('meal_name')
+                                    }}</label>
+                                <input
+                                    :class="['form-input', { 'border-red-500': !newMealNameComputed, 'border-sky-500': newMealNameComputed }]"
                                     id="name" v-model="newMeal.name" type="text"
-                                    :disabled="highlightStore.isHighlightMode"
-                                    :placeholder="t('enter_meal_name')" />
+                                    :disabled="highlightStore.isHighlightMode" :placeholder="t('enter_meal_name')" />
                                 <div v-if="newMealNameError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ newMealNameError }}
                                 </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-name'" class="edit-button" />
                             </div>
                         </div>
 
                         <div class="highlightable" id="meals-add-when_served"
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-add-when_served', $event)">
                             <div class="component-wrapper">
-                                <label for="when_served" class="block text-sm font-medium text-white mb-1">{{ t('when_served') }}</label>
-                                <USelect
-                                    :class="[{ 'border-red-500': !newMealWhenServedComputed, 'border-green-500': newMealWhenServedComputed }]"
-                                    id="when_served" v-model="newMeal.when_served"
-                                    :options="whenServedOptions"
-                                    :disabled="highlightStore.isHighlightMode"
-                                    :placeholder="t('select_when_served')" />
+                                <label for="when_served" class="block text-sm font-medium text-white mb-1">{{
+                                    t('when_served') }}</label>
+                                <USelect :color="newMealWhenServedComputed ? 'sky' : 'red'" id="when_served"
+                                    v-model="newMeal.when_served" :items="whenServedOptions"
+                                    :disabled="highlightStore.isHighlightMode" :placeholder="t('select_when_served')" />
                                 <div v-if="newMealWhenServedError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ newMealWhenServedError }}
                                 </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-when-served'" class="edit-button" />
+                            </div>
+                        </div>
+
+                        <div class="highlightable" id="meals-add-allergens"
+                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-add-allergens', $event)">
+                            <div class="component-wrapper">
+                                <label for="allergens"
+                                    class="block text-sm font-medium text-white mb-1">Alergeny</label>
+                                <USelect :color="newMealAllergensComputed ? 'sky' : 'red'" id="allergens"
+                                    v-model="newMeal.allergens" :items="allergenOptions" multiple
+                                    placeholder="Vyberte alergeny" :disabled="highlightStore.isHighlightMode" />
+                                <div v-if="newMealAllergensError" class="text-red-500 text-sm mt-1 font-bold">
+                                    {{ newMealAllergensError }}
+                                </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-allergens'" class="edit-button" />
                             </div>
                         </div>
 
                         <div class="flex flex-col gap-3 pt-4">
-                            <UButton type="submit" color="green" :loading="isSubmitting" :disabled="hasValidationErrors">
+                            <UButton type="submit" color="green" :loading="isSubmitting"
+                                :disabled="hasValidationErrors">
                                 {{ t('add') }}
                             </UButton>
                             <UButton variant="outline" color="green" @click="resetForm">
@@ -61,6 +80,7 @@ import { useI18n } from 'vue-i18n'
 import { useSelectedSystemStore, useToast } from '#imports'
 import { useHighlightStore } from '#imports'
 import { useComponentCodeStore } from '~/stores/useComponentCodeStore'
+import EditComponentModalOpenButton from '~/components/EditComponentModalOpenButton.vue'
 
 const { t } = useI18n()
 const selectedSystemStore = useSelectedSystemStore()
@@ -87,7 +107,8 @@ const modalOpen = computed({
 // Form state
 const newMeal = ref({
     name: '',
-    when_served: ''
+    when_served: '',
+    allergens: [] as number[]
 })
 
 const isSubmitting = ref(false)
@@ -95,6 +116,10 @@ const isSubmitting = ref(false)
 // Validation
 const newMealNameComputed = computed(() => newMeal.value.name.trim().length > 0)
 const newMealWhenServedComputed = computed(() => newMeal.value.when_served.trim().length > 0)
+const newMealAllergensComputed = computed(() => {
+    // Allergens are optional - always return true
+    return true
+})
 
 const newMealNameError = computed(() => {
     if (!newMealNameComputed.value) {
@@ -110,6 +135,11 @@ const newMealWhenServedError = computed(() => {
     return ''
 })
 
+const newMealAllergensError = computed(() => {
+    // Allergens are optional - no error
+    return ''
+})
+
 const hasValidationErrors = computed(() => {
     return !newMealNameComputed.value || !newMealWhenServedComputed.value
 })
@@ -121,6 +151,17 @@ const whenServedOptions = [
     { label: t('dinner'), value: 'Dinner' },
     { label: t('snack'), value: 'Snack' }
 ]
+
+// Allergen options
+const allergenOptions = computed(() => {
+    const _ = selectedSystemStore.dbNumber
+    const query: string = componentCodeStore.getComponentCodeByType('participants-allergen-options', 'sql', 'sql') || ``;
+    const result = selectedSystemStore.selectedSystem?.db?.query(query)?.results || [];
+    return result.map(allergen => ({
+        label: allergen.name,
+        value: allergen.allergen_id
+    }))
+})
 
 // Handle form submission
 const handleAddMeal = async (mealData: any) => {
@@ -148,6 +189,22 @@ const handleAddMeal = async (mealData: any) => {
         // Execute the insert query
         system.db.exec(sqlQuery, [mealData.name, mealData.when_served])
 
+        // Handle allergens if provided
+        if (mealData.allergens && mealData.allergens.length > 0) {
+            // Get the inserted meal ID
+            const getMealIdQuery = componentCodeStore.getComponentCodeByType('meal-get-id', 'sql', 'sql') || '';
+            const mealIdResult = system.db.query(getMealIdQuery, [mealData.name, mealData.when_served]);
+            const mealId = mealIdResult?.results?.[0]?.meal_id;
+
+            if (mealId) {
+                // Add allergen associations
+                for (const allergenId of mealData.allergens) {
+                    const insertAllergenQuery = componentCodeStore.getComponentCodeByType('meal-allergen-insert', 'sql', 'sql') || '';
+                    system.db.exec(insertAllergenQuery, [mealId, allergenId]);
+                }
+            }
+        }
+
         // If we reach here without error, the meal was added successfully
         selectedSystemStore.incrementDbNumber()
         toast.add({
@@ -170,7 +227,8 @@ const handleAddMeal = async (mealData: any) => {
 const resetForm = () => {
     newMeal.value = {
         name: '',
-        when_served: ''
+        when_served: '',
+        allergens: []
     }
     modalOpen.value = false
 }
@@ -250,8 +308,8 @@ watch(() => modalOpen.value, (isOpen) => {
     border-width: 3px !important;
 }
 
-.border-green-500 {
-    border-color: #22c55e !important;
+.border-sky-500 {
+    border-color: #0ea5e9 !important;
     border-width: 3px !important;
 }
 

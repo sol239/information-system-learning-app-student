@@ -13,14 +13,16 @@
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-edit-name', $event)">
                             <div class="component-wrapper">
                                 <label for="name" class="block text-sm font-medium text-white mb-1">{{ t('meal_name') }}</label>
-                                <UInput
-                                    :class="[{ 'border-red-500': !editMealNameComputed, 'border-green-500': editMealNameComputed }]"
+                                <input
+                                    :class="['form-input', { 'border-red-500': !editMealNameComputed, 'border-sky-500': editMealNameComputed }]"
                                     id="name" v-model="editMeal.name" type="text"
                                     :disabled="highlightStore.isHighlightMode"
                                     :placeholder="t('enter_meal_name')" />
                                 <div v-if="editMealNameError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ editMealNameError }}
                                 </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-name'" class="edit-button" />
                             </div>
                         </div>
 
@@ -28,15 +30,31 @@
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-edit-when_served', $event)">
                             <div class="component-wrapper">
                                 <label for="when_served" class="block text-sm font-medium text-white mb-1">{{ t('when_served') }}</label>
-                                <USelect
-                                    :class="[{ 'border-red-500': !editMealWhenServedComputed, 'border-green-500': editMealWhenServedComputed }]"
-                                    id="when_served" v-model="editMeal.when_served"
-                                    :options="whenServedOptions"
+                                <USelect :color="editMealWhenServedComputed ? 'sky' : 'red'" id="when_served"
+                                    v-model="editMeal.when_served" :items="whenServedOptions"
                                     :disabled="highlightStore.isHighlightMode"
                                     :placeholder="t('select_when_served')" />
                                 <div v-if="editMealWhenServedError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ editMealWhenServedError }}
                                 </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-when-served'" class="edit-button" />
+                            </div>
+                        </div>
+
+                        <div class="highlightable" id="meals-edit-allergens"
+                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-edit-allergens', $event)">
+                            <div class="component-wrapper">
+                                <label for="allergens"
+                                    class="block text-sm font-medium text-white mb-1">Alergeny</label>
+                                <USelect :color="editMealAllergensComputed ? 'sky' : 'red'" id="allergens"
+                                    v-model="editMeal.allergens" :items="allergenOptions" multiple
+                                    placeholder="Vyberte alergeny" :disabled="highlightStore.isHighlightMode" />
+                                <div v-if="editMealAllergensError" class="text-red-500 text-sm mt-1 font-bold">
+                                    {{ editMealAllergensError }}
+                                </div>
+                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-allergens'" class="edit-button" />
                             </div>
                         </div>
 
@@ -61,6 +79,7 @@ import { useI18n } from 'vue-i18n'
 import { useSelectedSystemStore, useToast } from '#imports'
 import { useHighlightStore } from '#imports'
 import { useComponentCodeStore } from '~/stores/useComponentCodeStore'
+import EditComponentModalOpenButton from '~/components/EditComponentModalOpenButton.vue'
 
 const { t } = useI18n()
 const selectedSystemStore = useSelectedSystemStore()
@@ -89,7 +108,8 @@ const modalOpen = computed({
 const editMeal = ref({
     id: null,
     name: '',
-    when_served: ''
+    when_served: '',
+    allergens: [] as number[]
 })
 
 const isSubmitting = ref(false)
@@ -97,6 +117,10 @@ const isSubmitting = ref(false)
 // Validation
 const editMealNameComputed = computed(() => editMeal.value.name.trim().length > 0)
 const editMealWhenServedComputed = computed(() => editMeal.value.when_served.trim().length > 0)
+const editMealAllergensComputed = computed(() => {
+    // Allergens are optional - always return true
+    return true
+})
 
 const editMealNameError = computed(() => {
     if (!editMealNameComputed.value) {
@@ -112,6 +136,11 @@ const editMealWhenServedError = computed(() => {
     return ''
 })
 
+const editMealAllergensError = computed(() => {
+    // Allergens are optional - no error
+    return ''
+})
+
 const hasValidationErrors = computed(() => {
     return !editMealNameComputed.value || !editMealWhenServedComputed.value
 })
@@ -124,13 +153,25 @@ const whenServedOptions = [
     { label: t('snack'), value: 'Snack' }
 ]
 
+// Allergen options
+const allergenOptions = computed(() => {
+    const _ = selectedSystemStore.dbNumber
+    const query: string = componentCodeStore.getComponentCodeByType('participants-allergen-options', 'sql', 'sql') || ``;
+    const result = selectedSystemStore.selectedSystem?.db?.query(query)?.results || [];
+    return result.map(allergen => ({
+        label: allergen.name,
+        value: allergen.allergen_id
+    }))
+})
+
 // Watch for meal prop changes to populate form
 watch(() => props.meal, (newMeal) => {
     if (newMeal && modalOpen.value) {
         editMeal.value = {
             id: newMeal.id,
             name: newMeal.title || '',
-            when_served: newMeal.description || ''
+            when_served: newMeal.description || '',
+            allergens: [] as number[]
         }
     }
 }, { immediate: true })
@@ -141,7 +182,8 @@ watch(() => modalOpen.value, (isOpen) => {
         editMeal.value = {
             id: props.meal.id,
             name: props.meal.title || '',
-            when_served: props.meal.description || ''
+            when_served: props.meal.description || '',
+            allergens: [] as number[]
         }
     }
 })
@@ -195,7 +237,8 @@ const resetForm = () => {
     editMeal.value = {
         id: null,
         name: '',
-        when_served: ''
+        when_served: '',
+        allergens: []
     }
     modalOpen.value = false
 }
@@ -267,8 +310,8 @@ const resetForm = () => {
     border-width: 3px !important;
 }
 
-.border-green-500 {
-    border-color: #22c55e !important;
+.border-sky-500 {
+    border-color: #0ea5e9 !important;
     border-width: 3px !important;
 }
 
