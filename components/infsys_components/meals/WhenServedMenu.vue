@@ -1,8 +1,5 @@
 <template>
     <div class="when-served-menu">
-        <label for="when-served-select" class="block text-sm font-medium text-gray-700 mb-2">
-            {{ t('filter_by_when_served') }}
-        </label>
         <USelect id="when-served-select" v-model="selectedValue" :options="whenServedOptions"
             :placeholder="t('all_meals')" :key="optionsKey" class="w-64" :items="whenServedOptions" />
     </div>

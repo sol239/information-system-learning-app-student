@@ -206,21 +206,26 @@ const resetForm = () => {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: flex-end;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     z-index: 5000;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    transition: opacity 0.3s ease;
 }
 
 .custom-drawer {
-    background-color: white;
     width: 400px;
-    height: 100%;
+    max-width: 90vw;
+    background: #1e293b;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
     transform: translateX(100%);
     transition: transform 0.3s ease;
     overflow-y: auto;
+    border-left: 1px solid #334155;
+    z-index: 5001;
 }
 
 .custom-drawer.open {
@@ -229,26 +234,54 @@ const resetForm = () => {
 
 .drawer-content {
     padding: 1rem;
+    height: 100%;
 }
 
 .form-input {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
-    background-color: white;
+    background-color: #ffffff;
     color: #111827;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .form-input:focus {
     outline: none;
     border-color: #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input:disabled {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* Validation colors */
+.border-red-500 {
+    border-color: #ef4444 !important;
+    border-width: 3px !important;
+}
+
+.border-green-500 {
+    border-color: #22c55e !important;
+    border-width: 3px !important;
 }
 
 .component-wrapper {
     position: relative;
     display: inline-block;
     width: 100%;
+}
+
+.edit-button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    z-index: 10;
 }
 </style>
