@@ -433,8 +433,6 @@
                                             class="text-red-500 text-sm mt-1 font-bold">
                                             {{ newParticipantAddressError }}
                                         </div>
-                                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                            :componentId="'participants-add-address'" class="edit-button" />
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-age"
@@ -448,8 +446,6 @@
                                         <div v-if="newParticipantAgeError" class="text-red-500 text-sm mt-1 font-bold">
                                             {{ newParticipantAgeError }}
                                         </div>
-                                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                            :componentId="'participants-add-age'" class="edit-button" />
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-session"
@@ -465,8 +461,6 @@
                                             class="text-red-500 text-sm mt-1 font-bold">
                                             {{ newParticipantSessionIdError }}
                                         </div>
-                                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                            :componentId="'participants-add-session'" class="edit-button" />
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-allergens"
@@ -481,8 +475,6 @@
                                             class="text-red-500 text-sm mt-1 font-bold">
                                             {{ newParticipantAllergensError }}
                                         </div>
-                                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                            :componentId="'participants-add-allergens'" class="edit-button" />
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
