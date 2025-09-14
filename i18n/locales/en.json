@@ -30,7 +30,16 @@
     "delete": "Delete",
     "delete_toast_success": "Record deleted successfully",
     "delete_toast_error": "Error deleting record",
-    "sql_query": "SQL query",
+    "enter_sql_query": "Enter SQL query here...",
+    "execute_query": "Execute Query",
+    "clear": "Clear",
+    "error": "Error",
+    "query_results": "Query Results",
+    "rows": "rows",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results",
+    "no_results": "No results returned.",
     "add_toast_success": "Record added successfully",
     "save": "Save",
     "cancel": "Cancel",
@@ -221,5 +230,6 @@
     "email": "Email",
     "personal_number": "Personal Number",
     "session_id": "Session ID",
-    "actions": "Actions"
+    "actions": "Actions",
+    "custom_query": "Custom Query"
 }

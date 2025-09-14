@@ -31,7 +31,16 @@
     "delete": "Smazat",
     "delete_toast_success": "Záznam úspěšně smazán",
     "delete_toast_error": "Chyba při mazání záznamu",
-    "sql_query": "SQL dotaz",
+    "enter_sql_query": "Zadejte SQL dotaz zde...",
+    "execute_query": "Spustit dotaz",
+    "clear": "Vymazat",
+    "error": "Chyba",
+    "query_results": "Výsledky dotazu",
+    "rows": "řádků",
+    "showing": "Zobrazeno",
+    "to": "do",
+    "results": "výsledků",
+    "no_results": "Nebyly vráceny žádné výsledky.",
     "save": "Uložit",
     "cancel": "Zrušit",
     "edit_entity_toast_success": "Záznam úspěšně upraven",
@@ -227,5 +236,6 @@
     "name": "Název",
     "email": "E-mail",
     "personal_number": "Rodné číslo",
-    "actions": "Akce"
+    "actions": "Akce",
+    "custom_query": "Vlastní dotaz"
 }

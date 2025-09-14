@@ -28,6 +28,7 @@ const { copy } = useClipboard()
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
+const ROW_COUNT = 10 // Constant row count per page
 
 /* 5. Props */
 const props = defineProps<{
@@ -72,6 +73,7 @@ const currentSort = ref<{
     order: null
 })
 const editingColumn = ref<string | null>(null)
+const currentPage = ref(1) // Pagination state
 
 /* 8. Computed */
 const data = computed(() => {
@@ -140,6 +142,18 @@ const filteredAndSortedData = computed(() => {
     return d
 })
 
+// Computed properties for pagination
+const totalPages = computed(() => Math.ceil(filteredAndSortedData.value.length / ROW_COUNT))
+
+const paginatedResults = computed(() => {
+    const start = (currentPage.value - 1) * ROW_COUNT
+    const end = start + ROW_COUNT
+    return filteredAndSortedData.value.slice(start, end)
+})
+
+const startIndex = computed(() => (currentPage.value - 1) * ROW_COUNT)
+const endIndex = computed(() => Math.min(currentPage.value * ROW_COUNT, filteredAndSortedData.value.length))
+
 const currentSqlQuery = computed(() => {
     if (!props.selectedTableName || props.columnNames.length === 0) return ''
     const columnList = props.columnNames.map(col => `"${col}"`).join(', ')
@@ -149,6 +163,7 @@ const currentSqlQuery = computed(() => {
 /* 9. Watchers */
 watch(globalFilter, (newFilter) => {
     emit('filter-change', newFilter)
+    currentPage.value = 1 // Reset to first page when filter changes
 }, { debounce: 300 })
 
 useHighlightWatchers(highlightStore.highlightHandler, highlightStore)
@@ -191,22 +206,6 @@ function parseArrayData(value: any): string[] {
     }
 
     return []
-}
-
-function getTranslatedColumnName(field: string): string {
-    try {
-        // Try to get the translation for this field
-        const translated = t(field)
-        // If translation exists and is different from the key, return it
-        if (translated && translated !== field) {
-            return translated
-        }
-    } catch (error) {
-        // Translation doesn't exist, continue to fallback
-    }
-    
-    // Fallback: format the field name nicely
-    return formatColumnName(field)
 }
 
 function formatColumnName(field: string): string {
@@ -259,8 +258,8 @@ function getHeader(label: string, field: string) {
     const isCurrentField = currentSort.value.field === field
     const currentOrder = isCurrentField ? currentSort.value.order : null
     
-    // Try to get translated header, fallback to formatted label
-    const translatedLabel = getTranslatedColumnName(field)
+    // Use formatted column name directly (no translation)
+    const formattedLabel = formatColumnName(field)
     
     return h(
         'button',
@@ -283,7 +282,7 @@ function getHeader(label: string, field: string) {
             }
         },
         [
-            translatedLabel,
+            formattedLabel,
             currentOrder === 'asc' ? ' \u25B2' : currentOrder === 'desc' ? ' \u25BC' : ''
         ]
     )
@@ -343,6 +342,7 @@ function applyChanges() {
 
 function handleTableSelect(tableName: string) {
     emit('table-select', tableName)
+    currentPage.value = 1 // Reset to first page when table changes
 }
 
 // Helper to detect array type
@@ -411,7 +411,7 @@ defineExpose({
 
 <template>
     <div>
-        <h1 class="text-4xl font-bold mb-4">{{ t('database') }}</h1>
+        <h1 class="text-4xl font-bold mb-4 pl-4">{{ t('database') }}</h1>
 
         <div class="flex flex-row items-center justify-between w-full px-4 py-2">
             <!-- Left side: Table Selector -->
@@ -437,82 +437,116 @@ defineExpose({
         </div>
 
         <!-- Replace UTable with native HTML table -->
-        <table class="min-w-full divide-y divide-gray-200 my-4 rounded shadow custom-table-bg">
-            <thead>
-                <tr>
-                    <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
-                        class="px-4 py-2 text-left font-semibold relative">
-                        <span :id="`table-${col.id}`" v-if="typeof col.header === 'function'">
-                            <component :is="col.header()" />
-                        </span>
-                        <span v-else :id="`table-${col.id}`">
-                            {{ col.header }}
-                        </span>
-                    </th>
-                    <th v-if="columnNames.includes('od') && columnNames.includes('do')"
-                        class="px-4 py-2 text-left font-semibold">
-                        {{ t('days_count') }}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(row, rowIndex) in filteredAndSortedData" :key="row.id || rowIndex"
-                    class="hover:border hover:border-gray-400 border-collapse">
+        <UCard>
+            <table class="w-full border border-white" style="background-color: #0f172b;">
+                <thead>
+                    <tr style="background-color: #0f172b;">
+                        <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
+                            class="border border-white px-4 py-2 text-left text-white" style="background-color: #0f172b;">
+                            <span :id="`table-${col.id}`" v-if="typeof col.header === 'function'">
+                                <component :is="col.header()" />
+                            </span>
+                            <span v-else :id="`table-${col.id}`">
+                                {{ col.header }}
+                            </span>
+                        </th>
+                        <th v-if="columnNames.includes('od') && columnNames.includes('do')"
+                            class="border border-white px-4 py-2 text-left text-white" style="background-color: #0f172b;">
+                            {{ t('days_count') }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(row, rowIndex) in paginatedResults" :key="row.id || rowIndex"
+                        class="hover:bg-gray-700" style="background-color: #0f172b;">
 
-                    <td v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
-                        class="px-4 py-2">
-                        <!-- Formátování pro sloupce 'od' a 'do' -->
-                        <template v-if="col.id === 'od' || col.id === 'do'">
-                            {{ formatDate(row[col.id!]) }}
-                        </template>
-                        <!-- Special rendering for 'name' column with avatar -->
-                        <template v-else-if="col.id === 'name'">
-                            <div class="flex items-center gap-3">
-                                <UAvatar v-if="row.id" size="lg" :alt="`${row.name || row.id} avatar`" />
-                                <div>
-                                    <p class="font-medium text-highlighted">
-                                        {{ row.name }}
-                                    </p>
-                                    <p v-if="row.age">
-                                        {{ row.age }}
-                                    </p>
+                        <td v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
+                            class="border border-white px-4 py-2 text-white" style="background-color: #0f172b;">
+                            <!-- Formátování pro sloupce 'od' a 'do' -->
+                            <template v-if="col.id === 'od' || col.id === 'do'">
+                                {{ formatDate(row[col.id!]) }}
+                            </template>
+                            <!-- Special rendering for 'name' column with avatar -->
+                            <template v-else-if="col.id === 'name'">
+                                <div class="flex items-center gap-3">
+                                    <UAvatar v-if="row.id" size="lg" :alt="`${row.name || row.id} avatar`" />
+                                    <div>
+                                        <p class="font-medium text-highlighted">
+                                            {{ row.name }}
+                                        </p>
+                                        <p v-if="row.age">
+                                            {{ row.age }}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </template>
-                        <!-- Special rendering for array data columns (like roles, alergeny, etc.) -->
-                        <template v-else-if="isArrayColumn(row[col.id!])">
-                            <div class="flex flex-wrap gap-1">
-                                <UBadge v-for="(item, index) in parseArrayData(row[col.id!])" :key="index"
-                                    size="md">
-                                    {{ item }}
-                                </UBadge>
-                            </div>
-                        </template>
-                        <!-- Default rendering for other columns -->
-                        <template v-else>
-                            {{ row[col.id!] }}
-                        </template>
-                    </td>
-                    <!-- Nový sloupec 'délka' -->
-                    <td v-if="columnNames.includes('od') && columnNames.includes('do')" class="px-4 py-2">
-                        {{ getDaysLength(row['od'], row['do']) }}
-                    </td>
-                    <!--
-                    <td v-if="autoColumns.some(col => col.id === 'action')" class="px-4 py-2">
-                        <UDropdownMenu :items="getDropdownActions(row)">
-                            <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost"
-                                aria-label="Actions" />
-                        </UDropdownMenu>
-                    </td>
-                    -->
-                </tr>
-                <tr v-if="filteredAndSortedData.length === 0">
-                    <td :colspan="autoColumns.length" class="text-center text-gray-400 py-4">
-                        {{ t('no_data') }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                            </template>
+                            <!-- Special rendering for array data columns (like roles, alergeny, etc.) -->
+                            <template v-else-if="isArrayColumn(row[col.id!])">
+                                <div class="flex flex-wrap gap-1">
+                                    <UBadge v-for="(item, index) in parseArrayData(row[col.id!])" :key="index"
+                                        size="md">
+                                        {{ item }}
+                                    </UBadge>
+                                </div>
+                            </template>
+                            <!-- Default rendering for other columns -->
+                            <template v-else>
+                                {{ row[col.id!] }}
+                            </template>
+                        </td>
+                        <!-- Nový sloupec 'délka' -->
+                        <td v-if="columnNames.includes('od') && columnNames.includes('do')" class="border border-white px-4 py-2 text-white" style="background-color: #0f172b;">
+                            {{ getDaysLength(row['od'], row['do']) }}
+                        </td>
+                        <!--
+                        <td v-if="autoColumns.some(col => col.id === 'action')" class="px-4 py-2">
+                            <UDropdownMenu :items="getDropdownActions(row)">
+                                <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost"
+                                    aria-label="Actions" />
+                            </UDropdownMenu>
+                        </td>
+                        -->
+                    </tr>
+                    <tr v-if="paginatedResults.length === 0">
+                        <td :colspan="autoColumns.filter(col => col.id !== 'action').length + (columnNames.includes('od') && columnNames.includes('do') ? 1 : 0)" class="text-center text-gray-400 py-4">
+                            {{ t('no_data') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination Controls -->
+            <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
+                <div class="text-sm text-gray-300">
+                    {{ t('showing') }} {{ startIndex + 1 }} {{ t('to') }} {{ endIndex }} {{ t('of') }} {{ filteredAndSortedData.length }} {{ t('results') }}
+                </div>
+                <div class="flex items-center gap-2">
+                    <UButton 
+                        @click="currentPage = Math.max(1, currentPage - 1)" 
+                        :disabled="currentPage === 1"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
+                    >
+                        {{ t('previous') }}
+                    </UButton>
+                    
+                    <span class="text-sm text-gray-300">
+                        {{ t('page') }} {{ currentPage }} {{ t('of') }} {{ totalPages }}
+                    </span>
+                    
+                    <UButton 
+                        @click="currentPage = Math.min(totalPages, currentPage + 1)" 
+                        :disabled="currentPage === totalPages"
+                        size="sm"
+                        color="neutral"
+                        variant="outline"
+                    >
+                        {{ t('next') }}
+                    </UButton>
+                </div>
+            </div>
+        </UCard>
 
         <!--<EditComponentModal v-if="highlightStore.isEditModeActive && highlightStore.selectedComponentId" />-->
     </div>
@@ -538,21 +572,5 @@ defineExpose({
 
 .sort-header.desc:after {
     content: ' \u25BC';
-}
-
-/* Add custom table background color */
-.custom-table-bg {
-    background-color: #0f172b !important;
-}
-
-/* Add white column borders */
-.custom-table-bg th,
-.custom-table-bg td {
-    border-right: 1px solid white;
-}
-
-.custom-table-bg th:last-child,
-.custom-table-bg td:last-child {
-    border-right: none;
 }
 </style>
