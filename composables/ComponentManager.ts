@@ -1632,6 +1632,11 @@ navigateTo({
       js: { "js": "" },
       sql: {
         "sql-1": `SELECT * FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')};`,
+        "sql-2": `SELECT DISTINCT m.name AS meal_name, mp.date_served, m.when_served, p.name AS participant_name, p.email AS participant_email, sp.session_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} m JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_participants')} mp ON m.meal_id = mp.meal_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} p ON p.participant_id = mp.participant_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} sp ON sp.participant_id = p.participant_id`,
+        "sql-3": `SELECT DISTINCT m.name AS meal_name, mp.date_served, m.when_served, s.name AS supervisor_name, s.email AS supervisor_email, sp.session_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} m JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_supervisors')} mp ON m.meal_id = mp.meal_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')} s ON s.supervisor_id = mp.supervisor_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_supervisors')} sp ON sp.supervisor_id = s.supervisor_id`,
+        "sql-4": `SELECT allergen_id, name FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} ON ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')}.meal_id = ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')}.meal_id WHERE ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')}.meal_id = ?`,
+
+
       },
       additionals: {}
     });
@@ -1644,7 +1649,7 @@ navigateTo({
       css: { "css": "" },
       js: { "js": "" },
       sql: {
-        "sql-1": `SELECT * FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} JOIN;`,
+        "sql-1": `SELECT m.*, mp.meal_id AS mp_meal_id, mp.participant_id AS mp_participant_id, sp.session_id, sp.participant_id AS sp_participant_id, p.* FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} m JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_participants')} mp ON m.meal_id = mp.meal_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} sp ON sp.participant_id = mp.participant_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} p ON p.participant_id = mp.participant_id WHERE sp.session_id = ?`,
       },
       additionals: {}
     });

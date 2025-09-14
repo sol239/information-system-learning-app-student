@@ -26,17 +26,38 @@ const highlightStore = useHighlightStore()
 const componentCodeStore = useComponentCodeStore()
 const selectedSystemStore = useSelectedSystemStore()
 
-// Get system from route and set as selected
-const systemId = route.params.id
-const systems = informationSystemStore.systems
 const currentSystem = computed(() => systems.find((sys: any) => sys.id === parseInt(systemId as string, 10)) || null)
 
 const componentId = 'meal-plan'
 
-const system = selectedSystemStore.selectedSystem
 
 const mealPlanComponent = computed(() => componentCodeStore.getComponentById(componentId) || componentCodeStore.getDefaultComponent(componentId))
 
 
+// Get system from route and set as selected
+const systemId = route.params.id
+const systems = informationSystemStore.systems
+const system = computed(() => {
+    return systems.find((sys: any) => sys.id === parseInt(systemId as string, 10)) || null
+})
+
+// Watch for system changes and set selected system
+watch(system, (newSystem) => {
+    if (newSystem) {
+        selectedSystemStore.setSelectedSystem(newSystem as InformationSystem)
+    }
+}, { immediate: true })
+
+// Watch for database initialization and initialize components when ready
+watch(
+    () => selectedSystemStore.selectedSystem?.dbInitialized && !ComponentManager.areComponentsInitialized(),
+    (shouldInitialize) => {
+        if (shouldInitialize && selectedSystemStore.selectedSystem?.db) {
+            console.warn("[X] Components not initialized in sessions.vue")
+            ComponentManager.initializeComponents()
+        }
+    },
+    { immediate: true }
+)
 
 </script>
