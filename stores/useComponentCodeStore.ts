@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Component } from '~/model/Component'
+import { Component } from '~/model/Component'
 
 export const useComponentCodeStore = defineStore('componentCode', () => {
 
@@ -106,5 +106,42 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
     updateComponent,
     getComponentCodeByType,
     updateComponentCodeByType
+  }
+}, {
+  persist: {
+    serializer: {
+      serialize: JSON.stringify,
+      deserialize: (value: string) => {
+        const parsed = JSON.parse(value)
+
+        console.log("Deserializing componentCode store:", parsed)
+        
+        // Check if this is old data structure with componentCodeMap properties
+        if (parsed.defaultComponentCodeMap || parsed.actualComponentCodeMap) {
+          console.log("Detected old data structure, clearing store and localStorage")
+          // Clear the persisted data from localStorage
+          localStorage.removeItem('componentCode')
+          return {
+            defaultComponentMap: [],
+            actualComponentMap: []
+          }
+        }
+        
+        // Convert plain objects back to Component instances
+        if (parsed.defaultComponentMap && Array.isArray(parsed.defaultComponentMap)) {
+          parsed.defaultComponentMap = parsed.defaultComponentMap.map((comp: any) => new Component(comp))
+        } else {
+          parsed.defaultComponentMap = []
+        }
+        
+        if (parsed.actualComponentMap && Array.isArray(parsed.actualComponentMap)) {
+          parsed.actualComponentMap = parsed.actualComponentMap.map((comp: any) => new Component(comp))
+        } else {
+          parsed.actualComponentMap = []
+        }
+        
+        return parsed
+      }
+    }
   }
 })

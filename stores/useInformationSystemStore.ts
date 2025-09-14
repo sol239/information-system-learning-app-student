@@ -17,10 +17,12 @@ export const useInformationSystemStore = defineStore('informationSystem', () => 
   async function initializeDbs() {
     console.log("Reinitializing databases.")
     for (let i = 0; i < systems.value.length; i++) {
+        systems.value[i].dbInitialized = false;
         const dbHandler = await InformationSystem.databaseInitStatic(systems.value[i].configData);
+        
         systems.value[i].db = dbHandler;
-        console.log("Results:", systems.value[i].db.query("SELECT * FROM účastníci").results);
-    }
+        systems.value[i].dbInitialized = true;  
+      }
   }
 
   return {

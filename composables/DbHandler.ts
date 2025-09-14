@@ -76,6 +76,10 @@ export default class DbHandler {
         return this.tableNameMap.get(tableId);
     }
 
+    public static getTableNameStatic(tableNameMap: Map<string, string>, tableId: string): string | undefined {
+        return tableNameMap.get(tableId);
+    }
+
     private createTables(tables: any[]): void {
 
         // Create participants table

@@ -659,7 +659,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSelectedSystemStore } from '#imports'
+import { useRoute } from 'vue-router'
+import { useSelectedSystemStore, useInformationSystemStore } from '#imports'
 import { Supervisor } from '~/model/Supervisor'
 import { Session } from '~/model/Session'
 import { useHighlightStore } from '#imports'
@@ -673,9 +674,23 @@ import EditComponentModalOpenButton from '~/components/EditComponentModalOpenBut
 import { Participant } from '~/model/Participant'
 
 const selectedSystemStore = useSelectedSystemStore()
+const informationSystemStore = useInformationSystemStore()
+const route = useRoute()
 const { t } = useI18n()
 const highlightStore = useHighlightStore()
 const componentCodeStore = useComponentCodeStore()
+
+// Get system from route and set as selected
+const systemId = route.params.id
+const systems = informationSystemStore.systems
+const system = computed(() => systems.find(sys => sys.id === parseInt(systemId as string, 10)) || null)
+
+// Watch for system changes and set selected system
+watch(system, (newSystem) => {
+    if (newSystem) {
+        selectedSystemStore.setSelectedSystem(newSystem)
+    }
+}, { immediate: true })
 
 // Component definitions
 const participantsCapacityCountComponent = computed(() => componentCodeStore.getComponentById('supervisors-capacity-count') || componentCodeStore.getDefaultComponent('supervisors-capacity-count'))
@@ -1993,11 +2008,18 @@ const hasEditParticipantErrors = computed(() => {
 
 
 onMounted(() => {
-    if (!ComponentManager.areComponentsInitialized()) {
-        ComponentManager.initializeComponents()
-    }
     loadParticipantsFromDatabase()
 })
+
+watch(
+    () => selectedSystemStore.selectedSystem?.dbInitialized && !ComponentManager.areComponentsInitialized(),
+    (shouldInitialize) => {
+        if (shouldInitialize && selectedSystemStore.selectedSystem?.db) {
+            ComponentManager.initializeComponents()
+        }
+    },
+    { immediate: true }
+)
 </script>
 
 <style scoped>

@@ -38,6 +38,7 @@ import { ComponentManager, usePersistentStorageTestStore } from "#imports"
 import { useHighlightWatchers } from '~/composables/highlightWatchers'
 import '~/assets/css/highlight.css'
 import { InformationSystem } from '~/model/InformationSystem'
+import { useSelectedSystemStore } from '~/stores/useSelectedSystemStore'
 
 /* 2. Stores */
 const store = useInformationSystemStore()
@@ -47,6 +48,7 @@ const persistentStorageTestStore = usePersistentStorageTestStore()
 /* 3. Kontextové hooky */
 const route = useRoute()
 const { t } = useI18n()
+const selectedSystemStore = useSelectedSystemStore()
 
 /* 4. Konstanty (nereaktivní) */
 const systemId = route.params.id
@@ -198,12 +200,24 @@ function isElementTaskCompleted(elementId: string): boolean {
     return task ? task.completed : false;
 }
 
-/* 12. Lifecycle */
-onMounted(() => {
-    if (!ComponentManager.areComponentsInitialized()) {
-        ComponentManager.initializeComponents();
+watch(system, (newSystem) => {
+    if (newSystem) {
+        selectedSystemStore.setSelectedSystem(newSystem);
     }
-})
+}, { immediate: true });
+watch(
+    () => selectedSystemStore.selectedSystem?.dbInitialized && !ComponentManager.areComponentsInitialized(),
+    (shouldInitialize) => {
+        if (shouldInitialize && selectedSystemStore.selectedSystem?.db) {
+            console.warn("[X] Components not initialized in dashboard.vue");
+            ComponentManager.initializeComponents();
+        }
+    },
+    { immediate: true }
+)
+
+/* 12. Lifecycle */
+
 /* 13. defineExpose */
 // none
 </script>

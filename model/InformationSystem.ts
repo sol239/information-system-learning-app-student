@@ -21,6 +21,7 @@ export class InformationSystem {
     public tasks: Task[] = [],
     public configData: any,
     public dbNumber: number = 0,
+    public dbInitialized: boolean = true
   ) {
     this.db = new DbHandler();
   }
@@ -34,6 +35,7 @@ export class InformationSystem {
   public async databaseInit(json: any): Promise<void> {
     console.log("Initializing database for Information System:", this.name);
     await this.db.init(json);
+    this.dbInitialized = true;
     console.log("Database initialized for Information System:", this.name);
   }
 
