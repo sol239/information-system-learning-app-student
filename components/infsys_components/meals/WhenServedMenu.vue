@@ -2,7 +2,7 @@
 <template>
     <div class="when-served-menu-wrapper">
         <div class="when-served-menu">
-            <USelect size="lg" id="when-served-select" v-model="selectedValue" :options="whenServedOptions"
+            <USelect size="xl" id="when-served-select" v-model="selectedValue" :options="whenServedOptions"
                 :placeholder="t('all_meals')" :key="optionsKey" class="w-64" :items="whenServedOptions" />
             <!-- Edit button positioned absolutely in top right -->
             <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"

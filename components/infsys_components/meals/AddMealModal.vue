@@ -7,7 +7,7 @@
                     <template #header>
                         <h3 class="text-lg font-semibold">{{ t('add_meal') }}</h3>
                     </template>
-
+                    <!-- TODO: Create working edit component modals for the form fields -->
                     <UForm :state="newMeal" @submit="handleAddMeal(newMeal)" class="flex flex-col space-y-4">
                         <div class="highlightable" id="meals-add-name"
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-add-name', $event)">

@@ -1,7 +1,7 @@
 <template>
     <!-- Delete meal button -->
     <div class="delete-container">
-        <UButton size="sm" color="red" variant="outline" @click="deleteMeal">
+        <UButton size="md" color="red" variant="soft" @click="deleteMeal">
             {{ t('delete') }}
         </UButton>
         <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="componentId"

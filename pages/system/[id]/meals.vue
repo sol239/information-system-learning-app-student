@@ -26,7 +26,7 @@
                                     <h3 class="text-xl font-semibold text-gray-900">
                                         {{ meal.title }}
                                     </h3>
-                                    <UBadge size="lg" color="green" variant="soft">
+                                    <UBadge size="xl" color="green" variant="soft">
                                         {{ meal.description }}
                                     </UBadge>
                                 </div>
@@ -43,7 +43,7 @@
                             <!-- Meal Actions -->
                             <div class="meal-actions mt-6 pt-4 border-t border-gray-200">
                                 <div class="flex gap-2 justify-end">
-                                    <UButton size="sm" color="yellow" variant="outline" @click="editMeal(meal)">
+                                    <UButton size="md" color="primary" variant="solid" @click="editMeal(meal)">
                                         {{ t('view_details') }}
                                     </UButton>
                                     <DeleteMealButton :mealId="meal.id" />
@@ -64,7 +64,7 @@
                 <UIcon name="i-heroicons-cake" class="empty-icon" />
                 <h3 class="empty-title">{{ t('no_meals') }}</h3>
                 <p class="empty-description">{{ t('no_meals_description') }}</p>
-                <UButton color="green" class="mt-4" @click="openAddMealModal">
+                <UButton size="xl" color="green" class="mt-4" @click="openAddMealModal">
                     {{ t('add_meal') }}
                 </UButton>
             </div>

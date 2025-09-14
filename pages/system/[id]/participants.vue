@@ -338,7 +338,7 @@
                         <div class="flex gap-2">
                             <!-- Edit Participant Button only -->
                             <div class="ml-auto">
-                                <UButton size="sm" color="sky" variant="solid"
+                                <UButton size="md" color="sky" variant="solid"
                                     @click="viewParticipantDetails(participant)" class="flex-1">
                                     {{ t('view_details') }}
                                 </UButton>
@@ -347,7 +347,7 @@
                                 ? highlightStore.highlightHandler.selectElement('participants-delete-button-' + participant.id, $event)
                                 : removeParticipant(participant)">
                                 <div class="component-wrapper">
-                                    <UButton size="sm" color="red" variant="outline">
+                                    <UButton size="md" color="red" variant="soft">
                                         {{ t('delete') }}
                                     </UButton>
                                     <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
