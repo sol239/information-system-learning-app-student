@@ -223,19 +223,19 @@ navigateTo({
     });
 
     const sessionDayCountBadgeComponent = new Component({
-  id: "session-day-count-badge",
-  name: "Session Day Count Badge",
-  description: `Badge showing the count of days for a session.`,
-  html: {
-    "html": `
+      id: "session-day-count-badge",
+      name: "Session Day Count Badge",
+      description: `Badge showing the count of days for a session.`,
+      html: {
+        "html": `
       <div class="badge primary medium">
         <span class="icon">📅</span>
         <span>{{ label }}: {{ dayCount }}</span>
       </div>
     `
-  },
-  css: {
-    "css": `.badge {
+      },
+      css: {
+        "css": `.badge {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
@@ -268,33 +268,33 @@ navigateTo({
       font-size: 1.2rem; /* balanced icon size */
     }
     `
-  },
-  js: { 
-    "js": `const timeDifference = end.getTime() - start.getTime(); return Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;` 
-  },
-  sql: {
-    "sql": `SELECT from_date, to_date FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')} WHERE session_id = ?`,
-  },
-  additionals: {}
-});
+      },
+      js: {
+        "js": `const timeDifference = end.getTime() - start.getTime(); return Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;`
+      },
+      sql: {
+        "sql": `SELECT from_date, to_date FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')} WHERE session_id = ?`,
+      },
+      additionals: {}
+    });
 
-const mealCountBadgeComponent = new Component({
-  id: "meals-count-badge",
-  name: "Meals Count Badge",
-  description: `Badge showing the count of meals, optionally filtered by when_served type.`,
-  html: {
-    "html": ``
-  },
-  css: {
-    "css": ``
-  },
-  js: { "js": `` },
-  sql: {
-    "sql-1": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')}`,
-    "sql-2": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} WHERE when_served = ?`,
-  },
-  additionals: {}
-});
+    const mealCountBadgeComponent = new Component({
+      id: "meals-count-badge",
+      name: "Meals Count Badge",
+      description: `Badge showing the count of meals, optionally filtered by when_served type.`,
+      html: {
+        "html": ``
+      },
+      css: {
+        "css": ``
+      },
+      js: { "js": `` },
+      sql: {
+        "sql-1": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')}`,
+        "sql-2": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} WHERE when_served = ?`,
+      },
+      additionals: {}
+    });
 
 
     const sessionDateRangeComponent = new Component({
@@ -1231,7 +1231,7 @@ const mealCountBadgeComponent = new Component({
     });
 
 
-    
+
     // Supervisors page components (mirroring participants)
     const supervisorsCapacityCountComponent = new Component({
       id: "supervisors-capacity-count",
@@ -1601,7 +1601,9 @@ const mealCountBadgeComponent = new Component({
       css: { "css": "" },
       js: { "js": "" },
       sql: {
-        "sql": `UPDATE ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} SET name = ?, when_served = ? WHERE meal_id = ?`
+        "sql-1": `UPDATE ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} SET name = ?, when_served = ? WHERE meal_id = ?`,
+        "sql-2": `SELECT allergen_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} WHERE meal_id = ?`,
+        "sql-3": `SELECT * from ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens')}`,
       },
       additionals: {}
     });
@@ -1635,7 +1637,7 @@ const mealCountBadgeComponent = new Component({
       },
       additionals: {}
     });
-// Store the instances into the store
+    // Store the instances into the store
     componentCodeStore.updateDefaultComponent(statsMealsComponent);
     componentCodeStore.updateDefaultComponent(statsParticipantsComponent);
     componentCodeStore.updateDefaultComponent(statsSessionsComponent);

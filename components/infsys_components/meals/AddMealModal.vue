@@ -31,7 +31,7 @@
                             <div class="component-wrapper">
                                 <label for="when_served" class="block text-sm font-medium text-white mb-1">{{
                                     t('when_served') }}</label>
-                                <USelect :color="newMealWhenServedComputed ? 'sky' : 'red'" id="when_served"
+                                <USelect :color="newMealWhenServedComputed ? 'primary' : 'red'" id="when_served"
                                     v-model="newMeal.when_served" :items="whenServedOptions"
                                     :disabled="highlightStore.isHighlightMode" :placeholder="t('select_when_served')" />
                                 <div v-if="newMealWhenServedError" class="text-red-500 text-sm mt-1 font-bold">
@@ -47,7 +47,7 @@
                             <div class="component-wrapper">
                                 <label for="allergens"
                                     class="block text-sm font-medium text-white mb-1">Alergeny</label>
-                                <USelect :color="newMealAllergensComputed ? 'sky' : 'red'" id="allergens"
+                                <USelect :color="newMealAllergensComputed ? 'primary' : 'red'" id="allergens"
                                     v-model="newMeal.allergens" :items="allergenOptions" multiple
                                     placeholder="Vyberte alergeny" :disabled="highlightStore.isHighlightMode" />
                                 <div v-if="newMealAllergensError" class="text-red-500 text-sm mt-1 font-bold">
@@ -310,7 +310,7 @@ watch(() => modalOpen.value, (isOpen) => {
 }
 
 .border-sky-500 {
-    border-color: #0ea5e9 !important;
+    border-color: #05df72 !important;
     border-width: 3px !important;
 }
 

@@ -31,7 +31,7 @@
                             <div class="component-wrapper">
                                 <label for="when_served" class="block text-sm font-medium text-white mb-1">{{
                                     t('when_served') }}</label>
-                                <USelect :color="editMealWhenServedComputed ? 'sky' : 'red'" id="when_served"
+                                <USelect :color="editMealWhenServedComputed ? 'primary' : 'red'" id="when_served"
                                     v-model="editMeal.when_served" :items="whenServedOptions"
                                     :disabled="highlightStore.isHighlightMode" :placeholder="t('select_when_served')" />
                                 <div v-if="editMealWhenServedError" class="text-red-500 text-sm mt-1 font-bold">
@@ -47,7 +47,7 @@
                             <div class="component-wrapper">
                                 <label for="allergens"
                                     class="block text-sm font-medium text-white mb-1">Alergeny</label>
-                                <USelect :color="editMealAllergensComputed ? 'sky' : 'red'" id="allergens"
+                                <USelect :color="editMealAllergensComputed ? 'primary' : 'red'" id="allergens"
                                     v-model="editMeal.allergens" :items="allergenOptions" multiple
                                     placeholder="Vyberte alergeny" :disabled="highlightStore.isHighlightMode" />
                                 <div v-if="editMealAllergensError" class="text-red-500 text-sm mt-1 font-bold">
@@ -59,13 +59,14 @@
                         </div>
 
                         <div class="flex flex-col gap-3 pt-4">
-                            <UButton type="submit" color="yellow" :loading="isSubmitting"
+                            <UButton type="submit" color="primary" :loading="isSubmitting"
                                 :disabled="hasValidationErrors">
                                 {{ t('update') }}
                             </UButton>
-                            <UButton variant="outline" color="yellow" @click="resetForm">
+                            <UButton variant="outline" color="primary" @click="resetForm">
                                 {{ t('cancel') }}
                             </UButton>
+                            <UButton @click="helperMethod">Helper</UButton>
                         </div>
                     </UForm>
                 </UCard>
@@ -90,6 +91,9 @@ const componentCodeStore = useComponentCodeStore()
 
 const componentId = 'meals-edit'
 const editMealComponent = componentCodeStore.getComponentById(componentId) || componentCodeStore.getDefaultComponent(componentId)
+
+const actualMealAllergensQuery = computed(() => editMealComponent?.sql?.['sql-2'] || '')
+const currentMealAllergensQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-2', actualMealAllergensQuery.value))
 
 // Props
 const props = defineProps<{
@@ -160,12 +164,42 @@ const whenServedOptions = computed(() => {
         value: allergen.allergen_id
     }))
 })
-    */
+*/
+
+const currentAllergens = computed(() => {
+    const _ = selectedSystemStore.dbNumber
+    const query = currentMealAllergensQuery.value
+    const system = selectedSystemStore.selectedSystem
+    if (!system?.db || !editMeal.value.id) {
+        return []
+    }
+    const result = system.db.query(query, [editMeal.value.id])?.results || []
+    const allergenIds = result.map((row: any) => row.allergen_id)
+    console.log("Current Allergens for meal ID", editMeal.value.id, ":", allergenIds)
+    console.log("Query used:", query)
+    console.log("Parameters:", [editMeal.value.id])
+    editMeal.value.allergens = allergenIds
+    return allergenIds
+})
+
+function helperMethod() {
+    console.log("Current Allergens:", currentAllergens.value)
+}
+
+// When served options
+/* TODO: hardcoded options only for czech lang */
+const whenServedOptions = [
+    { label: t('breakfast'), value: 'snídaně' },
+    { label: t('lunch'), value: 'oběd' },
+    { label: t('dinner'), value: 'večeře' },
+]
+
+
 
 // Allergen options
 const allergenOptions = computed(() => {
     const _ = selectedSystemStore.dbNumber
-    const query: string = componentCodeStore.getComponentCodeByType('participants-allergen-options', 'sql', 'sql') || ``;
+    const query: string = componentCodeStore.getComponentCodeByType('meals-edit', 'sql', 'sql-3') || ``;
     const result = selectedSystemStore.selectedSystem?.db?.query(query)?.results || [];
     return result.map(allergen => ({
         label: allergen.name,
@@ -213,7 +247,7 @@ const handleEditMeal = async (mealData: any) => {
 
         // Get the edit meal component
 
-        const sqlQuery = editMealComponent?.sql?.['sql'] || ''
+        const sqlQuery = editMealComponent?.sql?.['sql-1'] || ''
 
         if (!sqlQuery) {
             throw new Error('Edit meal SQL query not found')
@@ -319,7 +353,7 @@ const resetForm = () => {
 }
 
 .border-sky-500 {
-    border-color: #0ea5e9 !important;
+    border-color: #05df72 !important;
     border-width: 3px !important;
 }
 
