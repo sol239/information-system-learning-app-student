@@ -83,8 +83,8 @@ const autoColumns = computed<TableColumn<any>[]>(() => {
     console.log("KEYS:", keys)
 
     const columns: TableColumn<any>[] = keys.map(key => ({
-        accessorKey: key,
-        header: () => getHeader(key.charAt(0).toUpperCase() + key.slice(1), key)
+        id: key,
+        header: () => getHeader(key, key)
     }))
 
     console.log("COLUMNS:", columns)
@@ -102,7 +102,7 @@ const autoColumns = computed<TableColumn<any>[]>(() => {
         ...columns,
         {
             id: 'action',
-            header: 'Akce'
+            header: t('actions')
         }
     ]
 })
@@ -193,9 +193,28 @@ function parseArrayData(value: any): string[] {
     return []
 }
 
-function generateSqlOrderBy(field: string, order: 'asc' | 'desc') {
-    const sanitizedField = field.replace(/[^a-zA-Z0-9_]/g, '')
-    return `ORDER BY ${sanitizedField} ${order.toUpperCase()}`
+function getTranslatedColumnName(field: string): string {
+    try {
+        // Try to get the translation for this field
+        const translated = t(field)
+        // If translation exists and is different from the key, return it
+        if (translated && translated !== field) {
+            return translated
+        }
+    } catch (error) {
+        // Translation doesn't exist, continue to fallback
+    }
+    
+    // Fallback: format the field name nicely
+    return formatColumnName(field)
+}
+
+function formatColumnName(field: string): string {
+    // Convert snake_case or camelCase to Title Case
+    return field
+        .replace(/_/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/\b\w/g, l => l.toUpperCase())
 }
 
 function generateSqlWhere(filter: string, columns: string[]) {
@@ -239,6 +258,10 @@ function handleSort(field: string) {
 function getHeader(label: string, field: string) {
     const isCurrentField = currentSort.value.field === field
     const currentOrder = isCurrentField ? currentSort.value.order : null
+    
+    // Try to get translated header, fallback to formatted label
+    const translatedLabel = getTranslatedColumnName(field)
+    
     return h(
         'button',
         {
@@ -260,7 +283,7 @@ function getHeader(label: string, field: string) {
             }
         },
         [
-            label,
+            translatedLabel,
             currentOrder === 'asc' ? ' \u25B2' : currentOrder === 'desc' ? ' \u25BC' : ''
         ]
     )
@@ -276,7 +299,7 @@ function getDropdownActions(row: any): DropdownMenuItem[] {
         {
             label: t('delete'),
             icon: 'i-lucide-trash',
-            color: 'error',
+            color: 'red',
             onSelect: () => emit('delete', row)
         }
     ]
@@ -335,7 +358,7 @@ async function refreshDatabase() {
             // TODO: This is not the best way to reflect the changes of refreshing the database
             /*
             When db refreshes the data are not reloaded and selecting other table is needed
-            */ 
+            */
             window.location.reload();
             //emit('table-select', props.tableNames[0]);
         }
@@ -388,21 +411,22 @@ defineExpose({
 
 <template>
     <div>
-                                <h1 class="text-4xl font-bold mb-4">{{ t('database') }}</h1>
+        <h1 class="text-4xl font-bold mb-4">{{ t('database') }}</h1>
 
         <div class="flex flex-row items-center justify-between w-full px-4 py-2">
             <!-- Left side: Table Selector -->
             <div class="flex items-center gap-2" id="database-select-table">
                 <USelect size="xl" :model-value="selectedTableName" :items="tableNames" class="w-48"
                     @update:model-value="handleTableSelect" />
-                                    <UButton size="xl" :label="$t('refresh_database')" color="primary" variant="outline" icon="i-heroicons-arrow-path"
-                    @click="refreshDatabase" />
+                <UButton size="xl" :label="$t('refresh_database')" color="primary" variant="outline"
+                    icon="i-heroicons-arrow-path" @click="refreshDatabase" />
             </div>
 
             <!-- Right side: Add Button, Global Filter Input, Refresh Button -->
             <div class="flex items-center gap-4">
+                <!--
                 <UButton size="xl" variant="subtle" @click="addMethod">{{ t('add_entity') }}</UButton>
-
+                -->
                 <div id="database-filter">
                     <UInput size="xl" :disabled="highlightStore.isHighlightMode" v-model="globalFilter" class="max-w-sm"
                         :placeholder="`${t('filter')} ${selectedTableName || 'items'}...`" />
@@ -416,19 +440,18 @@ defineExpose({
         <table class="min-w-full divide-y divide-gray-200 my-4 rounded shadow custom-table-bg">
             <thead>
                 <tr>
-                    <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.accessorKey || col.id"
+                    <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
                         class="px-4 py-2 text-left font-semibold relative">
-                        <span :id="`table-${col.accessorKey}`" v-if="typeof col.header === 'function'">
+                        <span :id="`table-${col.id}`" v-if="typeof col.header === 'function'">
                             <component :is="col.header()" />
                         </span>
-                        <span v-else :id="`table-${col.accessorKey}`">
+                        <span v-else :id="`table-${col.id}`">
                             {{ col.header }}
                         </span>
                     </th>
-                    <!-- Pokud existuje sloupec 'od' a 'do', přidej třetí sloupec 'délka' -->
                     <th v-if="columnNames.includes('od') && columnNames.includes('do')"
                         class="px-4 py-2 text-left font-semibold">
-                        Délka
+                        {{ t('days_count') }}
                     </th>
                 </tr>
             </thead>
@@ -436,14 +459,14 @@ defineExpose({
                 <tr v-for="(row, rowIndex) in filteredAndSortedData" :key="row.id || rowIndex"
                     class="hover:border hover:border-gray-400 border-collapse">
 
-                    <td v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.accessorKey || col.id"
+                    <td v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
                         class="px-4 py-2">
                         <!-- Formátování pro sloupce 'od' a 'do' -->
-                        <template v-if="col.accessorKey === 'od' || col.accessorKey === 'do'">
-                            {{ formatDate(row[col.accessorKey]) }}
+                        <template v-if="col.id === 'od' || col.id === 'do'">
+                            {{ formatDate(row[col.id!]) }}
                         </template>
                         <!-- Special rendering for 'name' column with avatar -->
-                        <template v-else-if="col.accessorKey === 'name'">
+                        <template v-else-if="col.id === 'name'">
                             <div class="flex items-center gap-3">
                                 <UAvatar v-if="row.id" size="lg" :alt="`${row.name || row.id} avatar`" />
                                 <div>
@@ -457,9 +480,9 @@ defineExpose({
                             </div>
                         </template>
                         <!-- Special rendering for array data columns (like roles, alergeny, etc.) -->
-                        <template v-else-if="isArrayColumn(row[col.accessorKey])">
+                        <template v-else-if="isArrayColumn(row[col.id!])">
                             <div class="flex flex-wrap gap-1">
-                                <UBadge v-for="(item, index) in parseArrayData(row[col.accessorKey])" :key="index"
+                                <UBadge v-for="(item, index) in parseArrayData(row[col.id!])" :key="index"
                                     size="md">
                                     {{ item }}
                                 </UBadge>
@@ -467,19 +490,21 @@ defineExpose({
                         </template>
                         <!-- Default rendering for other columns -->
                         <template v-else>
-                            {{ row[col.accessorKey] }}
+                            {{ row[col.id!] }}
                         </template>
                     </td>
                     <!-- Nový sloupec 'délka' -->
                     <td v-if="columnNames.includes('od') && columnNames.includes('do')" class="px-4 py-2">
                         {{ getDaysLength(row['od'], row['do']) }}
                     </td>
+                    <!--
                     <td v-if="autoColumns.some(col => col.id === 'action')" class="px-4 py-2">
                         <UDropdownMenu :items="getDropdownActions(row)">
                             <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost"
                                 aria-label="Actions" />
                         </UDropdownMenu>
                     </td>
+                    -->
                 </tr>
                 <tr v-if="filteredAndSortedData.length === 0">
                     <td :colspan="autoColumns.length" class="text-center text-gray-400 py-4">
