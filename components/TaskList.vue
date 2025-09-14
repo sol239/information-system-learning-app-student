@@ -167,7 +167,7 @@
 
 <script setup lang="ts">
 /* 1. Imports */
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useSelectedSystemStore } from '~/stores/useSelectedSystemStore'
 import { useInformationSystemStore } from '~/stores/useInformationSystemStore'
 import { useSelectedTaskStore } from '~/stores/useSelectedTaskStore'
@@ -179,7 +179,6 @@ import { Task } from '~/model/Task'
 import { sys } from 'typescript'
 import type { StepperItem } from '@nuxt/ui'
 import { useComponentCodeStore } from '#imports'
-
 
 /* 2. Stores */
 const selectedSystemStore = useSelectedSystemStore()
@@ -194,39 +193,36 @@ const componentCodeStore = useComponentCodeStore()
 /* 3. Context hooks */
 const { t } = useI18n()
 
-const currentStepIndex = ref(0)
-
-function onStepChange(newIndex: string | number | undefined) {
-  if (typeof newIndex === 'number') {
-    currentStepIndex.value = newIndex
-    console.log('Current stepper item:', stepperItems.value[newIndex])
-  }
-}
-
 /* 4. Constants (non-reactive) */
 const systemId = selectedSystemStore.selectedId
 const system = store.systems.find(sys => sys.id === systemId)
 const toast = useToast()
-//TODO: locale
+// TODO: locale
 
 /* 5. Props */
-// none
+/* No props defined */
 
 /* 6. Emits */
-// none
+/* No emits defined */
 
 /* 7. Template refs */
-// none
+/* No template refs defined */
 
-/* 8. Local state (ref, reactive) */
+/* 8. State (ref, reactive) */
+const currentStepIndex = ref(0)
 const newTaskText = ref('')
 const form = ref({
   answer: ''
 })
 const taskCompleted = ref(false)
 const taskIncorrect = ref(false)
+const questionsForm = ref<string[]>([])
 
 /* 9. Computed */
+/**
+ * Computed property that returns the list of tasks for the current system.
+ * Also manages highlight edit mode based on editable tasks.
+ */
 const tasks = computed(() => {
   if (systemId == null) return [];
   ComponentHandler.getComponentMap(selectedTaskStore.currentRound)
@@ -241,23 +237,28 @@ const tasks = computed(() => {
     highlightStore.isEditModeActive = false;
   }
 
-
   return _tasks;
 })
 
+/**
+ * Computed property that returns the currently selected task.
+ */
 const selectedTask = computed(() =>
   tasks.value.find((t: Task) => t.id === selectedTaskStore.selectedId) ?? null
 )
 
+/**
+ * Computed property that returns the questions for the selected task.
+ */
 const questions = computed(() => {
   if (!selectedTask.value) return []
   return TaskAnswerEval.getQuestions(selectedTask.value.answer)
 })
 
-const questionsForm = ref<string[]>([])
-// TODO: Finish
-
 /* 10. Watchers */
+/**
+ * Watcher for current round changes to show toast notifications.
+ */
 watch(() => selectedTaskStore.currentRound, (newRound) => {
   const newTasksCount = ComponentHandler.getComponentMap(newRound).length - selectedTaskStore.completedTasksCount;
 
@@ -280,44 +281,48 @@ watch(() => selectedTaskStore.currentRound, (newRound) => {
 
 })
 
+/**
+ * Watcher for selected task changes to update step index.
+ */
 watch(selectedTask, (task) => {
   if (task?.completed) {
     currentStepIndex.value = 2
   }
 })
 
-// Keyboard shortcut for submit button
-onMounted(() => {
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 's' && event.altKey && selectedTask.value && !selectedTask.value.completed) {
-      handleSubmit()
-    }
-  }
-
-  document.addEventListener('keydown', handleKeydown)
-
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown)
-  })
-})
-
 /* 11. Methods */
-
+/**
+ * Handles the repair action for a task.
+ * @param event - The mouse event
+ */
 async function handleRepair(event: MouseEvent) {
   // print selected task answer
   const evalResult: boolean = await TaskAnswerEval.evaluateTaskAnswer(selectedTask.value?.answer || '')
   console.log("Task answer evaluation result:", evalResult)
 }
 
+/**
+ * Removes a task from the system.
+ * @param index - The index of the task to remove
+ */
 function removeTask(index: number) {
   if (!system || !system.tasks) return
   system.tasks.splice(index, 1)
 }
 
+/**
+ * Updates a task in the system.
+ * @param index - The index of the task to update
+ * @param task - The updated task object
+ */
 function updateTask(index: number, task: Task) {
   if (!system) return
 }
 
+/**
+ * Selects or deselects a task.
+ * @param id - The ID of the task to select
+ */
 function selectTask(id: number) {
   if (selectedTaskStore.selectedId === id) {
     selectedTaskStore.clear()
@@ -338,12 +343,29 @@ function selectTask(id: number) {
     console.log("Selected task:", selectedTaskStore.selectedTask)
     const selectedTaskId = selectedTaskStore.selectedId;
     const systemId = selectedSystemStore.selectedId;
-    const componentsToFind: string[] = TaskQueue.getSelectedTaskErrorComponentFilenames(selectedTaskId, systemId);
-    selectedTaskStore.setSelectedTaskComponentsToFind(componentsToFind);
+    if (selectedTaskId !== null && systemId !== null) {
+      const componentsToFind: string[] = TaskQueue.getSelectedTaskErrorComponentFilenames(selectedTaskId, systemId);
+      selectedTaskStore.setSelectedTaskComponentsToFind(componentsToFind);
+    }
     console.log("Selected task:", selectedTaskStore.selectedTask)
   }
 }
 
+/**
+ * Handles the step change in the stepper.
+ * @param newIndex - The new step index
+ */
+function onStepChange(newIndex: string | number | undefined) {
+  if (typeof newIndex === 'number') {
+    currentStepIndex.value = newIndex
+    // Note: stepperItems is not defined in this component
+    console.log('Current stepper index:', newIndex)
+  }
+}
+
+/**
+ * Handles the submission of a task answer.
+ */
 async function handleSubmit() {
   if (!selectedTask.value) return
 
@@ -377,7 +399,7 @@ async function handleSubmit() {
           const toRepair: string[] = ["sql", "html", "js"]
 
           for (const section of toRepair) {
-            componentCodeStore.resetComponentCode(id + "-" + section)
+            componentCodeStore.resetComponent(id + "-" + section)
           }
         }
       }
@@ -397,10 +419,12 @@ async function handleSubmit() {
     console.log("Task kind: type-correct, isMatch:", isMatch)
   } else if (selectedTask.value.kind === 'repair') {
     isMatch = await TaskAnswerEval.evaluateTaskAnswer(selectedTask.value?.answer || '')
-    const idx = system.tasks.findIndex(t => t.id === selectedTask.value!.id)
-    system.tasks[idx].completed = isMatch
-    if (isMatch) {
-      await evaluate();
+    if (system && selectedTask.value) {
+      const idx = system.tasks.findIndex(t => t.id === selectedTask.value!.id)
+      system.tasks[idx].completed = isMatch
+      if (isMatch) {
+        await evaluate();
+      }
     }
   } else if (selectedTask.value.kind === 'select-options') {
     if (isMatch) {
@@ -429,7 +453,12 @@ async function handleSubmit() {
   console.log("User records:", scoreStore.getUserRecords())
 }
 
+/**
+ * Evaluates the task and updates its completion status.
+ */
 async function evaluate() {
+  if (!system || !selectedTask.value) return
+
   const idx = system.tasks.findIndex(t => t.id === selectedTask.value!.id)
   if (idx !== -1) {
     console.log(selectedSystemStore.selectedSystem)
@@ -483,10 +512,25 @@ async function evaluate() {
 }
 
 /* 12. Lifecycle */
-// none
+/**
+ * Lifecycle hook that sets up keyboard shortcuts and cleanup.
+ */
+onMounted(() => {
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 's' && event.altKey && selectedTask.value && !selectedTask.value.completed) {
+      handleSubmit()
+    }
+  }
+
+  document.addEventListener('keydown', handleKeydown)
+
+  onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown)
+  })
+})
 
 /* 13. defineExpose */
-// none
+/* No exposed methods */
 </script>
 
 <style scoped>
