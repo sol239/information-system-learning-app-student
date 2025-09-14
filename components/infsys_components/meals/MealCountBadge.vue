@@ -1,11 +1,10 @@
 <template>
-  <div v-if="system" class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+  <div v-if="system" class="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg whitespace-nowrap">
     <UIcon name="i-lucide-utensils" class="w-4 h-4 text-gray-600" />
-
     <!-- Meal Count -->
-    <div class="highlightable" :id="'meals-count-badge'"
+    <div class="highlightable inline-flex items-center" :id="'meals-count-badge'"
       @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('meals-count-badge', $event)">
-      <div class="component-wrapper">
+      <div class="component-wrapper inline-flex items-center">
         <span class="text-sm font-medium text-gray-700">
           {{ t('meal_count') }}: {{ mealsCount }}
         </span>
@@ -13,7 +12,6 @@
           :componentId="'meals-count-badge'" class="edit-button" />
       </div>
     </div>
-
   </div>
   <EditComponentModal v-if="highlightStore.isEditModeActive && highlightStore.selectedComponentId" />
 </template>
@@ -78,7 +76,8 @@ useHighlightWatchers(highlightStore.highlightHandler, highlightStore);
 <style>
 .component-wrapper {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .edit-button {

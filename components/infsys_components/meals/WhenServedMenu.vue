@@ -1,7 +1,13 @@
+
 <template>
-    <div class="when-served-menu">
-        <USelect size="lg" id="when-served-select" v-model="selectedValue" :options="whenServedOptions"
-            :placeholder="t('all_meals')" :key="optionsKey" class="w-64" :items="whenServedOptions" />
+    <div class="when-served-menu-wrapper">
+        <div class="when-served-menu">
+            <USelect size="lg" id="when-served-select" v-model="selectedValue" :options="whenServedOptions"
+                :placeholder="t('all_meals')" :key="optionsKey" class="w-64" :items="whenServedOptions" />
+            <!-- Edit button positioned absolutely in top right -->
+            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                :componentId="'meals-when-served'" class="edit-button" />
+        </div>
     </div>
 </template>
 
@@ -63,12 +69,10 @@ const correctSqlQuery = computed(() => {
     if (sql) {
         return sql
     }
-    // Fallback SQL if component not found
-    console.log("Using fallback SQL")
-    return `SELECT DISTINCT when_served FROM ${system?.db?.getTableName('meals')} ORDER BY when_served`
 })
 const sqlQuery = computed(() => {
-    const value = ComponentHandler.getComponentValue(componentId, 'sql', correctSqlQuery.value)
+    const sql = correctSqlQuery.value ?? '';
+    const value = ComponentHandler.getComponentValue(componentId, 'sql', sql)
     console.log("ComponentHandler result:", value)
     return value
 })
@@ -141,12 +145,28 @@ useHighlightWatchers(highlightStore.highlightHandler, highlightStore);
 </script>
 
 <style scoped>
+
+.when-served-menu-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .when-served-menu {
+    position: relative;
     display: flex;
     flex-direction: column;
+    width: 100%;
+}
+
+.edit-button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    z-index: 10;
 }
 
 select option {
     background-color: gray;
 }
+
 </style>

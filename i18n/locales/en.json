@@ -212,5 +212,14 @@
     "filter_by_when_served": "Filter by When Served",
     "all_meals": "All Meals",
     "snack": "Snack",
-    "meal_count": "Počet jídel"
+    "meal_count": "Meal Count",
+    "allergen_id": "Allergen ID",
+    "meal_id": "Meal ID",
+    "participant_id": "Participant ID",
+    "date_served": "Date Served",
+    "supervisor_id": "Supervisor ID",
+    "email": "Email",
+    "personal_number": "Personal Number",
+    "session_id": "Session ID",
+    "actions": "Actions"
 }

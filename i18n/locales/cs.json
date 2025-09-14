@@ -218,5 +218,14 @@
     "filter_by_when_served": "Filtrovat podle kdy se podává",
     "all_meals": "Všechna jídla",
     "snack": "Svačina",
-    "meal_count": "Počet jídel"
+    "meal_count": "Počet jídel",
+    "allergen_id": "ID alergenu",
+    "meal_id": "ID jídla",
+    "participant_id": "ID účastníka",
+    "date_served": "Datum podávání",
+    "supervisor_id": "ID vedoucího",
+    "name": "Název",
+    "email": "E-mail",
+    "personal_number": "Rodné číslo",
+    "actions": "Akce"
 }
