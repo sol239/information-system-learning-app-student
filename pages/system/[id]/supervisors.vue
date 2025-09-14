@@ -13,7 +13,7 @@
                 <div class="highlightable" :id="'supervisors-session-menu'"
                     @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-session-menu', $event)">
                     <div class="component-wrapper">
-                        <USelect v-model="value" :items="filterSessionsItems"
+                        <USelect size="xl" v-model="value" :items="filterSessionsItems"
                             :disabled="highlightStore.isEditModeActive" />
                         <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
                             :componentId="'sessions-list'" class="edit-button" />
@@ -66,17 +66,17 @@
                     <!-- Filter Field and Reset Button (left) -->
                     <div class="flex gap-2 items-center">
                         <UButton class="highlightable" id="supervisors-filter-reset" variant="outline" color="violet"
-                            size="sm" @click="resetFilter" icon="i-lucide-rotate-ccw"
+                            size="xl" @click="resetFilter" icon="i-lucide-rotate-ccw"
                             @click.stop="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-filter-reset', $event)">
                         </UButton>
                         <div class="highlightable" id="supervisors-filter-input"
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-filter-input', $event)">
                             <UInput v-model="filterText" color="violet" :placeholder="t('filter_supervisors')"
-                                size="sm" />
+                                size="xl" />
                         </div>
                     </div>
                     <!-- Add Supervisor Button (right) -->
-                    <UButton color="violet" variant="outline" @click="createNewParticipant" icon="i-heroicons-plus">
+                    <UButton size="xl" color="violet" variant="outline" @click="createNewParticipant" icon="i-heroicons-plus">
                         {{ t('add_supervisor') }}
                     </UButton>
                 </div>
