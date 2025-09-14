@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay">
+  <div class="modal-overlay" >
     <div class="modal">
       <div class="editor-container">
         <div v-for="section in availableSections" :key="section.key" class="editor-section">
@@ -348,7 +348,7 @@ function closeModal() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5000;
+  z-index: 10000;
 }
 
 .modal {

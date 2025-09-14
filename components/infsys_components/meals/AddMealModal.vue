@@ -21,8 +21,8 @@
                                 <div v-if="newMealNameError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ newMealNameError }}
                                 </div>
-                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                    :componentId="'validation-name'" class="edit-button" />
+                                <!-- <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-name'" class="edit-button" /> -->
                             </div>
                         </div>
 
@@ -37,8 +37,8 @@
                                 <div v-if="newMealWhenServedError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ newMealWhenServedError }}
                                 </div>
-                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                    :componentId="'validation-when-served'" class="edit-button" />
+                                <!-- <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'meals-add'" class="edit-button" /> -->
                             </div>
                         </div>
 
@@ -53,8 +53,8 @@
                                 <div v-if="newMealAllergensError" class="text-red-500 text-sm mt-1 font-bold">
                                     {{ newMealAllergensError }}
                                 </div>
-                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                    :componentId="'validation-allergens'" class="edit-button" />
+                                <!-- <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
+                                    :componentId="'validation-allergens'" class="edit-button" /> -->
                             </div>
                         </div>
 
