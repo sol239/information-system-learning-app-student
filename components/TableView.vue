@@ -327,6 +327,23 @@ function isArrayType(type: string) {
     return type === 'array'
 }
 
+async function refreshDatabase() {
+    try {
+        await SystemReset.refreshDatabaseCore();
+        toast.add({
+            title: t('refresh_database_success') || 'Database refreshed successfully',
+            color: 'primary',
+            icon: 'i-lucide-check-circle'
+        })
+    } catch {
+        toast.add({
+            title: t('refresh_database_error') || 'Database refresh error',
+            color: 'red',
+            icon: 'i-lucide-alert-triangle'
+        })
+    }
+}
+
 /* Helper pro formátování ISO data na DD.MM.YYYY */
 function formatDate(dateStr: string): string {
     if (!dateStr) return ''
@@ -366,21 +383,24 @@ defineExpose({
 
             <!-- Table Selector -->
             <div class="flex items-center gap-2" id="database-select-table">
-                <label for="table-select">{{ t('select_table') }}:</label>
-                <USelect :model-value="selectedTableName" :items="tableNames" class="w-48"
+                <USelect size="xl" :model-value="selectedTableName" :items="tableNames" class="w-48"
                     @update:model-value="handleTableSelect" />
             </div>
 
             <!-- Add Button -->
-            <UButton variant="subtle" @click="addMethod">{{ t('add') }}</UButton>
+            <UButton size="xl" variant="subtle" @click="addMethod">{{ t('add_entity') }}</UButton>
 
             <!-- Global Filter Input -->
             <div id="database-filter">
-                <UInput :disabled="highlightStore.isHighlightMode" v-model="globalFilter" class="max-w-sm"
+                <UInput size="xl" :disabled="highlightStore.isHighlightMode" v-model="globalFilter" class="max-w-sm"
                     :placeholder="`${t('filter')} ${selectedTableName || 'items'}...`" />
             </div>
 
+            <UButton size="xl" :label="$t('refresh_database')" color="primary" variant="outline" icon="i-heroicons-arrow-path"
+                @click="refreshDatabase" />
+
             <!-- SQL Query Display -->
+            <!--
             <div class="ml-auto text-sm text-gray-500 font-mono flex items-center">
                 <span>{{ t('sql_query') }}:</span>
                 <span class="ml-2 p-2 bg-gray-100 rounded text-xs">
@@ -388,6 +408,7 @@ defineExpose({
                         any)?.accessorKey || '').filter(Boolean))}}
                 </span>
             </div>
+            -->
         </div>
 
         <!-- Replace UTable with native HTML table -->

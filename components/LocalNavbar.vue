@@ -1,4 +1,3 @@
-
 <template>
     <div class="w-full" style="z-index: 10000;">
         <!-- Main navbar container with flex wrap -->
@@ -6,7 +5,8 @@
 
             <!-- Navigation Menu on the left -->
             <div class="flex-shrink-0">
-                <UNavigationMenu orientation="horizontal" :items="localItems" class="data-[orientation=vertical]:w-48" />
+                <UNavigationMenu orientation="horizontal" :items="localItems"
+                    class="data-[orientation=vertical]:w-48" />
             </div>
 
             <!-- Right side items - responsive grid -->
@@ -14,18 +14,21 @@
 
                 <!-- First row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
+                    <!--
                     <UButton label="Helper" @click="handleHelperClick" size="sm">
                         <span class="mobile-hidden">Helper</span>
                     </UButton>
-
-                    <UButton icon="i-heroicons-table-cells" @click="navigateTo(`/system/${selectedSystemStore.selectedId}/database`)" size="sm">{{ t('database') }}</UButton>
+                    -->
+                    <UButton icon="i-heroicons-table-cells"
+                        @click="navigateTo(`/system/${selectedSystemStore.selectedId}/database`)" size="sm">{{
+                        t('database') }}</UButton>
 
                     <UBadge color="red" variant="outline" size="lg">
                         {{ $t('score') }}: {{ scoreStore.score }}
                     </UBadge>
 
                     <!-- Tasks Popover -->
-                     <!--
+                    <!--
                     <UPopover v-model:open="tasksPopoverOpen" arrow>
                         <UButton icon="i-lucide-list-todo" :label="selectedTaskStore.selectedTask?.title || $t('tasks')"
                             color="primary" variant="subtle" size="sm">
@@ -34,31 +37,35 @@
                         <template #content>
                             <TaskList />
                         </template>
-                    </UPopover>
-                    -->
+</UPopover>
+-->
                 </div>
 
                 <!-- Second row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
                     <UButton :icon="highlightStore.isHighlightMode ? 'i-lucide-lightbulb' : 'i-lucide-lightbulb-off'"
-                        :label="highlightStore.isHighlightMode ? $t('disable_highlight') : $t('enable_highlight')" color="lime"
-                        :variant="highlightStore.isHighlightMode ? 'solid' : 'subtle'" size="sm"
+                        :label="highlightStore.isHighlightMode ? $t('disable_highlight') : $t('enable_highlight')"
+                        color="lime" :variant="highlightStore.isHighlightMode ? 'solid' : 'subtle'" size="sm"
                         @click="highlightStore.toggleHighlight">
-                        <span class="mobile-hidden">{{ highlightStore.isHighlightMode ? $t('disable_highlight') : $t('enable_highlight') }}</span>
+                        <span class="mobile-hidden">{{ highlightStore.isHighlightMode ? $t('disable_highlight') :
+                            $t('enable_highlight')
+                            }}</span>
                     </UButton>
 
                     <UButton :icon="highlightStore.isEditModeActive ? 'i-lucide-pencil' : 'i-lucide-pencil-off'"
                         :label="highlightStore.isEditModeActive ? $t('disable_edit') : $t('enable_edit')" color="yellow"
                         :variant="highlightStore.isEditModeActive ? 'solid' : 'subtle'" size="sm"
                         @click="highlightStore.toggleEdit">
-                        <span class="mobile-hidden">{{ highlightStore.isEditModeActive ? $t('disable_edit') : $t('enable_edit') }}</span>
+                        <span class="mobile-hidden">{{ highlightStore.isEditModeActive ? $t('disable_edit') :
+                            $t('enable_edit')
+                            }}</span>
                     </UButton>
                 </div>
 
                 <!-- Third row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
                     <!-- Teacher Drawer -->
-                     <!--
+                    <!--
                     <UDrawer v-model:open="teacherDrawerOpen" direction="right">
                         <UButton color="violet" variant="outline" @click="teacherDrawerOpen = true" icon="i-lucide-school" size="sm">
                             <span class="mobile-hidden">{{ $t('teacher') }}</span>
@@ -79,8 +86,9 @@
                     -->
 
                     <!-- Student Drawer -->
-                    <UDrawer v-model:open="studentDrawerOpen" direction="right" >
-                        <UButton color="sky" variant="outline" @click="studentDrawerOpen = true" icon="i-lucide-graduation-cap" size="sm">
+                    <UDrawer v-model:open="studentDrawerOpen" direction="right">
+                        <UButton color="sky" variant="outline" @click="studentDrawerOpen = true"
+                            icon="i-lucide-graduation-cap" size="sm">
                             <span class="mobile-hidden">{{ $t('student') }}</span>
                         </UButton>
                         <template #content>
@@ -103,7 +111,8 @@
                 <!-- Fourth row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
                     <UPopover v-model:open="resetPopoverOpen" arrow>
-                        <UButton  icon="i-heroicons-arrow-path" :label="$t('refresh_system')" color="primary" variant="subtle" size="sm">
+                        <UButton icon="i-heroicons-arrow-path" :label="$t('refresh_system')" color="primary"
+                            variant="subtle" size="sm">
                             <span class="mobile-hidden">{{ $t('refresh_system') }}</span>
                         </UButton>
                         <template #content>
@@ -111,8 +120,10 @@
                                 <div class="flex flex-col gap-2">
                                     <UButton :label="$t('refresh_components')" color="primary" variant="outline"
                                         icon="i-heroicons-arrow-path" @click="refreshComponents" />
+                                    <!--
                                     <UButton :label="$t('refresh_database')" color="lime" variant="outline"
                                         icon="i-heroicons-arrow-path" @click="refreshDatabase" />
+                                    -->
                                     <UButton :label="$t('refresh_tasks')" color="sky" variant="outline"
                                         icon="i-heroicons-arrow-path" @click="refreshTasks" />
                                 </div>
@@ -144,16 +155,17 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Floating Button -->
     <UPopover v-model:open="tasksPopoverOpen" arrow>
-      <UButton icon="i-lucide-list-todo" :label="selectedTaskStore.selectedTask?.title || $t('tasks')" color="lime"
-        variant="solid" size="xl" :class="['fixed bottom-15 right-15 rounded-full shadow-lg', { 'task-button-animation': selectedTaskStore.selectedTask }]">
-        <span class="mobile-hidden">{{ selectedTaskStore.selectedTask?.title || $t('tasks') }}</span>
-      </UButton>
-      <template #content >
-        <TaskList />
-      </template>
+        <UButton icon="i-lucide-list-todo" :label="selectedTaskStore.selectedTask?.title || $t('tasks')" color="lime"
+            variant="solid" size="xl"
+            :class="['fixed bottom-15 right-15 rounded-full shadow-lg', { 'task-button-animation': selectedTaskStore.selectedTask }]">
+            <span class="mobile-hidden">{{ selectedTaskStore.selectedTask?.title || $t('tasks') }}</span>
+        </UButton>
+        <template #content>
+            <TaskList />
+        </template>
     </UPopover>
 </template>
 
@@ -244,7 +256,7 @@ const localItems = ref<NavigationMenuItem[]>([
         to: `/system/${selectedSystemStore.selectedId}/meals`,
         data_target: 'system-meals',
     },
-     {
+    {
         label: t('meal_plan'),
         to: `/system/${selectedSystemStore.selectedId}/meal-plan`,
         data_target: 'system-meal-plan',
@@ -286,49 +298,12 @@ async function handleHelperClick() {
     console.log(componentCodeStore.getComponentById("stats-meals"));
 }
 
-// Core refresh methods without toasts
-async function refreshComponentsCore() {
-    console.log("Refreshing components...");
-    componentCodeStore.resetAllComponents();
-}
 
-async function refreshTasksCore() {
-    selectedTaskStore.resetTasks()
-    scoreStore.resetScore()
-    errorComponentStore.clearErrorComponents()
-    ComponentHandler.getComponentMap(selectedTaskStore.currentRound)
-
-    for (let j = 0; j < informationSystemStore.systems.length; j++) {
-        const system = informationSystemStore.systems[j];
-        for (let i = 0; i < system.tasks.length; i++) {
-            system.tasks[i].completed = false;
-            system.tasks[i].componentsRepaired = false;
-        }
-    }
-}
-
-async function refreshDatabaseCore() {
-    console.log("Refreshing database...");
-    const systems: InformationSystem[] = FileHandler.getInformationSystems();
-
-    for (const system of systems) {
-        if (system.id === selectedSystemStore.selectedId) {
-            if (selectedSystemStore.selectedSystem) {
-                selectedSystemStore.selectedSystem.tables = system.tables;
-            }
-            break;
-        }
-    }
-
-    if (selectedSystemStore.selectedSystem) {
-        await selectedSystemStore.selectedSystem.db.init(selectedSystemStore.selectedSystem.configData)
-    }
-}
 
 // Wrapper methods with toasts
 async function refreshComponents() {
     try {
-        await refreshComponentsCore();
+        await SystemReset.refreshComponentsCore();
         toast.add({
             title: t('component_refresh_success') || 'Component refresh successful',
             color: 'primary',
@@ -345,7 +320,7 @@ async function refreshComponents() {
 
 async function refreshTasks() {
     try {
-        await refreshTasksCore();
+        await SystemReset.refreshTasksCore();
         toast.add({
             title: t('refresh_tasks_success') || 'Tasks refreshed successfully',
             color: 'primary',
@@ -362,7 +337,7 @@ async function refreshTasks() {
 
 async function refreshDatabase() {
     try {
-        await refreshDatabaseCore();
+        await SystemReset.refreshDatabaseCore();
         toast.add({
             title: t('refresh_database_success') || 'Database refreshed successfully',
             color: 'primary',
@@ -386,9 +361,9 @@ async function refreshAll() {
 async function leaveSystem() {
     // Navigate back to systems list
     await navigateTo('/system');
-    await refreshComponentsCore();
-    await refreshDatabaseCore();
-    await refreshTasksCore();
+    await SystemReset.refreshComponentsCore();
+    await SystemReset.refreshDatabaseCore();
+    await SystemReset.refreshTasksCore();
     exitPopoverOpen.value = false;
 }
 

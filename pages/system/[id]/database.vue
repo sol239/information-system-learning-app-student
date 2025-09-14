@@ -168,6 +168,8 @@ function isArrayType(type: string) {
     return type === 'array'
 }
 
+
+
 // Fetch possible values for array columns
 async function fetchColumnValues(tableName: string, columns: string[]) {
     if (!system.value?.db) return
