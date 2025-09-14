@@ -14,6 +14,7 @@
 
     <div class="flex justify-center">
         <div class="flex gap-x-8" style="width:90%">
+            <!--
             <UCard class="flex-1" style="border: 2px solid; border-color: #616aca;">
                 <h1 class="text-2xl font-bold mb-4">{{ t('im_teacher') }}</h1>
                 <div class="flex flex-col gap-4">
@@ -22,6 +23,7 @@
                     </UButton>
                 </div>
             </UCard>
+            -->
             <UCard class="flex-1" style="border: 2px solid; border-color: #04a599;">
                 <h1 class="text-2xl font-bold mb-4">{{ t('im_student') }}</h1>
                 <div class="flex flex-col gap-4">

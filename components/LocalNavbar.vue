@@ -1,6 +1,6 @@
 
 <template>
-    <div class="w-full" style="z-index: 1000;">
+    <div class="w-full" style="z-index: 10000;">
         <!-- Main navbar container with flex wrap -->
         <div class="flex flex-wrap items-center justify-between gap-2 py-2">
 
@@ -56,6 +56,7 @@
                 <!-- Third row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
                     <!-- Teacher Drawer -->
+                     <!--
                     <UDrawer v-model:open="teacherDrawerOpen" direction="right">
                         <UButton color="violet" variant="outline" @click="teacherDrawerOpen = true" icon="i-lucide-school" size="sm">
                             <span class="mobile-hidden">{{ $t('teacher') }}</span>
@@ -73,6 +74,7 @@
                             </UCard>
                         </template>
                     </UDrawer>
+                    -->
 
                     <!-- Student Drawer -->
                     <UDrawer v-model:open="studentDrawerOpen" direction="right" >

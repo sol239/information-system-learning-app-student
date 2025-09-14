@@ -1,6 +1,6 @@
 <template>
   <UDrawer v-model:open="isOpen" direction="right">
-    <UButton color="sky" variant="outline" @click="openDrawer" icon="i-heroicons-cog-6-tooth" style="margin-left: 10px">
+    <UButton color="sky" variant="outline" @click="openDrawer" icon="i-heroicons-cog-6-tooth">
       <span class="mobile-hidden">{{ t('settings') }}</span>
     </UButton>
 

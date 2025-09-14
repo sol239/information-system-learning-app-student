@@ -22,7 +22,7 @@ export class ComponentManager {
     const statsMealsNavigateJs = `
 selectedTableStore.select('jídla');
 navigateTo({
-  path: \`/system/\${systemId}/database\`,
+  path: \`/system/\${systemId}/meals\`,
 });
 `
 
