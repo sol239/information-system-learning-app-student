@@ -81,7 +81,7 @@ export class ComponentHandler {
         const componentCodeStore = useComponentCodeStore();
         const actualComponent = componentCodeStore.getActualComponent(componentFilename);
         if (actualComponent && actualComponent.edited) {
-            console.log("Component was edited, considered in error components.");
+            console.log("Component was edited, consided in error components.");
             return false;
         }
 
