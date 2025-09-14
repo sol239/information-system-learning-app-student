@@ -2,7 +2,7 @@
     <div class="meal-plan-container">
         
 
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between mb-8">
                 <h1 class="text-4xl font-bold text-white-950">{{ t('meal_plan') }}</h1>
             </div>
@@ -160,6 +160,9 @@
                 <h3 class="empty-title">{{ t('no_meal_plan_data') }}</h3>
                 <p class="empty-description">{{ t('no_meal_plan_description') }}</p>
             </div>
+
+    <USeparator color="primary" />
+
         </div>
     </div>
 </template>
@@ -481,9 +484,6 @@ const allergens = computed(() => {
 </script>
 
 <style scoped>
-.meal-plan-container {
-    min-height: 100vh;
-}
 
 /* Session Cards */
 .session-card {

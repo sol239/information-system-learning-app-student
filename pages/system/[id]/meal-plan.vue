@@ -1,8 +1,12 @@
 <template>
-    <LocalNavbar></LocalNavbar>
+    <LocalNavbar>
+
+    </LocalNavbar>
 
 
-    <MealsPlanList></MealsPlanList>
+    <div>
+        <MealsPlanList></MealsPlanList>
+    </div>
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'

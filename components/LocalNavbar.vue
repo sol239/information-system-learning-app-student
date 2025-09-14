@@ -243,21 +243,25 @@ const localItems = ref<NavigationMenuItem[]>([
     },
     {
         label: t('participants'),
+        icon: 'i-heroicons-users',
         to: `/system/${selectedSystemStore.selectedId}/participants`,
         data_target: 'system-participants',
     },
     {
         label: t('supervisors'),
+        icon: 'i-heroicons-user-group',
         to: `/system/${selectedSystemStore.selectedId}/supervisors`,
         data_target: 'system-supervisors',
     },
     {
         label: t('meals'),
+        icon: 'i-lucide-utensils',
         to: `/system/${selectedSystemStore.selectedId}/meals`,
         data_target: 'system-meals',
     },
     {
         label: t('meal_plan'),
+        icon: 'i-lucide-square-menu',
         to: `/system/${selectedSystemStore.selectedId}/meal-plan`,
         data_target: 'system-meal-plan',
     },
