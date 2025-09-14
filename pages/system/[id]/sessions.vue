@@ -97,7 +97,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useSelectedSystemStore } from '#imports'
+import { useRoute } from 'vue-router'
+import { useSelectedSystemStore, useInformationSystemStore } from '#imports'
 import { Session } from '~/model/Session'
 import { Participant } from '~/model/Participant'
 import { Supervisor } from '~/model/Supervisor'
@@ -118,38 +119,68 @@ import SessionDeleteButton from '~/components/infsys_components/sessions/Session
 import AddSessionButton from '~/components/infsys_components/sessions/AddSessionButton.vue'
 import EditSessionModal from '~/components/infsys_components/sessions/EditSessionModal.vue'
 import LocalNavbar from '~/components/LocalNavbar.vue'
+import { InformationSystem } from '~/model/InformationSystem'
+import { ComponentManager } from '#imports'
 
+const route = useRoute()
 const selectedSystemStore = useSelectedSystemStore()
+const informationSystemStore = useInformationSystemStore()
 const { t } = useI18n()
 const highlightStore = useHighlightStore()
+
+// Get system from route and set as selected
+const systemId = route.params.id
+const systems = informationSystemStore.systems
+const system = computed(() => {
+    return systems.find((sys: any) => sys.id === parseInt(systemId as string, 10)) || null
+})
+
+// Watch for system changes and set selected system
+watch(system, (newSystem) => {
+    if (newSystem) {
+        selectedSystemStore.setSelectedSystem(newSystem as InformationSystem)
+    }
+}, { immediate: true })
+
+// Watch for database initialization and initialize components when ready
+watch(
+    () => selectedSystemStore.selectedSystem?.dbInitialized && !ComponentManager.areComponentsInitialized(),
+    (shouldInitialize) => {
+        if (shouldInitialize && selectedSystemStore.selectedSystem?.db) {
+            console.warn("[X] Components not initialized in sessions.vue")
+            ComponentManager.initializeComponents()
+        }
+    },
+    { immediate: true }
+)
 
 const localItems = ref([
     {
         label: t('dashboard'),
         icon: 'i-heroicons-chart-bar-20-solid',
-        to: `/system/${selectedSystemStore.selectedId}/dashboard`,
+        to: `/system/${systemId}/dashboard`,
         data_target: 'system-dashboard',
     },
     {
         label: t('sessions'),
         icon: 'i-heroicons-calendar-date-range',
-        to: `/system/${selectedSystemStore.selectedId}/sessions`,
+        to: `/system/${systemId}/sessions`,
         data_target: 'system-sessions',
     },
     {
         label: t('participants'),
-        to: `/system/${selectedSystemStore.selectedId}/participants`,
+        to: `/system/${systemId}/participants`,
         data_target: 'system-participants',
     },
     {
         label: t('supervisors'),
-        to: `/system/${selectedSystemStore.selectedId}/supervisors`,
+        to: `/system/${systemId}/supervisors`,
         data_target: 'system-supervisors',
     },
     {
         label: t('database'),
         icon: 'i-heroicons-table-cells',
-        to: `/system/${selectedSystemStore.selectedId}/database`,
+        to: `/system/${systemId}/database`,
         data_target: 'system-table',
     }
 ])
@@ -278,12 +309,13 @@ function getDayCount(session: Session): number {
     return Math.ceil(diff / (1000 * 3600 * 24)) + 1
 }
 
-onMounted(() => {
-    // Ensure sessions are loaded when page mounts
-    if (selectedSystemStore.selectedSystem?.db) {
-        selectedSystemStore.loadSessions()
-    }
-})
+// Sessions are loaded reactively via watchers above
+// onMounted(() => {
+//     // Ensure sessions are loaded when page mounts
+//     if (selectedSystemStore.selectedSystem?.db) {
+//         selectedSystemStore.loadSessions()
+//     }
+// })
 </script>
 
 <style scoped>
