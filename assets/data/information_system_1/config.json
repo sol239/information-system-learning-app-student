@@ -105,15 +105,15 @@
         },
         {
             "id": 2,
-            "title": "Zobrazování statistik v Dashboardu",
-            "description": "Zkontrolujte, zda se v Dashboardu správně zobrazují statistiky o počtu účastníků, jídlech a dozorčích. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.",
+            "title": "Zobrazování statistik v nástěnce",
+            "description": "Zkontrolujte, zda se v nástěnce správně zobrazují statistiky o počtu jídel. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.",
             "status": "pending",
             "kind": "select",
             "answer": "none",
             "elementClass": [
                 "stats-supervisors"
             ],
-            "round": 2,
+            "round": 1,
             "is_editable": false,
             "error-components": [
                 {
