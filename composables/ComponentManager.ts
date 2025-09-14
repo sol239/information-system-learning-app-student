@@ -1604,6 +1604,8 @@ navigateTo({
         "sql-1": `UPDATE ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} SET name = ?, when_served = ? WHERE meal_id = ?`,
         "sql-2": `SELECT allergen_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} WHERE meal_id = ?`,
         "sql-3": `SELECT * from ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens')}`,
+        "sql-4": `DELETE FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} WHERE meal_id = ?`,
+        "sql-5": `INSERT INTO ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} (meal_id, allergen_id) VALUES (?, ?)`,
       },
       additionals: {}
     });

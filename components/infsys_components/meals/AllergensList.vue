@@ -46,6 +46,10 @@ const allergensQuery = computed(() => ComponentHandler.getComponentValue(compone
 
 // Computed property to get allergen IDs for the specific meal
 const allergens = computed(() => {
+
+    const _ = selectedSystemStore.dbNumber
+
+
     if (!system?.db || typeof system?.db?.query !== "function") {
         return []
     }

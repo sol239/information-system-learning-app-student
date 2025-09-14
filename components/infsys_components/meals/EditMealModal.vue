@@ -93,7 +93,7 @@ const componentId = 'meals-edit'
 const editMealComponent = componentCodeStore.getComponentById(componentId) || componentCodeStore.getDefaultComponent(componentId)
 
 const actualMealAllergensQuery = computed(() => editMealComponent?.sql?.['sql-2'] || '')
-const currentMealAllergensQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql-2', actualMealAllergensQuery.value))
+const currentMealAllergensQuery = actualMealAllergensQuery
 
 // Props
 const props = defineProps<{
@@ -168,6 +168,8 @@ const whenServedOptions = computed(() => {
 
 const currentAllergens = computed(() => {
     const _ = selectedSystemStore.dbNumber
+    console.log("Current Allergens for meal ID", editMeal.value.id)
+
     const query = currentMealAllergensQuery.value
     const system = selectedSystemStore.selectedSystem
     if (!system?.db || !editMeal.value.id) {
@@ -178,7 +180,6 @@ const currentAllergens = computed(() => {
     console.log("Current Allergens for meal ID", editMeal.value.id, ":", allergenIds)
     console.log("Query used:", query)
     console.log("Parameters:", [editMeal.value.id])
-    editMeal.value.allergens = allergenIds
     return allergenIds
 })
 
@@ -199,8 +200,9 @@ const whenServedOptions = [
 // Allergen options
 const allergenOptions = computed(() => {
     const _ = selectedSystemStore.dbNumber
-    const query: string = componentCodeStore.getComponentCodeByType('meals-edit', 'sql', 'sql-3') || ``;
+    const query: string = editMealComponent?.sql?.['sql-3'] || ``;
     const result = selectedSystemStore.selectedSystem?.db?.query(query)?.results || [];
+    
     return result.map(allergen => ({
         label: allergen.name,
         value: allergen.allergen_id
@@ -216,6 +218,7 @@ watch(() => props.meal, (newMeal) => {
             when_served: newMeal.description || '',
             allergens: [] as number[]
         }
+        editMeal.value.allergens = currentAllergens.value
     }
 }, { immediate: true })
 
@@ -228,6 +231,7 @@ watch(() => modalOpen.value, (isOpen) => {
             when_served: props.meal.description || '',
             allergens: [] as number[]
         }
+        editMeal.value.allergens = currentAllergens.value
     }
 })
 
@@ -255,8 +259,24 @@ const handleEditMeal = async (mealData: any) => {
 
         // Execute the update query
         system.db.exec(sqlQuery, [mealData.name, mealData.when_served, mealData.id])
+        selectedSystemStore.incrementDbNumber()
+        // Delete existing allergen relations
+        const deleteQuery = editMealComponent?.sql?.['sql-4'] || ''
+        if (deleteQuery) {
+            system.db.exec(deleteQuery, [mealData.id])
+            selectedSystemStore.incrementDbNumber()
+        }
 
-        // If we reach here without error, the meal was updated successfully
+        // Insert new allergen relations
+        const insertQuery = editMealComponent?.sql?.['sql-5'] || ''
+        if (insertQuery) {
+            for (const allergenId of mealData.allergens) {
+                system.db.exec(insertQuery, [mealData.id, allergenId])
+                selectedSystemStore.incrementDbNumber()
+            }
+        }
+
+        // Only increment dbNumber once at the end, after all operations are complete
         selectedSystemStore.incrementDbNumber()
         toast.add({
             title: t('meal_updated_successfully'),
@@ -284,6 +304,8 @@ const resetForm = () => {
     }
     modalOpen.value = false
 }
+
+
 </script>
 
 <style scoped>
