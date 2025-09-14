@@ -365,8 +365,7 @@ defineExpose({
         <div class="flex flex-row items-center gap-4 w-full px-4 py-2">
 
             <!-- Table Selector -->
-            <div class="flex items-center gap-2 highlightable" id="database-select-table"
-                @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('database-select-table', $event)">
+            <div class="flex items-center gap-2" id="database-select-table">
                 <label for="table-select">{{ t('select_table') }}:</label>
                 <USelect :model-value="selectedTableName" :items="tableNames" class="w-48"
                     @update:model-value="handleTableSelect" />
@@ -376,8 +375,7 @@ defineExpose({
             <UButton variant="subtle" @click="addMethod">{{ t('add') }}</UButton>
 
             <!-- Global Filter Input -->
-            <div class="highlightable" id="database-filter"
-                @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('database-filter', $event)">
+            <div id="database-filter">
                 <UInput :disabled="highlightStore.isHighlightMode" v-model="globalFilter" class="max-w-sm"
                     :placeholder="`${t('filter')} ${selectedTableName || 'items'}...`" />
             </div>
@@ -398,18 +396,12 @@ defineExpose({
                 <tr>
                     <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.accessorKey || col.id"
                         class="px-4 py-2 text-left font-semibold relative">
-                        <span :id="`table-${col.accessorKey}`" v-if="typeof col.header === 'function'"
-                            class="highlightable"
-                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`table-${col.accessorKey}`, $event)">
+                        <span :id="`table-${col.accessorKey}`" v-if="typeof col.header === 'function'">
                             <component :is="col.header()" />
                         </span>
-                        <span v-else :id="`table-${col.accessorKey}`" class="highlightable"
-                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement(`table-${col.accessorKey}`, $event)">
+                        <span v-else :id="`table-${col.accessorKey}`">
                             {{ col.header }}
                         </span>
-                        <!-- Edit icon for column -->
-                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                            @click="openEditorForColumn(col)" />
                     </th>
                     <!-- Pokud existuje sloupec 'od' a 'do', přidej třetí sloupec 'délka' -->
                     <th v-if="columnNames.includes('od') && columnNames.includes('do')"
