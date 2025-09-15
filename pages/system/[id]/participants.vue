@@ -5,7 +5,7 @@
 
 
         <div class="container mx-auto px-4 py-8">
-                    <h1 class="text-4xl font-bold mb-4">{{ t('participants') }}</h1>
+            <h1 class="text-4xl font-bold mb-4">{{ t('participants') }}</h1>
 
             <div class="flex items-center gap-4 mb-6">
 
@@ -99,7 +99,8 @@
                         <div class="highlightable" id="participants-filter-input"
                             @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-filter-input', $event)">
                             <div class="component-wrapper">
-                                <UInput size="xl" v-model="filterText" color="sky" :placeholder="t('filter_participants')"
+                                <UInput size="xl" v-model="filterText" color="sky"
+                                    :placeholder="t('filter_participants')"
                                     :disabled="highlightStore.isEditModeActive" />
                                 <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
                                     :componentId="'participants-filter-input'" class="edit-button" />
@@ -108,7 +109,8 @@
 
                     </div>
                     <!-- Add Participant Button (right) -->
-                    <UButton size="xl" color="sky" variant="outline" @click="createNewParticipant" icon="i-heroicons-plus">
+                    <UButton size="xl" color="sky" variant="outline" @click="createNewParticipant"
+                        icon="i-heroicons-plus">
                         {{ t('add_participant') }}
                     </UButton>
                 </div>
@@ -665,7 +667,8 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
-                                    <UButton type="submit" color="sky" :loading="isSubmitting" :disabled="hasEditParticipantErrors">
+                                    <UButton type="submit" color="sky" :loading="isSubmitting"
+                                        :disabled="hasEditParticipantErrors">
                                         {{ t('save_changes') }}
                                     </UButton>
                                     <UButton variant="outline" color="sky" @click="resetForm">
@@ -1677,10 +1680,20 @@ const validationEmailComponent = computed(() => componentCodeStore.getComponentB
 const validationPersonalNumberComponent = computed(() => componentCodeStore.getComponentById('validation-personal-number') || componentCodeStore.getDefaultComponent('validation-personal-number'))
 const validationPhoneComponent = computed(() => componentCodeStore.getComponentById('validation-phone') || componentCodeStore.getDefaultComponent('validation-phone'))
 
+const validationNameJs = computed(() => validationNameComponent.value?.js?.['isValidName'] || '')
+const validationEmailJs = computed(() => validationEmailComponent.value?.js?.['isValidEmail'] || '')
+const validationPersonalNumberJs = computed(() => validationPersonalNumberComponent.value?.js?.['isValidPersonalNumber'] || '')
+const validationPhoneJs = computed(() => validationPhoneComponent.value?.js?.['isValidPhone'] || '')
+
+const actualvalidationNameJs = computed(() => ComponentHandler.getComponentValue("validation-name", "isValidName", validationNameJs.value))
+const actualvalidationEmailJs = computed(() => ComponentHandler.getComponentValue("validation-email", "isValidEmail", validationEmailJs.value))
+const actualvalidationPersonalNumberJs = computed(() => ComponentHandler.getComponentValue("validation-personal-number", "isValidPersonalNumber", validationPersonalNumberJs.value))
+const actualvalidationPhoneJs = computed(() => ComponentHandler.getComponentValue("validation-phone", "isValidPhone", validationPhoneJs.value))
+
 // Validation functions using component validation logic
 const isValidName = (name: string): boolean => {
     try {
-        const jsCode = validationNameComponent.value?.js?.['isValidName'] || ''
+        const jsCode = actualvalidationNameJs.value
         if (jsCode) {
             // Create a function that returns the isValidName function
             const func = new Function(`${jsCode}; return isValidName;`)
@@ -1695,7 +1708,9 @@ const isValidName = (name: string): boolean => {
 
 const isValidEmail = (email: string): boolean => {
     try {
-        const jsCode = validationEmailComponent.value?.js?.['isValidEmail'] || ''
+        const jsCode = actualvalidationEmailJs.value
+        console.log("Email:", email)
+        console.log("JS CODE:", jsCode)
         if (jsCode) {
             const func = new Function(`${jsCode}; return isValidEmail;`)
             const validatorFn = func()
@@ -1710,7 +1725,7 @@ const isValidEmail = (email: string): boolean => {
 
 const isValidPersonalNumber = (personalNumber: string): boolean => {
     try {
-        const jsCode = validationPersonalNumberComponent.value?.js?.['isValidPersonalNumber'] || ''
+        const jsCode = actualvalidationPersonalNumberJs.value
         if (jsCode) {
             const func = new Function(`${jsCode}; return isValidPersonalNumber;`)
             const validatorFn = func()
@@ -1724,7 +1739,7 @@ const isValidPersonalNumber = (personalNumber: string): boolean => {
 
 const isValidPhone = (phone: string): boolean => {
     try {
-        const jsCode = validationPhoneComponent.value?.js?.['isValidPhone'] || ''
+        const jsCode = actualvalidationPhoneJs.value
         if (jsCode) {
             const func = new Function(`${jsCode}; return isValidPhone;`)
             const validatorFn = func()

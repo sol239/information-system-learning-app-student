@@ -133,18 +133,18 @@
             "title": "Úprava uživatele",
             "description": "Upravte uživatele: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
             "status": "pending",
-            "kind": "select",
+            "kind": "repair",
             "answer": "tbl-účastníci == jméno:Tereza Svobodová Nováková",
             "elementClass": [
                 "table-form-účastníci-alergeny"
             ],
             "is_editable": false,
-            "round": 2,
+            "round": 1,
             "error-components": [
                 {
-                    "id": "table-form-účastníci-alergeny",
+                    "id": "validation-name",
                     "variables": {
-                        "isMultiple": false
+                        "isValidName": "const isValidName = (name) => {\n    if (!name || name.trim().length === 0) return false;\n    // Must have at least one space (first and last name)\n    return name.trim().split(' ').length == 2;\n}"
                     },
                     "error-component-name": ""
                 }

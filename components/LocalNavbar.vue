@@ -302,11 +302,7 @@ async function handleHelperClick() {
     console.log(ComponentHandler.isInErrorComponents("stats-supervisors"));
     console.log(componentCodeStore.getComponentById("stats-supervisors"));
     */
-    for (const id of selectedTaskStore.selectedTask?.errorComponents?.map(c => c.id) || []) {
-        console.log("|X| REMOVING ERROR COMPONENT ID:", id)
-        errorComponentStore.removeErrorComponent(id)
-      }
-
+    console.log("Current error components:", errorComponentStore.errorComponents);
 }
 
 

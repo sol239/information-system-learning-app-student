@@ -32,7 +32,7 @@
             <div v-for="entry in section.entries" :key="entry.key" class="entry-section">
               <div v-if="section.entries.length > 1" class="entry-title">{{ entry.key }}</div>
               <textarea
-                :value="entry.value"
+                :value="getEntryValue(section.key, entry.key)"
                 @input="(event) => onEntryInput(event, section.key, entry.key)"
                 class="code-editor"
                 :class="getSectionEditorClass(section.key)"
@@ -111,43 +111,97 @@ const sqlValid = ref(true)
 
 // Check if component is in error components and load error code if available
 const isErrorComponent = ComponentHandler.isInErrorComponents(highlightStore.selectedComponentId ?? '')
+console.log("Is Error Component:", isErrorComponent)
 
 // Dynamic section handling with multiple entries
 const sectionEntries = ref<Record<string, Record<string, string>>>({})
 const selectedSqlKey = ref<string>('')
 
-// Initialize section entries from component or error components
-const initializeSectionEntries = () => {
+// Computed properties for each section and key using ComponentHandler pattern
+const sectionComputedValues = computed(() => {
+  const result: Record<string, Record<string, string>> = {}
+  
+  if (!editedComponent) return result
+  
   const sections = ['html', 'css', 'js', 'sql', 'additionals']
   sections.forEach(section => {
-    const errorValue = isErrorComponent ? ComponentHandler.getVariableValue(highlightStore.selectedComponentId ?? '', section) : null
-    const componentValue = editedComponent?.[section as keyof Component] as Record<string, string>
+    const sectionData = editedComponent[section as keyof Component] as Record<string, string>
+    if (sectionData && Object.keys(sectionData).length > 0) {
+      result[section] = {}
+      Object.keys(sectionData).forEach(key => {
+        const baseValue = sectionData[key] || ''
+        const actualValue = ComponentHandler.getComponentValue(
+          highlightStore.selectedComponentId ?? '', 
+          key, 
+          baseValue
+        )
+        if (actualValue && actualValue.trim() !== '') {
+          result[section][key] = actualValue
+        }
+      })
+    }
+  })
+  
+  return result
+})
 
+// Get all available sections dynamically from the component
+const getComponentSections = (): string[] => {
+  if (!editedComponent) return []
+  return ['html', 'css', 'js', 'sql', 'additionals'].filter(section => {
+    const sectionData = editedComponent[section as keyof Component] as Record<string, string>
+    return sectionData && Object.keys(sectionData).length > 0
+  })
+}
+
+// Get all keys for a specific section
+const getSectionKeys = (section: string): string[] => {
+  if (!editedComponent) return []
+  const sectionData = editedComponent[section as keyof Component] as Record<string, string>
+  return sectionData ? Object.keys(sectionData) : []
+}
+
+// Initialize section entries from component or error components
+const initializeSectionEntries = () => {
+  const sections = getComponentSections()
+  sections.forEach(section => {
+    const sectionKeys = getSectionKeys(section)
     sectionEntries.value[section] = {}
 
-    // If there's error value, use it for the first/default key
-    if (errorValue) {
-      sectionEntries.value[section]['default'] = errorValue
-    }
-    // Otherwise use component values
-    else if (componentValue && Object.keys(componentValue).length > 0) {
-      sectionEntries.value[section] = { ...componentValue }
-    }
+    sectionKeys.forEach(key => {
+      const errorValue = isErrorComponent ? ComponentHandler.getVariableValue(highlightStore.selectedComponentId ?? '', section) : null
+      
+      // If there's error value and this is the first key, use it
+      if (errorValue && Object.keys(sectionEntries.value[section]).length === 0) {
+        sectionEntries.value[section][key] = errorValue
+      }
+      // Otherwise use computed values from ComponentHandler
+      else {
+        const componentValue = editedComponent?.[section as keyof Component] as Record<string, string>
+        if (componentValue && componentValue[key]) {
+          const baseValue = componentValue[key]
+          const actualValue = ComponentHandler.getComponentValue(
+            highlightStore.selectedComponentId ?? '', 
+            key, 
+            baseValue
+          )
+          sectionEntries.value[section][key] = actualValue || baseValue
+        }
+      }
+    })
 
     console.log(`Initialized ${section} entries:`, sectionEntries.value[section])
   })
 
-  // Set default SQL key
+  // Set default SQL key directly from sectionEntries
   if (sectionEntries.value['sql'] && Object.keys(sectionEntries.value['sql']).length > 0) {
     selectedSqlKey.value = Object.keys(sectionEntries.value['sql'])[0]
   }
 }
 
-initializeSectionEntries()
-
 // Computed property to get available sections with entries (excluding empty ones)
 const availableSections = computed(() => {
-  return Object.entries(sectionEntries.value)
+  return Object.entries(sectionComputedValues.value)
     .map(([key, entries]) => ({
       key,
       entries: Object.entries(entries)
@@ -160,6 +214,9 @@ const availableSections = computed(() => {
     .filter(section => section.entries.length > 0)
 })
 
+// Initialize after all computed properties are defined
+initializeSectionEntries()
+
 const applyButtonHover = ref(false)
 const closeButtonHover = ref(false)
 const showTables = ref(false)
@@ -169,6 +226,15 @@ const showEditor: boolean = highlightStore.isEditModeActive
 /* 10. Watchers */
 
 /* 11. Methods */
+function getEntryValue(section: string, entryKey: string): string {
+  // First try to get from sectionEntries (edited values)
+  if (sectionEntries.value[section] && sectionEntries.value[section][entryKey]) {
+    return sectionEntries.value[section][entryKey]
+  }
+  // Fallback to computed values (original/component values)
+  return sectionComputedValues.value[section]?.[entryKey] || ''
+}
+
 function getSectionLabel(section: string): string {
   const labels: Record<string, string> = {
     html: t('html_template'),
@@ -204,6 +270,12 @@ function getSectionEditorClass(section: string): string {
 
 function onEntryInput(event: Event, section: string, entryKey: string) {
   const value = (event.target as HTMLTextAreaElement)?.value || ''
+  
+  // Ensure section exists in sectionEntries
+  if (!sectionEntries.value[section]) {
+    sectionEntries.value[section] = {}
+  }
+  
   sectionEntries.value[section][entryKey] = value
   console.log(`Current ${section.toUpperCase()} ${entryKey}:`, value)
 
@@ -228,10 +300,22 @@ function onEntryInput(event: Event, section: string, entryKey: string) {
 
 function selectSqlEntry(entryKey: string) {
   selectedSqlKey.value = entryKey
+  // Ensure the entry exists in sectionEntries for editing
+  if (!sectionEntries.value['sql']) {
+    sectionEntries.value['sql'] = {}
+  }
+  if (!sectionEntries.value['sql'][entryKey]) {
+    sectionEntries.value['sql'][entryKey] = sectionComputedValues.value['sql']?.[entryKey] || ''
+  }
 }
 
 function getSelectedSqlValue(): string {
-  return sectionEntries.value['sql'][selectedSqlKey.value] || ''
+  // First try to get from sectionEntries (edited values)
+  if (sectionEntries.value['sql'] && sectionEntries.value['sql'][selectedSqlKey.value]) {
+    return sectionEntries.value['sql'][selectedSqlKey.value]
+  }
+  // Fallback to computed values (original/component values)
+  return sectionComputedValues.value['sql']?.[selectedSqlKey.value] || ''
 }
 function getApplyButtonStyle() {
   const baseColor = !sqlValid.value ? '#ef4444' : '#3b82f6'
