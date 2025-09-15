@@ -12,6 +12,8 @@ export class ComponentHandler {
         const tasks = TaskQueue.getTasks(round);
         const notCompletedTasks = tasks.filter(task => !task.completed && task.round === round);
 
+        console.log("|X| Adding error definitions except for not completed components:", notCompletedTasks);
+
         const errorDefinitions: ComponentErrorDefinition[] = [];
         for (const task of notCompletedTasks) {
             const errorComps = task.errorComponents ?? [];
@@ -35,6 +37,8 @@ export class ComponentHandler {
                 }
             }
         }
+
+        console.log("|X| Updated error component store:", errorComponentStore.errorComponents);
 
         return errorDefinitions;
     }

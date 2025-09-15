@@ -11,10 +11,8 @@ export const useErrorComponentStore = defineStore('errorComponent', () => {
   }
 
   function removeErrorComponent(componentName: string) {
-    console.log('Removing error component:', componentName)
-    console.log("BEFORE:",errorComponents.value)
+    // Use filter to create a new array without the component
     errorComponents.value = errorComponents.value.filter(component => component.componentId !== componentName)
-    console.log('Updated error components:', errorComponents.value)
   }
 
   function setErrorComponents(components: ComponentErrorDefinition[]) {

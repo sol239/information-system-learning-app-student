@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-md mx-auto mt-8" >
+  <div class="max-w-md mx-auto mt-8">
     <UCard class="bg-slate-950">
-      
+
       <template #header>
         <h2 class="text-xl font-semibold text-center">{{ t('tasks') }}</h2>
       </template>
@@ -33,7 +33,8 @@
           <div class="flex items-center justify-between mb-6 mt-6">
             <!-- Step 1: Task Selected -->
             <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2" style="background-color: #9ae600;">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mb-2"
+                style="background-color: #9ae600;">
                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
@@ -42,7 +43,8 @@
             </div>
 
             <!-- Connector Line -->
-            <div class="flex-1 h-0.5 mx-2" :style="selectedTask.componentsRepaired ? 'background-color: #9ae600;' : 'background-color: #d1d5db;'">
+            <div class="flex-1 h-0.5 mx-2"
+              :style="selectedTask.componentsRepaired ? 'background-color: #9ae600;' : 'background-color: #d1d5db;'">
             </div>
 
             <!-- Step 2: Components Repaired -->
@@ -62,7 +64,8 @@
             </div>
 
             <!-- Connector Line -->
-            <div class="flex-1 h-0.5 mx-2" :style="selectedTask.completed ? 'background-color: #9ae600;' : 'background-color: #d1d5db;'"></div>
+            <div class="flex-1 h-0.5 mx-2"
+              :style="selectedTask.completed ? 'background-color: #9ae600;' : 'background-color: #d1d5db;'"></div>
 
             <!-- Step 3: Task Completed -->
             <div class="flex flex-col items-center">
@@ -88,7 +91,7 @@
           <div>
             <!-- Kind of task: select -->
             <div v-if="selectedTask.kind === 'select'">
-              <UButton  variant="outline" style="margin-left: 5px;" color="lime"
+              <UButton variant="outline" style="margin-left: 5px;" color="lime"
                 :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.length === 0"
                 @click="handleSubmit">
                 {{ t('submit') }}
@@ -104,7 +107,7 @@
             <div v-if="selectedTask.kind === 'type-correct'">
               <UInput v-model="form.answer" placeholder="Enter your answer" class="mt-2" />
               <UButton variant="outline" style="margin-left: 5px;" :disabled="selectedTask.completed" color="lime"
-                @click="handleSubmit">{{ 
+                @click="handleSubmit">{{
                   t('submit') }}
               </UButton>
             </div>
@@ -119,17 +122,14 @@
             </div>
 
             <div v-if="selectedTask.componentsRepaired">
-              <UForm :state="questionsForm" >
+              <UForm :state="questionsForm">
                 <div v-for="(question, idx) in questions" :key="idx" class="mb-2 flex items-center gap-2">
                   <UCheckbox color="lime" v-model="questionsForm[idx]" />
                   <label>{{ question }}</label>
                 </div>
-                <UButton
-                  type="submit" color="lime"
+                <UButton type="submit" color="lime"
                   :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.length === 0"
-                  variant="outline"
-                  style="margin-left: 5px;"
-                >
+                  variant="outline" style="margin-left: 5px;">
                   {{ t('check_repair_task') }}
                 </UButton>
               </UForm>
@@ -147,7 +147,7 @@
         </div>
       </div>
 
-      <div v-else >
+      <div v-else>
         <div v-if="tasks.length === 0" class="text-center text-gray-500 py-4">
           No tasks yet
         </div>
@@ -156,7 +156,8 @@
             <UCheckbox color="lime" :model-value="task.completed" disabled class="mr-2" />
             <UCard>
               {{ task.title }}
-              <UButton color="lime" style="margin-left: 5px;" @click="selectTask(task.id)">{{ t('select_task') }}</UButton>
+              <UButton color="lime" style="margin-left: 5px;" @click="selectTask(task.id)">{{ t('select_task') }}
+              </UButton>
             </UCard>
           </div>
         </div>
@@ -167,7 +168,7 @@
 
 <script setup lang="ts">
 /* 1. Imports */
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useSelectedSystemStore } from '~/stores/useSelectedSystemStore'
 import { useInformationSystemStore } from '~/stores/useInformationSystemStore'
 import { useSelectedTaskStore } from '~/stores/useSelectedTaskStore'
@@ -339,7 +340,7 @@ function selectTask(id: number) {
       selectedTaskStore.setCurrentRound(currentTask.round)
     }
 
-    
+
     console.log("Selected task:", selectedTaskStore.selectedTask)
     const selectedTaskId = selectedTaskStore.selectedId;
     const systemId = selectedSystemStore.selectedId;
@@ -370,12 +371,15 @@ async function handleSubmit() {
   if (!selectedTask.value) return
 
   const selectedComponentId = selectedComponentStore.selectedId
-  const taskElementClass: Set<string> = selectedTask.value.elementClass
+  const errorComponents = selectedTask.value.errorComponents || []
+  const expectedIds = errorComponents.map(comp => comp.id)
+  const expected = new Set(expectedIds)
   let isMatch: boolean = false
+
+  console.log("Error Components:", selectedTask.value.errorComponents)
 
   if (selectedTask.value.kind === 'select') {
     const actual: Set<string> = highlightStore.selectedIds
-    const expected = new Set(taskElementClass) // TODO: this is not a good way to do it!!! :(
     let match: boolean = false;
     console.log("EXPECTED:", expected)
     console.log("ACTUAL:", actual)
@@ -392,19 +396,8 @@ async function handleSubmit() {
         }
       }
 
-      if (match) {
-        for (let id of actual) {
-          errorComponentStore.removeErrorComponent(id)
-
-          const toRepair: string[] = ["sql", "html", "js"]
-
-          for (const section of toRepair) {
-            componentCodeStore.resetComponent(id + "-" + section)
-          }
-        }
-      }
-
     }
+    console.log("FINISHED COMPONENTS:", errorComponentStore.errorComponents)
 
     isMatch = match
     if (isMatch) {
@@ -448,6 +441,11 @@ async function handleSubmit() {
     })
   }
 
+  for (const id of selectedTaskStore.selectedTask?.errorComponents?.map(c => c.id) || []) {
+    console.log("|X| REMOVING ERROR COMPONENT ID:", id)
+    errorComponentStore.removeErrorComponent(id)
+  }
+
   scoreStore.updateScore()
   console.log("Current score:", scoreStore.score)
   console.log("User records:", scoreStore.getUserRecords())
@@ -470,6 +468,20 @@ async function evaluate() {
 
     if (selectedTaskStore.selectedTask?.answer === "none" || system.tasks[idx].completed) {
       system.tasks[idx].completed = true
+      
+      // Clean up error components and reset component code when task is completed
+      if (selectedTask.value.kind === 'select' && highlightStore.selectedIds) {
+        for (let id of highlightStore.selectedIds) {
+          errorComponentStore.removeErrorComponent(id)
+
+          const toRepair: string[] = ["sql", "html", "js"]
+
+          for (const section of toRepair) {
+            componentCodeStore.resetComponent(id)
+          }
+        }
+      }
+      
       taskCompleted.value = true
       setTimeout(() => {
         taskCompleted.value = false
@@ -488,6 +500,20 @@ async function evaluate() {
       console.log("Task answer evaluation result:", response)
       if (response) {
         system.tasks[idx].completed = true
+        
+        // Clean up error components and reset component code when task is completed
+        if (selectedTask.value.kind === 'select' && highlightStore.selectedIds) {
+          for (let id of highlightStore.selectedIds) {
+            errorComponentStore.removeErrorComponent(id)
+
+            const toRepair: string[] = ["sql", "html", "js"]
+
+            for (const section of toRepair) {
+              componentCodeStore.resetComponent(id)
+            }
+          }
+        }
+        
         taskCompleted.value = true
         setTimeout(() => {
           taskCompleted.value = false

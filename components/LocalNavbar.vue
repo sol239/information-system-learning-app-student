@@ -14,11 +14,11 @@
 
                 <!-- First row of items -->
                 <div class="flex items-center gap-2 flex-wrap">
-                    <!--
+                    
                     <UButton label="Helper" @click="handleHelperClick" size="sm">
                         <span class="mobile-hidden">Helper</span>
                     </UButton>
-                    -->
+                    
                     <UButton icon="i-heroicons-table-cells"
                         @click="navigateTo(`/system/${selectedSystemStore.selectedId}/database`)" size="sm">{{
                         t('database') }}</UButton>
@@ -297,9 +297,16 @@ onMounted(() => {
 
 /* 11. Methods */
 async function handleHelperClick() {
+    /*
     console.log("Helper button clicked");
-    console.log(ComponentHandler.isInErrorComponents("stats-meals"));
-    console.log(componentCodeStore.getComponentById("stats-meals"));
+    console.log(ComponentHandler.isInErrorComponents("stats-supervisors"));
+    console.log(componentCodeStore.getComponentById("stats-supervisors"));
+    */
+    for (const id of selectedTaskStore.selectedTask?.errorComponents?.map(c => c.id) || []) {
+        console.log("|X| REMOVING ERROR COMPONENT ID:", id)
+        errorComponentStore.removeErrorComponent(id)
+      }
+
 }
 
 
