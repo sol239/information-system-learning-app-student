@@ -131,7 +131,7 @@
         {
             "id": 3,
             "title": "Ukázkový úkol č. 3",
-            "description": "Upravte uživatele: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
+            "description": "Upravte účastníka: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
             "status": "pending",
             "kind": "repair",
             "answer": "tbl-účastníci == name:Tereza Svobodová Nováková",
