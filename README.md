@@ -93,7 +93,13 @@ Zde je jednoduchý návod jak aplikaci používat. Podrobná příručka pro uč
     - Více možností pro editaci komponent. Více komponent.
     - Zrychlení aplikace a loading animace.
     - Kontrola vyřešení úkolů dokáže zkontrolovat zda upravený SQL dotaz je správný, ale nedokáže to pro JS a HTML. To lze jen zatím zkontrolovat podle tohom zda byla např. přidána nějaká entita.
-
+    - Dynamciké zobrazování/kontrola podůkolů. Např. úkolem bude upravit několik uživatelů, to se musí nějak dynamicky zobrazit. Viz. TODO 1.1
+- Pokud není vybraný úkol, tak nějaké animace aby uživatel si vybral nějaký úkol.
+- Úkol typu, že má uživatel přímo odpovědět na otázku. Např. zjistit nějaký počet.
+- Úkol typu, že má uživatel opovědět na otázku z možností.
+- Počet bodů za úkoly.
+- Odeslání výsledku.
+- Import systému z uložiště. (Uložení někde v localStorage, atd.)
 ## Kontakt
 
 Pokud máte jakékoli dotazy nebo potřebujete pomoc, neváhejte mě kontaktovat na emailu: david.valek17@gmail.com

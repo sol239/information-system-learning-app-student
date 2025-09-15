@@ -105,8 +105,9 @@
               <UInput v-model="form.answer" placeholder="Enter your answer" class="mt-2 mb-4" />
             </div>
 
-            <!-- Questions form for repaired components -->
-            <div v-if="selectedTask.componentsRepaired" class="mb-4">
+            <!-- TODO 1.1: Questions form for repaired components -->
+             <!--
+            <div class="mb-4">
               <UForm :state="questionsForm">
                 <div v-for="(question, idx) in questions" :key="idx" class="mb-2 flex items-center gap-2">
                   <UCheckbox color="lime" v-model="questionsForm[idx]" />
@@ -114,6 +115,7 @@
                 </div>
               </UForm>
             </div>
+            -->
 
             <!-- Button container with flex layout -->
             <div class="flex items-center gap-2">

@@ -73,7 +73,7 @@
     "tasks": [
         {
             "id": 1,
-            "title": "Jídla a účastníci v nástěnce",
+            "title": "Ukázkový úkol č. 1",
             "description": "Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.",
             "status": "pending",
             "kind": "repair",
@@ -101,11 +101,11 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Správně jsi opravil SQL dotazy dvou komponent. Komponenta, která měla zobrazovat počet účastníku chybně zobrazovala počet vedoucích a komponenta, která měla zobrazovat počet jídel, zobrazovala počet turnusů. Opravil jsi to tak, že jsi změnil SQL dotazy na správné."
+            "feedback": "Správně jsi opravil/a SQL dotazy dvou komponent. Komponenta, která měla zobrazovat počet účastníku chybně zobrazovala počet vedoucích a komponenta, která měla zobrazovat počet jídel, zobrazovala počet turnusů. Opravil/a jsi to tak, že jsi změnil/a SQL dotazy na správné."
         },
         {
             "id": 2,
-            "title": "Zobrazování statistik v nástěnce",
+            "title": "Ukázkový úkol č. 2",
             "description": "Zkontrolujte, zda se v nástěnce správně zobrazují statistiky o počtu jídel. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.",
             "status": "pending",
             "kind": "select",
@@ -126,11 +126,11 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Správně jsi zvolil komponentu, která zobrazovala chybně počet vedoucích."
+            "feedback": "Správně jsi zvolil/a komponentu, která zobrazovala chybně počet vedoucích."
         },
         {
             "id": 3,
-            "title": "Úprava uživatele",
+            "title": "Ukázkový úkol č. 3",
             "description": "Upravte uživatele: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
             "status": "pending",
             "kind": "repair",
@@ -149,21 +149,21 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Před opravením komponenty bylo možné jenom v nabídce vybrat pouze jeden alergen. Po opravení je možné jich vybrat libobolně mnoho."
+            "feedback": "Správně jsi opravil/a JS kód, tak aby povoloval více mezer ve jménu než jedna. Šlo to vyřešit různě např. pomocí `length >= 2` místo `length == 2` nebo `length > 1`. apod."
         },
         {
             "id": 4,
-            "title": "Poslední ukázkový úkol",
-            "description": "Na stránce nástěnka se chybně zobrazuje počet vedoucích, vyber tuto komponentu a pošli ji a poté vyber důvod chyby.",
+            "title": "Ukázkový úkol č. 4 - Není hotový!!",
+            "description": "Přidejte vedoucímu Petr Novotný alergeny Lepek a Korýši. Pokud naleznete na nějakou chybu tak vyberte komponentu, která je chybná. Poté přidejte alergeny tomuto vedoucímu.",
             "status": "pending",
             "kind": "select",
-            "answer": "opt == cop1:Komponenta místo počtu vedoucích zobrazovala počet alergenů.;wop2:Komponenta zobrazovala počet účastníků.;wop3:Komponenta zobrazovala počet jídel.",
+            "answer": "tbl-účastníci == jméno:Petr Novotný;alergeny:Lepek,Koryši",
             "elementClass": "stats-supervisors",
             "is_editable": false,
-            "round": 3,
+            "round": 1111111,
             "error-components": [
                 {
-                    "id": "stats-supervisors",
+                    "id": "supervisors-edit-allergens",
                     "variables": {
                         "html": "",
                         "sql": "SELECT COUNT(*) as count FROM alergeny",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /* 1. Imports */
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { navigateTo } from '#app'
 import { FileHandler } from '~/composables/FileHandler'
 import { InformationSystem } from '~/model/InformationSystem'
@@ -30,7 +30,7 @@ let systems: InformationSystem[] = FileHandler.getInformationSystems()
 const isReloading = ref(false)
 
 /* 9. Computed */
-// none
+const flexJustifyClass = computed(() => systems.length === 1 ? 'justify-start' : 'justify-center')
 
 /* 10. Watchers */
 // none
@@ -75,7 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center gap-4 min-h-screen">
+  <div class="flex flex-col gap-4 min-h-screen" :class="flexJustifyClass">
     <UCard v-for="(system, index) in systems" :key="system.id" :class="{ 'mt-4': index === 0 }" class="w-full max-w-4xl mx-auto">
       <template #header>
         <h2 class="text-lg font-semibold">{{ system.name }}</h2>

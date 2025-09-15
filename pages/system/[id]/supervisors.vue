@@ -93,8 +93,8 @@
 
                             <UForm :state="newParticipant" @submit="handleAddParticipant(newParticipant)"
                                 class="flex flex-col space-y-4">
-                                <div class="highlightable" id="participants-add-name"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-name', $event)">
+                                <div class="highlightable" id="supervisors-add-name"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-name', $event)">
                                     <div class="component-wrapper">
                                         <label for="name"
                                             class="block text-sm font-medium text-white mb-1">Jméno</label>
@@ -110,8 +110,8 @@
                                             :componentId="'validation-name'" class="edit-button" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-add-email"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-email', $event)">
+                                <div class="highlightable" id="supervisors-add-email"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-email', $event)">
                                     <div class="component-wrapper">
                                         <label for="email"
                                             class="block text-sm font-medium text-white mb-1">E-mail</label>
@@ -129,7 +129,7 @@
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-personal_number"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-personal_number', $event)">
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-personal_number', $event)">
                                     <div class="component-wrapper">
                                         <label for="personal_number"
                                             class="block text-sm font-medium text-white mb-1">Rodné číslo</label>
@@ -147,7 +147,7 @@
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-phone"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-phone', $event)">
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-phone', $event)">
                                     <div class="component-wrapper">
                                         <label for="phone"
                                             class="block text-sm font-medium text-white mb-1">Telefon</label>
@@ -164,7 +164,7 @@
                                     </div>
                                 </div>
                                 <div class="highlightable" id="participants-add-address"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-address', $event)">
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-address', $event)">
                                     <div class="component-wrapper">
                                         <label for="address"
                                             class="block text-sm font-medium text-white mb-1">Adresa</label>
@@ -179,8 +179,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-add-age"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-age', $event)">
+                                <div class="highlightable" id="supervisors-add-age"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-age', $event)">
                                     <div class="component-wrapper">
                                         <label for="age" class="block text-sm font-medium text-white mb-1">Věk</label>
                                         <input
@@ -192,8 +192,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-add-session"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-session', $event)">
+                                <div class="highlightable" id="supervisors-add-session"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-session', $event)">
                                     <div class="component-wrapper">
                                         <label for="sessionId"
                                             class="block text-sm font-medium text-white mb-1">Turnus</label>
@@ -207,8 +207,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-add-allergens"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-add-allergens', $event)">
+                                <div class="highlightable" id="supervisors-add-allergens"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-add-allergens', $event)">
                                     <div class="component-wrapper">
                                         <label for="allergens"
                                             class="block text-sm font-medium text-white mb-1">Alergeny</label>
@@ -506,8 +506,8 @@
 
                             <UForm v-if="selectedParticipant" :state="selectedParticipant"
                                 @submit="handleEditParticipant(selectedParticipant)" class="flex flex-col space-y-4">
-                                <div class="highlightable" id="participants-edit-name"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-name', $event)">
+                                <div class="highlightable" id="supervisors-edit-name"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-name', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-name"
                                             class="block text-sm font-medium text-white mb-1">Jméno</label>
@@ -524,8 +524,8 @@
                                             :componentId="'validation-name'" class="edit-button" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-email"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-email', $event)">
+                                <div class="highlightable" id="supervisors-edit-email"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-email', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-email"
                                             class="block text-sm font-medium text-white mb-1">E-mail</label>
@@ -542,8 +542,8 @@
                                             :componentId="'validation-email'" class="edit-button" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-personal_number"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-personal_number', $event)">
+                                <div class="highlightable" id="supervisors-edit-personal_number"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-personal_number', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-personal_number"
                                             class="block text-sm font-medium text-white mb-1">Rodné
@@ -561,8 +561,8 @@
                                             :componentId="'validation-personal-number'" class="edit-button" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-phone"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-phone', $event)">
+                                <div class="highlightable" id="supervisors-edit-phone"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-phone', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-phone"
                                             class="block text-sm font-medium text-white mb-1">Telefon</label>
@@ -578,8 +578,8 @@
                                             :componentId="'validation-phone'" class="edit-button" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-address"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-address', $event)">
+                                <div class="highlightable" id="supervisors-edit-address"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-address', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-address"
                                             class="block text-sm font-medium text-white mb-1">Adresa</label>
@@ -594,8 +594,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-age"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-age', $event)">
+                                <div class="highlightable" id="supervisors-edit-age"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-age', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-age"
                                             class="block text-sm font-medium text-white mb-1">Věk</label>
@@ -609,8 +609,8 @@
                                     </div>
                                 </div>
                                 <!-- Allergen Edit Field -->
-                                <div class="highlightable" id="participants-edit-allergens"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-allergens', $event)">
+                                <div class="highlightable" id="supervisors-edit-allergens"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-allergens', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-allergens"
                                             class="block text-sm font-medium text-white mb-1">Alergeny</label>
@@ -620,8 +620,8 @@
                                             :disabled="highlightStore.isHighlightMode" />
                                     </div>
                                 </div>
-                                <div class="highlightable" id="participants-edit-sessions"
-                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-edit-sessions', $event)">
+                                <div class="highlightable" id="supervisors-edit-sessions"
+                                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('supervisors-edit-sessions', $event)">
                                     <div class="component-wrapper">
                                         <label for="edit-sessions"
                                             class="block text-sm font-medium text-white mb-1">Turnus</label>
@@ -1275,7 +1275,7 @@ const getParticipantAllergenCount = (participantId: number): number => {
 async function viewParticipantDetails(participant: Participant) {
     console.log("Participant: ", participant);
 
-    // Convert allergen labels back to IDs for the edit form
+    // Convert allergen labels to IDs for the edit form
     const allergenLabelToIdMap: Record<string, number> = {};
     const allergenOpts = allergenOptions.value;
     for (const opt of allergenOpts) {
