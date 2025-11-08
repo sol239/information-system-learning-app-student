@@ -31,7 +31,6 @@ export default defineNuxtConfig({
   app: {
     // locally:
     // baseURL: './'
-
     baseURL: '/information-system-learning-app', 
   },
   target: "static",
