@@ -263,5 +263,15 @@
     "participant_added_to_meal_success": "Participant successfully added to meal",
     "supervisor_added_to_meal_success": "Supervisor successfully added to meal",
     "participant_add_to_meal_error": "Error adding participant to meal",
-    "supervisor_add_to_meal_error": "Error adding supervisor to meal"
+    "supervisor_add_to_meal_error": "Error adding supervisor to meal",
+    "add_new_system": "Add New System",
+    "upload_system_zip": "Upload System .zip",
+    "upload_system": "Upload System",
+    "system_upload_success": "System Upload Successful",
+    "has_been_uploaded": "has been uploaded",
+    "upload_error": "Upload Error",
+    "no_valid_system_found": "No valid system found in the uploaded file",
+    "error_processing_zip": "Error processing ZIP file",
+    "clear_systems": "Clear Systems"
+
 }

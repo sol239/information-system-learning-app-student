@@ -10,7 +10,7 @@ export interface Table<T = any> {
 export class InformationSystem {
 
   // TODO: use db attribute for IS
-  public db: DbHandler;
+  public db: DbHandler | null;
 
   constructor(
     public id: number,
@@ -21,9 +21,10 @@ export class InformationSystem {
     public tasks: Task[] = [],
     public configData: any,
     public dbNumber: number = 0,
-    public dbInitialized: boolean = true
+    public dbInitialized: boolean = false
   ) {
-    this.db = new DbHandler();
+    // Don't initialize db here - it will be set later during hydration
+    this.db = null as any;
   }
 
   public static async databaseInitStatic(json: any) {
@@ -34,9 +35,22 @@ export class InformationSystem {
 
   public async databaseInit(json: any): Promise<void> {
     console.log("Initializing database for Information System:", this.name);
+    if (!this.db) {
+      this.db = new DbHandler();
+    }
     await this.db.init(json);
     this.dbInitialized = true;
     console.log("Database initialized for Information System:", this.name);
+  }
+
+  public async databaseInitNew(json: any, csvData: Record<string, string>): Promise<void> {
+    console.log("Initializing database for Information System (new):", this.name);
+    if (!this.db) {
+      this.db = new DbHandler();
+    }
+    await this.db.init(json, csvData);
+    this.dbInitialized = true;
+    console.log("Database initialized for Information System (new):", this.name);
   }
 
   static fromJSON(json: any): InformationSystem {

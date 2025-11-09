@@ -13,7 +13,8 @@ export class ComponentManager {
       id: "stats-meals",
       name: "Stats Meals",
       description: `Component for meals stats. SQL: SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')}`,
-      html: { "html": `
+      html: {
+        "html": `
   <div class="stat-card">
     <div class="stat-icon">🍽️</div>
     <div class="stat-content">
@@ -23,7 +24,8 @@ export class ComponentManager {
   </div>
 ` },
       css: { "css": "" },
-      js: { "js": `
+      js: {
+        "js": `
 selectedTableStore.select('jídla');
 navigateTo({
   path: \`/system/\${systemId}/meals\`,
@@ -37,7 +39,8 @@ navigateTo({
       id: "stats-participants",
       name: "Stats Participants",
       description: `Component for participants stats. SQL: SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}`,
-      html: { "html": `
+      html: {
+        "html": `
   <div class="stat-card">
     <div class="stat-icon">👥</div>
     <div class="stat-content">
@@ -47,7 +50,8 @@ navigateTo({
   </div>
 ` },
       css: { "css": "" },
-      js: { "js": `
+      js: {
+        "js": `
 selectedTableStore.select('účastníci');
 navigateTo({
   path: \`/system/\${systemId}/participants\`,
@@ -61,7 +65,8 @@ navigateTo({
       id: "stats-sessions",
       name: "Stats Sessions",
       description: `Component for sessions stats. SQL: SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')}`,
-      html: { "html": `
+      html: {
+        "html": `
   <div class="stat-card">
     <div class="stat-icon">📅</div>
     <div class="stat-content">
@@ -71,7 +76,8 @@ navigateTo({
   </div>
 ` },
       css: { "css": "" },
-      js: { "js": `
+      js: {
+        "js": `
 selectedTableStore.select('turnusy');
 navigateTo({
   path: \`/system/\${systemId}/sessions\`,
@@ -85,7 +91,8 @@ navigateTo({
       id: "stats-supervisors",
       name: "Stats Supervisors",
       description: `Component for supervisors stats. SQL: SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')}`,
-      html: { "html": `
+      html: {
+        "html": `
   <div class="stat-card">
     <div class="stat-icon">👨‍🏫</div>
     <div class="stat-content">
@@ -95,7 +102,8 @@ navigateTo({
   </div>
 ` },
       css: { "css": "" },
-      js: { "js": `
+      js: {
+        "js": `
 selectedTableStore.select('vedoucí');
 navigateTo({
   path: \`/system/\${systemId}/supervisors\`,
@@ -1567,7 +1575,7 @@ navigateTo({
       additionals: {}
     });
 
-    
+
 
     const mealPlanComponent = new Component({
       id: "meal-plan-list",
@@ -1757,7 +1765,7 @@ navigateTo({
 
 
     // Store the instances into the store
-        componentCodeStore.updateDefaultComponent(mealListComponent);
+    componentCodeStore.updateDefaultComponent(mealListComponent);
 
     componentCodeStore.updateDefaultComponent(statsMealsComponent);
     componentCodeStore.updateDefaultComponent(statsParticipantsComponent);

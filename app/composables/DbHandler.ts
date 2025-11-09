@@ -45,7 +45,7 @@ export default class DbHandler {
         return dbHandler;
     }
 
-    public async init(json: any): Promise<void> {
+    public async init(json: any, csvData?: Record<string, string>): Promise<void> {
         // Use the WASM file from the public directory
         const SQL = await initSqlJs({
             // github pages:
@@ -61,7 +61,7 @@ export default class DbHandler {
 
         // Create tables and insert data
         this.createTables(json.tables);
-        await this.insertData(json);
+        await this.insertData(json, csvData);
     }
 
     private getTableNameMap(tables: any[]): Map<string, string> {
@@ -268,14 +268,14 @@ export default class DbHandler {
         }
     }
 
-    // TODO: use simpler execution logic
-    private async insertData(json: any): Promise<void> {
+    private async insertData(json: any, csvData?: Record<string, string>): Promise<void> {
         console.log(`Inserting data into tables for system: ${json.directory}`);
 
-        // Glob all CSVs in assets/*/csv as raw text
-        const csvModules = import.meta.glob('~/assets/data/*/csv/*.csv', { as: 'raw' });
-
-        console.log("CSV MODULES:", csvModules);
+        // If csvData is provided, use it; otherwise, glob all CSVs in assets/*/csv as raw text
+        const csvModules = csvData ? undefined : import.meta.glob('~/assets/data/*/csv/*.csv', { as: 'raw' });
+        if (csvModules) {
+            console.log("CSV MODULES:", csvModules);
+        }
 
         // Define the prefix to filter by json.directory
         const prefix = `${json.directory}/csv/`;
@@ -283,19 +283,30 @@ export default class DbHandler {
         for (const table of json.tables) {
             const csvFilename = table.csv_path.split('/').pop(); // e.g., "participants.csv"
 
-            // Find the CSV that matches the directory prefix and filename
-            const moduleKey = Object.keys(csvModules).find(
-                key => key.includes(prefix) && key.endsWith("/" + csvFilename)
-            );
+            let csvText: string;
+            if (csvData && csvData[csvFilename]) {
+                // Use provided CSV data
+                csvText = csvData[csvFilename];
+                console.log("Using provided CSV data for:", csvFilename);
+            } else if (csvModules) {
+                // Find the CSV that matches the directory prefix and filename
+                const moduleKey = Object.keys(csvModules).find(
+                    key => key.includes(prefix) && key.endsWith("/" + csvFilename)
+                );
 
-            if (!moduleKey) {
+                if (!moduleKey || !csvModules![moduleKey]) {
+                    console.warn(`CSV not found for table: ${table.id}, file: ${csvFilename}`);
+                    continue;
+                }
+
+                // Load CSV content
+                csvText = await csvModules![moduleKey]();
+                console.log("CSV PATH:", moduleKey);
+            } else {
                 console.warn(`CSV not found for table: ${table.id}, file: ${csvFilename}`);
                 continue;
             }
 
-            // Load CSV content
-            const csvText = await csvModules[moduleKey]();
-            console.log("CSV PATH:", moduleKey);
             console.log("CSV FILENAME:", csvFilename);
 
             // Parse CSV with PapaParse

@@ -13,9 +13,11 @@
                 <div class="dashboard-content-main">
                     <div id="stats">
                         <DashboardStats :system-id="system?.id" />
+                        <!-- TODO: Keep or not?
                         <UCard>
                             <DashboardTableCountBadge />
                         </UCard>
+                        -->
                     </div>
 
                 </div>

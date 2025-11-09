@@ -33,8 +33,29 @@ export const useInformationSystemStore = defineStore('informationSystem', () => 
   }
 }, {
   persist: {
+    serializer: {
+      serialize: JSON.stringify,
+      deserialize: (value: string) => {
+        const parsed = JSON.parse(value)
+
+        console.log("Deserializing informationSystem store:", parsed)
+        
+        // Check if this is old data structure (if needed in future)
+        // For now, assume the structure is current
+        
+        // Convert plain objects back to InformationSystem instances
+        if (parsed.systems && Array.isArray(parsed.systems)) {
+          parsed.systems = parsed.systems.map((sys: any) => InformationSystem.fromJSON(sys))
+        } else {
+          parsed.systems = []
+        }
+        
+        return parsed
+      }
+    },
     afterHydrate: async (context) => {
-      await context.store.initializeDbs()
+      // TODO: Piece of trash - needs to be fixed !!!!
+      //await context.store.initializeDbs()
     }
   }
 })

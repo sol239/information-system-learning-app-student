@@ -268,5 +268,14 @@
     "participant_added_to_meal_success": "Účastník úspěšně přidán k jídlu",
     "supervisor_added_to_meal_success": "Vedoucí úspěšně přidán k jídlu",
     "participant_add_to_meal_error": "Chyba při přidávání účastníka k jídlu",
-    "supervisor_add_to_meal_error": "Chyba při přidávání vedoucího k jídlu"
+    "supervisor_add_to_meal_error": "Chyba při přidávání vedoucího k jídlu",
+    "add_new_system": "Přidat nový systém",
+    "upload_system_zip": "Nahrát systém ve formátu .zip",
+    "upload_system": "Nahrát systém",
+    "system_upload_success": "Systém úspěšně nahrán",
+    "has_been_uploaded": "byl nahrán",
+    "upload_error": "Chyba při nahrávání",
+    "no_valid_system_found": "V nahraném souboru nebyl nalezen žádný platný systém",
+    "error_processing_zip": "Chyba při zpracování ZIP souboru",
+    "clear_systems": "Vymazat systémy"
 }

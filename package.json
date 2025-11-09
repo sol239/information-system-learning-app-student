@@ -10,10 +10,11 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui": "^3.2.0",
+    "@nuxt/ui": "^3.3.7",
     "@nuxtjs/i18n": "^10.0.3",
     "@pinia/nuxt": "^0.11.1",
     "ajv": "^8.17.1",
+    "jszip": "^3.10.1",
     "nuxt": "^4.2.1",
     "papaparse": "^5.5.3",
     "pinia-plugin-persistedstate": "^4.5.0",
