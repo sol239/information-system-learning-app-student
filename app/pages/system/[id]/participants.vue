@@ -1202,6 +1202,7 @@ const handleEditParticipant = async (data: any) => {
                 color: 'primary',
                 icon: 'i-heroicons-check'
             })
+            selectedSystemStore.incrementDbNumber()
             loadParticipantsFromDatabase()
             editModalOpen.value = false
             selectedParticipant.value = null
