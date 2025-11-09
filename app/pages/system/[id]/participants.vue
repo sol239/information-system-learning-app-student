@@ -10,53 +10,10 @@
             <div class="flex items-center gap-4 mb-6">
 
                 <!-- Session Select Menu-->
-                <div class="highlightable" :id="'participants-session-menu'"
-                    @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-session-menu', $event)">
-                    <div class="component-wrapper">
-                        <USelect size="xl" v-model="value" :items="filterSessionsItems"
-                            :disabled="highlightStore.isEditModeActive" />
-                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                            :componentId="'sessions-list'" class="edit-button" />
-                    </div>
-                </div>
+                <ParticipantsSessionMenu v-model="value" />
 
                 <!-- Session Capacity Pillow -->
-                <div v-if="selectedSessionInfo" class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-                    <UIcon name="i-heroicons-users" class="w-4 h-4 text-gray-600" />
-
-                    <!-- Session Capacity Count -->
-                    <div class="highlightable" :id="'participants-capacity-count'"
-                        @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-capacity-count', $event)">
-                        <div class="component-wrapper">
-                            <span class="text-sm font-medium text-gray-700">
-                                {{ t('capacity') }}: {{ currentCount }}/{{ totalCapacity }}
-                            </span>
-                            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                :componentId="'participants-capacity-count'" class="edit-button" />
-                        </div>
-                    </div>
-
-                    <!-- Session Capacity Percentage -->
-                    <div class="highlightable" :id="'participants-capacity-percentage'"
-                        @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-capacity-percentage', $event)">
-                        <div class="component-wrapper">
-                            <span :style="{
-                                color: darkenColor(getCapacityBadgeColor(fillPercentage), 0.3),
-                                backgroundColor: lightenColor(getCapacityBadgeColor(fillPercentage), 0.8),
-                                fontWeight: 'bold',
-                                padding: '2px 8px',
-                                borderRadius: '6px',
-                                border: '1px solid rgba(0, 0, 0, 0.1)'
-                            }">
-                                {{ fillPercentage }}%
-                            </span>
-                            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                :componentId="'participants-capacity-percentage'" class="edit-button" />
-                        </div>
-                    </div>
-
-
-                </div>
+                <ParticipantsCapacityCount v-model="value" />
 
                 <!-- Pagination
                 <div v-if="totalPages > 1" class="flex justify-center items-center gap-4">
@@ -88,25 +45,8 @@
                 <div class="ml-auto flex gap-4 items-start">
                     <!-- Filter Field and Reset Button (left) -->
                     <div class="flex gap-2 items-center">
-                        <div class="highlightable" id="participants-filter-reset"
-                            @click="highlightStore.isHighlightMode ? highlightStore.highlightHandler.selectElement('participants-filter-reset', $event) : resetFilter()">
-                            <div class="component-wrapper">
-                                <UButton size="xl" variant="outline" color="sky" icon="i-lucide-rotate-ccw"
-                                    :disabled="highlightStore.isEditModeActive">
-                                </UButton>
-                            </div>
-                        </div>
-                        <div class="highlightable" id="participants-filter-input"
-                            @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-filter-input', $event)">
-                            <div class="component-wrapper">
-                                <UInput size="xl" v-model="filterText" color="sky"
-                                    :placeholder="t('filter_participants')"
-                                    :disabled="highlightStore.isEditModeActive" />
-                                <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                    :componentId="'participants-filter-input'" class="edit-button" />
-                            </div>
-                        </div>
-
+                        <ParticipantsFilterReset v-model="filterText" />
+                        <ParticipantsFilterInput v-model="filterText" />
                     </div>
                     <!-- Add Participant Button (right) -->
                     <UButton size="xl" color="sky" variant="outline" @click="createNewParticipant"
@@ -324,16 +264,7 @@
                         </div>
                     </div>
 
-                    <div class="highlightable relative" :id="'participant-allergens'"
-                        @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participant-allergens', $event)">
-                        <!-- Allergies Badge -->
-                        <UBadge size="lg" :color="getParticipantAllergenCount(participant.id) > 0 ? 'red' : 'green'"
-                            variant="soft" class="mt-2">
-                            {{ t("allergens") }}: {{ getParticipantAllergenCount(participant.id) }}
-                        </UBadge>
-                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                            :componentId="'participant-allergen-count'" class="absolute -top-1 -right-1 z-10" />
-                    </div>
+                    <ParticipantAllergenCount :participant-id="participant.id" />
 
                     <!-- Participant Actions -->
                     <div class="participant-actions mt-6 pt-4 border-t border-gray-200">
@@ -707,6 +638,11 @@ import { useToast } from '#imports'
 import EditComponentModal from '~/components/EditComponentModal.vue'
 import EditComponentModalOpenButton from '~/components/EditComponentModalOpenButton.vue'
 import { UsedValueState } from 'ajv/dist/compile/codegen/scope'
+import ParticipantsSessionMenu from '~/components/infsys_components/participants/ParticipantsSessionMenu.vue'
+import ParticipantsCapacityCount from '~/components/infsys_components/participants/ParticipantsCapacityCount.vue'
+import ParticipantsFilterReset from '~/components/infsys_components/participants/ParticipantsFilterReset.vue'
+import ParticipantsFilterInput from '~/components/infsys_components/participants/ParticipantsFilterInput.vue'
+import ParticipantAllergenCount from '~/components/infsys_components/participants/ParticipantAllergenCount.vue'
 
 const selectedSystemStore = useSelectedSystemStore()
 const informationSystemStore = useInformationSystemStore()
@@ -727,96 +663,6 @@ watch(system, (newSystem) => {
     }
 }, { immediate: true })
 
-// Component definitions
-const participantsCapacityCountComponent = computed(() => componentCodeStore.getComponentById('participants-capacity-count') || componentCodeStore.getDefaultComponent('participants-capacity-count'))
-const participantsCapacityPercentageComponent = computed(() => componentCodeStore.getComponentById('participants-capacity-percentage') || componentCodeStore.getDefaultComponent('participants-capacity-percentage'))
-const participantsPageCount1Component = computed(() => componentCodeStore.getComponentById('participants-page-count-1') || componentCodeStore.getDefaultComponent('participants-page-count-1'))
-const participantsPageCount2Component = computed(() => componentCodeStore.getComponentById('participants-page-count-2') || componentCodeStore.getDefaultComponent('participants-page-count-2'))
-const participantsFilterResetComponent = computed(() => componentCodeStore.getComponentById('participants-filter-reset') || componentCodeStore.getDefaultComponent('participants-filter-reset'))
-const participantsFilterInputComponent = computed(() => componentCodeStore.getComponentById('participants-filter-input') || componentCodeStore.getDefaultComponent('participants-filter-input'))
-const participantsSessionMenuComponent = computed(() => componentCodeStore.getComponentById('participants-session-menu') || componentCodeStore.getDefaultComponent('participants-session-menu'))
-const participantAllergenCountComponent = computed(() => componentCodeStore.getComponentById('participant-allergen-count') || componentCodeStore.getDefaultComponent('participant-allergen-count'))
-
-// Component values - Default values from component store
-const correctParticipantsCapacityCountSqlTotalAll = computed(() => participantsCapacityCountComponent.value?.sql?.['sql-total-all'] || '')
-const correctParticipantsCapacityCountSqlTotalSession = computed(() => participantsCapacityCountComponent.value?.sql?.['sql-total-session'] || '')
-const correctParticipantsCapacityCountSqlCurrentAll = computed(() => participantsCapacityCountComponent.value?.sql?.['sql-current-all'] || '')
-const correctParticipantsCapacityCountSqlCurrentSession = computed(() => participantsCapacityCountComponent.value?.sql?.['sql-current-session'] || '')
-const correctParticipantsCapacityPercentageJs = computed(() => participantsCapacityPercentageComponent.value?.js?.['js'] || 'Math.round(currentCount / totalCapacity * 100)')
-
-const correctParticipantsPageCount1Sql = computed(() => participantsPageCount1Component.value?.sql?.['sql'] || '')
-const correctParticipantsPageCount1Js = computed(() => participantsPageCount1Component.value?.js?.['js'] || '')
-const correctParticipantsPageCount1Html = computed(() => participantsPageCount1Component.value?.html?.['html'] || '')
-const correctParticipantsPageCount1Css = computed(() => participantsPageCount1Component.value?.css?.['css'] || '')
-
-const correctParticipantsPageCount2Sql = computed(() => participantsPageCount2Component.value?.sql?.['sql'] || '')
-const correctParticipantsPageCount2Js = computed(() => participantsPageCount2Component.value?.js?.['js'] || '')
-const correctParticipantsPageCount2Html = computed(() => participantsPageCount2Component.value?.html?.['html'] || '')
-const correctParticipantsPageCount2Css = computed(() => participantsPageCount2Component.value?.css?.['css'] || '')
-
-const correctParticipantsFilterResetSql = computed(() => participantsFilterResetComponent.value?.sql?.['sql'] || '')
-const correctParticipantsFilterResetJs = computed(() => participantsFilterResetComponent.value?.js?.['js'] || '')
-const correctParticipantsFilterResetHtml = computed(() => participantsFilterResetComponent.value?.html?.['html'] || '')
-const correctParticipantsFilterResetCss = computed(() => participantsFilterResetComponent.value?.css?.['css'] || '')
-
-const correctParticipantsFilterInputSql = computed(() => participantsFilterInputComponent.value?.sql?.['sql'] || '')
-const correctParticipantsFilterInputJs = computed(() => participantsFilterInputComponent.value?.js?.['js'] || `(p.name && p.name.toLowerCase().includes(text)) ||
-(p.email && p.email.toLowerCase().includes(text)) ||
-(p.phone && p.phone.toLowerCase().includes(text)) ||
-(p.address && p.address.toLowerCase().includes(text)) ||
-(p.sessions && getSessionNames(p.sessions).toLowerCase().includes(text))`)
-const correctParticipantsFilterInputHtml = computed(() => participantsFilterInputComponent.value?.html?.['html'] || '')
-const correctParticipantsFilterInputCss = computed(() => participantsFilterInputComponent.value?.css?.['css'] || '')
-
-const correctParticipantsSessionMenuSql = computed(() => participantsSessionMenuComponent.value?.sql?.['sql'] || '')
-const correctParticipantsSessionMenuJs = computed(() => participantsSessionMenuComponent.value?.js?.['js'] || '')
-const correctParticipantsSessionMenuHtml = computed(() => participantsSessionMenuComponent.value?.html?.['html'] || '')
-const correctParticipantsSessionMenuCss = computed(() => participantsSessionMenuComponent.value?.css?.['css'] || '')
-
-const correctParticipantAllergenCountSql = computed(() => participantAllergenCountComponent.value?.sql?.['sql'] || '')
-const participantsCapacityCountSqlTotal = computed(() => {
-    if (value.value === 'all') {
-        return ComponentHandler.getComponentValue('participants-capacity-count', 'sql-total-all', correctParticipantsCapacityCountSqlTotalAll.value)
-    } else {
-        return ComponentHandler.getComponentValue('participants-capacity-count', 'sql-total-session', correctParticipantsCapacityCountSqlTotalSession.value)
-    }
-})
-const participantsCapacityCountSqlCurrent = computed(() => {
-    if (value.value === 'all') {
-        return ComponentHandler.getComponentValue('participants-capacity-count', 'sql-current-all', correctParticipantsCapacityCountSqlCurrentAll.value)
-    } else {
-        return ComponentHandler.getComponentValue('participants-capacity-count', 'sql-current-session', correctParticipantsCapacityCountSqlCurrentSession.value)
-    }
-})
-
-const participantsCapacityPercentageJs = computed(() => ComponentHandler.getComponentValue('participants-capacity-percentage', 'js', correctParticipantsCapacityPercentageJs.value))
-
-const participantsPageCount1Sql = computed(() => ComponentHandler.getComponentValue('participants-page-count-1', 'sql', correctParticipantsPageCount1Sql.value))
-const participantsPageCount1Js = computed(() => ComponentHandler.getComponentValue('participants-page-count-1', 'js', correctParticipantsPageCount1Js.value))
-const participantsPageCount1Html = computed(() => ComponentHandler.getComponentValue('participants-page-count-1', 'html', correctParticipantsPageCount1Html.value))
-const participantsPageCount1Css = computed(() => ComponentHandler.getComponentValue('participants-page-count-1', 'css', correctParticipantsPageCount1Css.value))
-
-const participantsPageCount2Sql = computed(() => ComponentHandler.getComponentValue('participants-page-count-2', 'sql', correctParticipantsPageCount2Sql.value))
-const participantsPageCount2Js = computed(() => ComponentHandler.getComponentValue('participants-page-count-2', 'js', correctParticipantsPageCount2Js.value))
-const participantsPageCount2Html = computed(() => ComponentHandler.getComponentValue('participants-page-count-2', 'html', correctParticipantsPageCount2Html.value))
-const participantsPageCount2Css = computed(() => ComponentHandler.getComponentValue('participants-page-count-2', 'css', correctParticipantsPageCount2Css.value))
-
-const participantsFilterResetSql = computed(() => ComponentHandler.getComponentValue('participants-filter-reset', 'sql', correctParticipantsFilterResetSql.value))
-const participantsFilterResetJs = computed(() => ComponentHandler.getComponentValue('participants-filter-reset', 'js', correctParticipantsFilterResetJs.value))
-const participantsFilterResetHtml = computed(() => ComponentHandler.getComponentValue('participants-filter-reset', 'html', correctParticipantsFilterResetHtml.value))
-const participantsFilterResetCss = computed(() => ComponentHandler.getComponentValue('participants-filter-reset', 'css', correctParticipantsFilterResetCss.value))
-
-const participantsFilterInputSql = computed(() => ComponentHandler.getComponentValue('participants-filter-input', 'sql', correctParticipantsFilterInputSql.value))
-const participantsFilterInputJs = computed(() => ComponentHandler.getComponentValue('participants-filter-input', 'js', correctParticipantsFilterInputJs.value))
-const participantsFilterInputHtml = computed(() => ComponentHandler.getComponentValue('participants-filter-input', 'html', correctParticipantsFilterInputHtml.value))
-const participantsFilterInputCss = computed(() => ComponentHandler.getComponentValue('participants-filter-input', 'css', correctParticipantsFilterInputCss.value))
-
-const participantsSessionMenuSql = computed(() => ComponentHandler.getComponentValue('participants-session-menu', 'sql', correctParticipantsSessionMenuSql.value))
-const participantsSessionMenuJs = computed(() => ComponentHandler.getComponentValue('participants-session-menu', 'js', correctParticipantsSessionMenuJs.value))
-const participantsSessionMenuHtml = computed(() => ComponentHandler.getComponentValue('participants-session-menu', 'html', correctParticipantsSessionMenuHtml.value))
-const participantsSessionMenuCss = computed(() => ComponentHandler.getComponentValue('participants-session-menu', 'css', correctParticipantsSessionMenuCss.value))
-
-const participantAllergenCountSql = computed(() => ComponentHandler.getComponentValue('participant-allergen-count', 'sql', correctParticipantAllergenCountSql.value))
 const localItems = ref([
     {
         label: t('dashboard'),
@@ -936,13 +782,14 @@ const newParticipant = ref({
 const currentPage = ref(1)
 const itemsPerPage = ref(6) // 3x3 grid
 const totalPages = computed(() => {
-    const pageCount = pageCountFunction.value(filteredParticipants.value.length, itemsPerPage.value)
+    const participantsPageCount1Component = componentCodeStore.getComponentById('participants-page-count-1') || componentCodeStore.getDefaultComponent('participants-page-count-1')
+    const correctParticipantsPageCount1Js = participantsPageCount1Component?.js?.['js'] || 'Math.ceil(totalItems / itemsPerPage)'
+    const pageCountJs = ComponentHandler.getComponentValue('participants-page-count-1', 'js', correctParticipantsPageCount1Js)
+    const pageCountFunction = new Function('totalItems', 'itemsPerPage', `return ${pageCountJs}`)
+    const pageCount = pageCountFunction(filteredParticipants.value.length, itemsPerPage.value)
     console.log("Total pages:", pageCount, "for", filteredParticipants.value.length, "items with", itemsPerPage.value, "per page")
-    console.log("JS: ", correctParticipantsPageCount1Js.value)
     return pageCount;
 })
-
-const pageCountFunction = computed(() => new Function('totalItems', 'itemsPerPage', `return ${correctParticipantsPageCount1Js.value}`))
 
 
 const paginatedParticipants = computed(() => {
@@ -989,7 +836,13 @@ const filteredParticipants = computed(() => {
         const text = filterText.value.toLowerCase()
 
         // Use component-managed filtering logic
-        const filterJs = participantsFilterInputJs.value
+        const participantsFilterInputComponent = componentCodeStore.getComponentById('participants-filter-input') || componentCodeStore.getDefaultComponent('participants-filter-input')
+        const correctParticipantsFilterInputJs = participantsFilterInputComponent?.js?.['js'] || `(p.name && p.name.toLowerCase().includes(text)) ||
+(p.email && p.email.toLowerCase().includes(text)) ||
+(p.phone && p.phone.toLowerCase().includes(text)) ||
+(p.address && p.address.toLowerCase().includes(text)) ||
+(p.sessions && getSessionNames(p.sessions).toLowerCase().includes(text))`
+        const filterJs = ComponentHandler.getComponentValue('participants-filter-input', 'js', correctParticipantsFilterInputJs)
         console.log("Applying filter JS:", filterJs)
         if (filterJs) {
             arr = arr.filter(p => {
@@ -1010,81 +863,6 @@ const filteredParticipants = computed(() => {
 });
 
 const toast = useToast()
-
-// Individual computed properties for capacity pillow
-const totalCapacity = computed(() => {
-    const _ = selectedSystemStore.dbNumber  // Dependency tracking
-    if (!selectedSystemStore.selectedSystem?.db || typeof selectedSystemStore.selectedSystem?.db?.query !== "function") {
-        return 0
-    }
-
-    const totalCapacityQuery = participantsCapacityCountSqlTotal.value;
-    if (!totalCapacityQuery) return 0;
-
-    try {
-        if (value.value === 'all') {
-            const result = selectedSystemStore.selectedSystem.db.query(totalCapacityQuery)?.results || [];
-            return result[0]?.count || 0;
-        } else {
-            const sessionId = Number(value.value);
-            const result = selectedSystemStore.selectedSystem.db.query(totalCapacityQuery, [sessionId])?.results || [];
-            return result[0]?.count || 0;
-        }
-    } catch (error) {
-        console.error('Error querying total capacity:', error);
-        return 0;
-    }
-})
-
-const currentCount = computed(() => {
-    const _ = selectedSystemStore.dbNumber
-    if (!selectedSystemStore.selectedSystem?.db || typeof selectedSystemStore.selectedSystem?.db?.query !== "function") {
-        return 0
-    }
-
-    const currentCountQuery = participantsCapacityCountSqlCurrent.value;
-    if (!currentCountQuery) return 0;
-
-    try {
-        if (value.value === 'all') {
-            const result = selectedSystemStore.selectedSystem.db.query(currentCountQuery)?.results || [];
-            return result[0]?.count || 0;
-        } else {
-            const sessionId = Number(value.value);
-            const result = selectedSystemStore.selectedSystem.db.query(currentCountQuery, [sessionId])?.results || [];
-            return result[0]?.count || 0;
-        }
-    } catch (error) {
-        console.error('Error querying current count:', error);
-        return 0;
-    }
-})
-
-const fillPercentage = computed(() => {
-    const _ = selectedSystemStore.dbNumber
-    if (totalCapacity.value === 0) {
-        return 0;
-    }
-
-    const fillPercentageJs = participantsCapacityPercentageJs.value;
-    if (!fillPercentageJs) return 0;
-
-    try {
-        const fillPercentageFunction = new Function('currentCount', 'totalCapacity', `return ${fillPercentageJs}`);
-        return fillPercentageFunction(currentCount.value, totalCapacity.value);
-    } catch (error) {
-        console.error('Error evaluating fillPercentageJs:', error);
-        return 0;
-    }
-})
-
-const selectedSessionInfo = computed(() => ({
-    currentCount: currentCount.value,
-    totalCapacity: totalCapacity.value,
-    fillPercentage: fillPercentage.value,
-    isFull: currentCount.value >= totalCapacity.value,
-    isNearFull: fillPercentage.value >= 80
-}))
 
 // Reactive database monitoring using computed hash
 const participantsDataHash = computed(() => {
@@ -1263,30 +1041,6 @@ const formatDateRange = (fromDate: Date, toDate: Date): string => {
     const from = fromDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' })
     const to = toDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', year: 'numeric' })
     return `${from} - ${to}`
-}
-
-const getParticipantAllergenCount = (participantId: number): number => {
-    if (!participantId) return 0;
-
-    const _ = selectedSystemStore.dbNumber
-
-    if (!selectedSystemStore.selectedSystem?.db || typeof selectedSystemStore.selectedSystem?.db?.query !== "function") {
-        console.log("RETURNING ZERO")
-        return 0
-    }
-
-    const allergenCountQuery = participantAllergenCountSql.value;
-    console.log("QUERY: ", allergenCountQuery)
-    if (!allergenCountQuery) return 0;
-
-    try {
-        const result = selectedSystemStore.selectedSystem.db.query(allergenCountQuery, [participantId])?.results || [];
-        console.log("RESULT: ", result)
-        return result[0]?.count || 0;
-    } catch (error) {
-        console.error('Error querying allergen count:', error);
-        return 0;
-    }
 }
 
 async function viewParticipantDetails(participant: Participant) {
