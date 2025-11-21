@@ -15,3 +15,8 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+
+Cypress.on('window:before:load', (win) => {
+  Object.defineProperty(win.navigator, 'language', { value: 'en-US' })
+  Object.defineProperty(win.navigator, 'languages', { value: ['en-US'] })
+})
