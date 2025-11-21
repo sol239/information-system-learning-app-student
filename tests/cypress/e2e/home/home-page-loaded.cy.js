@@ -1,4 +1,5 @@
 describe('Home page loads correctly', () => {
+
     it('loads the home page and displays main elements', () => {
         cy.visit('/')
         cy.get('h1').contains('Welcome to the error-finding application for information systems')
