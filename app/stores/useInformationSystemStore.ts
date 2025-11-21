@@ -14,6 +14,13 @@ export const useInformationSystemStore = defineStore('informationSystem', () => 
     systems.value = []
   }
 
+  function deleteSystem(systemId: number) {
+    const index = systems.value.findIndex(sys => sys.id === systemId)
+    if (index !== -1) {
+      systems.value.splice(index, 1)
+    }
+  }
+
   async function initializeDbs() {
     console.log("Reinitializing databases.")
     for (let i = 0; i < systems.value.length; i++) {
@@ -29,6 +36,7 @@ export const useInformationSystemStore = defineStore('informationSystem', () => 
     systems,
     addSystem,
     clearSystems,
+    deleteSystem,
     initializeDbs
   }
 }, {

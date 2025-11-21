@@ -165,36 +165,7 @@ function nextMonth() {
 function goToToday() {
     currentDate.value = new Date()
 }
-const localItems = ref([
-    {
-        label: t('dashboard'),
-        icon: 'i-heroicons-chart-bar-20-solid',
-        to: `/system/${systemId}/dashboard`,
-        data_target: 'system-dashboard',
-    },
-    {
-        label: t('sessions'),
-        icon: 'i-heroicons-calendar-date-range',
-        to: `/system/${systemId}/sessions`,
-        data_target: 'system-sessions',
-    },
-    {
-        label: t('participants'),
-        to: `/system/${systemId}/participants`,
-        data_target: 'system-participants',
-    },
-    {
-        label: t('supervisors'),
-        to: `/system/${systemId}/supervisors`,
-        data_target: 'system-supervisors',
-    },
-    {
-        label: t('database'),
-        icon: 'i-heroicons-table-cells',
-        to: `/system/${systemId}/database`,
-        data_target: 'system-table',
-    }
-])
+
 function isElementTaskCompleted(elementId: string): boolean {
     if (!system.value) return false;
     const task = system.value.tasks.find(function (task) { return task.elementClass === elementId })

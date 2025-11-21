@@ -20,7 +20,7 @@
                     </UButton>
                     -->
                     <UButton icon="i-heroicons-table-cells" variant="outline"
-                        @click="navigateTo(`/system/${selectedSystemStore.selectedId}/database`)" size="md">{{
+                        @click="navigateTo(`/systems/${selectedSystemStore.selectedId}/database`)" size="md">{{
                         t('database') }}</UButton>
 
                     <UBadge color="red" variant="outline" size="xl">
@@ -231,37 +231,37 @@ const localItems = ref<NavigationMenuItem[]>([
     {
         label: t('dashboard'),
         icon: 'i-heroicons-chart-bar-20-solid',
-        to: `/system/${selectedSystemStore.selectedId}/dashboard`,
+        to: `/systems/${selectedSystemStore.selectedId}/dashboard`,
         data_target: 'system-dashboard',
     },
     {
         label: t('sessions'),
         icon: 'i-heroicons-calendar-date-range',
-        to: `/system/${selectedSystemStore.selectedId}/sessions`,
+        to: `/systems/${selectedSystemStore.selectedId}/sessions`,
         data_target: 'system-sessions',
     },
     {
         label: t('participants'),
         icon: 'i-heroicons-users',
-        to: `/system/${selectedSystemStore.selectedId}/participants`,
+        to: `/systems/${selectedSystemStore.selectedId}/participants`,
         data_target: 'system-participants',
     },
     {
         label: t('supervisors'),
         icon: 'i-heroicons-user-group',
-        to: `/system/${selectedSystemStore.selectedId}/supervisors`,
+        to: `/systems/${selectedSystemStore.selectedId}/supervisors`,
         data_target: 'system-supervisors',
     },
     {
         label: t('meals'),
         icon: 'i-lucide-utensils',
-        to: `/system/${selectedSystemStore.selectedId}/meals`,
+        to: `/systems/${selectedSystemStore.selectedId}/meals`,
         data_target: 'system-meals',
     },
     {
         label: t('meal_plan'),
         icon: 'i-lucide-square-menu',
-        to: `/system/${selectedSystemStore.selectedId}/meal-plan`,
+        to: `/systems/${selectedSystemStore.selectedId}/meal-plan`,
         data_target: 'system-meal-plan',
     },
 
@@ -366,7 +366,7 @@ async function refreshAll() {
 
 async function leaveSystem() {
     // Navigate back to systems list
-    await navigateTo('/system');
+    await navigateTo('/systems');
     await SystemReset.refreshComponentsCore();
     await SystemReset.refreshDatabaseCore();
     await SystemReset.refreshTasksCore();
@@ -381,7 +381,7 @@ async function leaveAndSave() {
         color: 'primary',
         icon: 'i-lucide-check-circle'
     })
-    await navigateTo('/system')
+    await navigateTo('/systems')
     exitPopoverOpen.value = false
 }
 

@@ -28,7 +28,7 @@ export class ComponentManager {
         "js": `
 selectedTableStore.select('jídla');
 navigateTo({
-  path: \`/system/\${systemId}/meals\`,
+  path: \`/systems/\${systemId}/meals\`,
 });
 ` },
       sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')}` },
@@ -54,7 +54,7 @@ navigateTo({
         "js": `
 selectedTableStore.select('účastníci');
 navigateTo({
-  path: \`/system/\${systemId}/participants\`,
+  path: \`/systems/\${systemId}/participants\`,
 });
 ` },
       sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}` },
@@ -80,7 +80,7 @@ navigateTo({
         "js": `
 selectedTableStore.select('turnusy');
 navigateTo({
-  path: \`/system/\${systemId}/sessions\`,
+  path: \`/systems/\${systemId}/sessions\`,
 });
 ` },
       sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')}` },
@@ -106,7 +106,7 @@ navigateTo({
         "js": `
 selectedTableStore.select('vedoucí');
 navigateTo({
-  path: \`/system/\${systemId}/supervisors\`,
+  path: \`/systems/\${systemId}/supervisors\`,
 });
 ` },
       sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')}` },

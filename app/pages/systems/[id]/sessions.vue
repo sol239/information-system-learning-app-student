@@ -154,36 +154,6 @@ watch(
     { immediate: true }
 )
 
-const localItems = ref([
-    {
-        label: t('dashboard'),
-        icon: 'i-heroicons-chart-bar-20-solid',
-        to: `/system/${systemId}/dashboard`,
-        data_target: 'system-dashboard',
-    },
-    {
-        label: t('sessions'),
-        icon: 'i-heroicons-calendar-date-range',
-        to: `/system/${systemId}/sessions`,
-        data_target: 'system-sessions',
-    },
-    {
-        label: t('participants'),
-        to: `/system/${systemId}/participants`,
-        data_target: 'system-participants',
-    },
-    {
-        label: t('supervisors'),
-        to: `/system/${systemId}/supervisors`,
-        data_target: 'system-supervisors',
-    },
-    {
-        label: t('database'),
-        icon: 'i-heroicons-table-cells',
-        to: `/system/${systemId}/database`,
-        data_target: 'system-table',
-    }
-])
 // Data from database
 const sessions = computed(() => selectedSystemStore.sessions)
 const supervisors = computed(() => selectedSystemStore.supervisors)

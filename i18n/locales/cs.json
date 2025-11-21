@@ -277,5 +277,26 @@
     "upload_error": "Chyba při nahrávání",
     "no_valid_system_found": "V nahraném souboru nebyl nalezen žádný platný systém",
     "error_processing_zip": "Chyba při zpracování ZIP souboru",
-    "clear_systems": "Vymazat systémy"
+    "clear_systems": "Vymazat systémy",
+    "information_systems": "Informační systémy",
+    "manage_your_systems_description": "Spravujte a přistupujte ke svým informačním systémům",
+    "no_systems_yet": "Žádné systémy zatím",
+    "no_systems_description": "Začněte přidáním svého prvního informačního systému",
+    "add_first_system": "Přidat první systém",
+    "information_system": "Informační systém",
+    "preview": "Náhled",
+    "systems_cleared": "Systémy vymazány",
+    "all_systems_have_been_removed": "Všechny systémy byly odstraněny",
+    "system_deleted": "Systém odstraněn",
+    "system_has_been_removed": "Systém byl odstraněn",
+    "confirm_clear_systems": "Potvrdit vymazání systémů",
+    "are_you_sure": "Jste si jisti?",
+    "clear_systems_warning": "Tato akce trvale odstraní všechny systémy. Tuto akci nelze vrátit zpět.",
+    "clear_all": "Vymazat vše",
+    "settings": "Nastavení",
+    "settings_description": "Přizpůsobte si preference aplikace a zkratky",
+    "language_settings": "Nastavení jazyka",
+    "select_language": "Vyberte jazyk",
+    "keyboard_shortcuts": "Klávesové zkratky"
+
 }

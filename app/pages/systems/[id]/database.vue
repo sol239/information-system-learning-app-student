@@ -38,36 +38,6 @@ const columnValuesMap = ref<Record<string, string[]>>({})
 
 let formState = reactive<Record<string, any>>({})
 
-const localItems = ref([
-    {
-        label: t('dashboard'),
-        icon: 'i-heroicons-chart-bar-20-solid',
-        to: `/system/${selectedSystemStore.selectedId}/dashboard`,
-        data_target: 'system-dashboard',
-    }, 
-    {
-        label: t('sessions'),
-        icon: 'i-heroicons-calendar-date-range',
-        to: `/system/${selectedSystemStore.selectedId}/sessions`,
-        data_target: 'system-sessions',
-    },
-    {
-        label: t('participants'),
-        to: `/system/${selectedSystemStore.selectedId}/participants`,
-        data_target: 'system-participants',
-    },
-    {
-        label: t('supervisors'),
-        to: `/system/${selectedSystemStore.selectedId}/supervisors`,
-        data_target: 'system-supervisors',
-    },
-    {
-        label: t('database'),
-        icon: 'i-heroicons-table-cells',
-        to: `/system/${selectedSystemStore.selectedId}/database`,
-        data_target: 'system-table',
-    }
-])
 
 /* 6. Computed */
 const tableNames = computed(() => {

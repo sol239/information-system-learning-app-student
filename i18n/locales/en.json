@@ -272,6 +272,26 @@
     "upload_error": "Upload Error",
     "no_valid_system_found": "No valid system found in the uploaded file",
     "error_processing_zip": "Error processing ZIP file",
-    "clear_systems": "Clear Systems"
+    "clear_systems": "Clear Systems",
+    "information_systems": "Information Systems",
+    "manage_your_systems_description": "Manage and access your information systems",
+    "no_systems_yet": "No Systems Yet",
+    "no_systems_description": "Get started by adding your first information system",
+    "add_first_system": "Add First System",
+    "information_system": "Information System",
+    "preview": "Preview",
+    "systems_cleared": "Systems Cleared",
+    "all_systems_have_been_removed": "All systems have been removed",
+    "system_deleted": "System Deleted",
+    "system_has_been_removed": "System has been removed",
+    "confirm_clear_systems": "Confirm Clear Systems",
+    "are_you_sure": "Are you sure?",
+    "clear_systems_warning": "This action will permanently remove all systems. This cannot be undone.",
+    "clear_all": "Clear All",
+    "settings": "Settings",
+    "settings_description": "Customize your application preferences and shortcuts",
+    "language_settings": "Language Settings",
+    "select_language": "Select Language",
+    "keyboard_shortcuts": "Keyboard Shortcuts"
 
 }

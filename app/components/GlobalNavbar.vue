@@ -2,7 +2,7 @@
   <div v-if="!isOnSystemDetailPage" class="flex items-center w-full justify-between text-lg py-4 px-4 text-black"
     style="border-bottom: 1px; border-color: #05df72; border-bottom-style: solid;">
     <!-- Navigation Menu on the left/center -->
-    <UNavigationMenu :items="items" class="flex-grow justify-start" style="z-index: 10000;" />
+    <UNavigationMenu :items="items" class="global-nav-menu flex-grow justify-start" style="z-index: 10000;" />
   </div>
 </template>
 
@@ -45,7 +45,7 @@ const items = computed<NavigationMenuItem[]>(() => [
   {
     label: t('systems'),
     icon: 'i-heroicons-computer-desktop',
-    to: '/system',
+    to: '/systems',
     data_target: 'systems',
   },
   {
@@ -58,7 +58,7 @@ const items = computed<NavigationMenuItem[]>(() => [
 ])
 
 const isOnSystemDetailPage = computed(() => {
-  return route.path.startsWith('/system/') && route.params.id
+  return route.path.startsWith('/systems/') && route.params.id
 })
 
 /* 10. Watchers */
