@@ -8,6 +8,11 @@ export class ComponentManager {
     const componentCodeStore = useComponentCodeStore()
     const selectedSystemStore = useSelectedSystemStore();
 
+    if (!selectedSystemStore.selectedSystem?.db) {
+      console.warn("Cannot initialize components: Database not ready");
+      return;
+    }
+
     // New instances created from the existing code above
     const statsMealsComponent = new Component({
       id: "stats-meals",
@@ -38,7 +43,7 @@ navigateTo({
     const statsParticipantsComponent = new Component({
       id: "stats-participants",
       name: "Stats Participants",
-      description: `Component for participants stats. SQL: SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}`,
+      description: `Component for participants stats. SQL: SELECT COUNT(*) as count FROM ${getTableName('participants')}`,
       html: {
         "html": `
   <div class="stat-card">
@@ -57,7 +62,7 @@ navigateTo({
   path: \`/systems/\${systemId}/participants\`,
 });
 ` },
-      sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}` },
+      sql: { "sql": `SELECT COUNT(*) as count FROM ${getTableName('participants')}` },
       additionals: {}
     });
 

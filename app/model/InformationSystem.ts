@@ -1,6 +1,7 @@
 import DbHandler from "~/composables/DbHandler";
 import { Participant } from "./Participant";
 import { Task } from "./Task";
+import { IndexedDbHandler } from "~/utils/IndexedDbHandler";
 
 export interface Table<T = any> {
   name: string;
@@ -28,8 +29,33 @@ export class InformationSystem {
   }
 
   public static async databaseInitStatic(json: any) {
+    // Try to load from IndexedDB first
+    if (json.id) {
+      try {
+        const buffer = await IndexedDbHandler.loadSystemDB(json.id);
+        if (buffer) {
+          console.log("Loading database from IndexedDB for system:", json.name);
+          const dbHandler = await DbHandler.fromBuffer(buffer, json);
+          return dbHandler;
+        }
+      } catch (e) {
+        console.error("Failed to load from IndexedDB", e);
+      }
+    }
+
     const dbHandler = await DbHandler.fromJSON(json);
     console.log("Database initialized for Information System (static):", json.name);
+
+    // Save to IndexedDB for next time
+    if (json.id) {
+      try {
+        const exported = dbHandler.exportDatabase();
+        await IndexedDbHandler.saveSystemDB(json.id, exported);
+      } catch (e) {
+        console.error("Failed to save to IndexedDB", e);
+      }
+    }
+
     return dbHandler;
   }
 
@@ -51,6 +77,14 @@ export class InformationSystem {
     await this.db.init(json, csvData);
     this.dbInitialized = true;
     console.log("Database initialized for Information System (new):", this.name);
+
+    // Save to IndexedDB
+    try {
+      const exported = this.db.exportDatabase();
+      await IndexedDbHandler.saveSystemDB(this.id, exported);
+    } catch (e) {
+      console.error("Failed to save to IndexedDB", e);
+    }
   }
 
   static fromJSON(json: any): InformationSystem {

@@ -7,10 +7,10 @@
     <h1 class="text-4xl font-bold mb-4">{{ t('dashboard') }}</h1>
 
     <div class="stats">
-      <StatsSessions ref="statsSessionsRef" />
-      <StatsParticipants ref="statsParticipantsRef" />
-      <StatsSupervisors ref="statsSupervisorsRef" />
-      <StatsMeals ref="statsMealsRef" />
+      <StatsSessions />
+      <StatsParticipants />
+      <StatsSupervisors />
+      <StatsMeals />
     </div>
   </div>
 </template>

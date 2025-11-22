@@ -24,52 +24,43 @@ import type { InformationSystem } from '~/model/InformationSystem'
 
 export class SystemReset {
 
-static async refreshComponentsCore() {
-    const componentCodeStore = useComponentCodeStore();
-    console.log("Refreshing components...");
-    componentCodeStore.resetAllComponents();
-}
-
-static async refreshTasksCore() {
-    const selectedTaskStore = useSelectedTaskStore();
-    const informationSystemStore = useInformationSystemStore();
-    const scoreStore = useScoreStore();
-    const errorComponentStore = useErrorComponentStore();
-
-    selectedTaskStore.resetTasks()
-    scoreStore.resetScore()
-    errorComponentStore.clearErrorComponents()
-    ComponentHandler.getComponentMap(selectedTaskStore.currentRound)
-
-    for (let j = 0; j < informationSystemStore.systems.length; j++) {
-        const system = informationSystemStore.systems[j];
-        for (let i = 0; i < system.tasks.length; i++) {
-            system.tasks[i].completed = false;
-            system.tasks[i].componentsRepaired = false;
-        }
+    static async refreshComponentsCore() {
+        const componentCodeStore = useComponentCodeStore();
+        console.log("Refreshing components...");
+        componentCodeStore.resetAllComponents();
     }
-}
 
-static async refreshDatabaseCore() {
-    const selectedSystemStore = useSelectedSystemStore();
-    selectedSystemStore.dbRefreshed = false;
-    
-    console.log("Refreshing database...");
-    const systems: InformationSystem[] = FileHandler.getInformationSystems();
+    static async refreshTasksCore() {
+        const selectedTaskStore = useSelectedTaskStore();
+        const informationSystemStore = useInformationSystemStore();
+        const scoreStore = useScoreStore();
+        const errorComponentStore = useErrorComponentStore();
 
-    for (const system of systems) {
-        if (system.id === selectedSystemStore.selectedId) {
-            if (selectedSystemStore.selectedSystem) {
-                selectedSystemStore.selectedSystem.tables = system.tables;
+        selectedTaskStore.resetTasks()
+        scoreStore.resetScore()
+        errorComponentStore.clearErrorComponents()
+        ComponentHandler.getComponentMap(selectedTaskStore.currentRound)
+
+        for (let j = 0; j < informationSystemStore.systems.length; j++) {
+            const system = informationSystemStore.systems[j];
+            for (let i = 0; i < system.tasks.length; i++) {
+                system.tasks[i].completed = false;
+                system.tasks[i].componentsRepaired = false;
             }
-            break;
         }
     }
 
-    if (selectedSystemStore.selectedSystem) {
-        await selectedSystemStore.selectedSystem.db.init(selectedSystemStore.selectedSystem.configData)
+    static async refreshDatabaseCore() {
+        const selectedSystemStore = useSelectedSystemStore();
+        selectedSystemStore.dbRefreshed = false;
+
+        console.log("Refreshing database...");
+
+        if (selectedSystemStore.selectedSystem) {
+            // Use the store's initializeDb method which handles static initialization correctly
+            await selectedSystemStore.initializeDb();
+        }
+        selectedSystemStore.dbRefreshed = true;
     }
-    selectedSystemStore.dbRefreshed = true;
-}
 
 }

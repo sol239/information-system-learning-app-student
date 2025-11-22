@@ -79,7 +79,11 @@ const currentDate = ref(new Date())
 
 /* 9. Computed */
 const system = computed<InformationSystem | null>(() => {
-    return systems.find(function (sys) { return sys.id === parseInt(systemId as string, 10) }) || null
+    const id = parseInt(systemId as string, 10)
+    if (selectedSystemStore.selectedSystem?.id === id) {
+        return selectedSystemStore.selectedSystem
+    }
+    return systems.find(function (sys) { return sys.id === id }) || null
 })
 const sessions = computed(function () { return system.value?.tables.find(function (t) { return t.name === 'sessions' })?.data || [] })
 const participants = computed(function () { return system.value?.tables.find(function (t) { return t.name === 'participants' })?.data || [] })
@@ -172,9 +176,10 @@ function isElementTaskCompleted(elementId: string): boolean {
     return task ? task.completed : false;
 }
 
-watch(system, (newSystem) => {
-    if (newSystem) {
+watch(system, async (newSystem) => {
+    if (newSystem && selectedSystemStore.selectedSystem?.id !== newSystem.id) {
         selectedSystemStore.setSelectedSystem(newSystem);
+        await selectedSystemStore.initializeDb();
     }
 }, { immediate: true });
 watch(

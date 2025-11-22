@@ -2,14 +2,14 @@
 /* 1. Imports */
 import { ref, computed, reactive, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import type { InformationSystem } from '~/model/InformationSystem'
+import { InformationSystem } from '~/model/InformationSystem'
 import { useInformationSystemStore } from '~/stores/useInformationSystemStore'
 import { useSelectedSystemStore } from '~/stores/useSelectedSystemStore'
 import { useSelectedTableStore } from '~/stores/useSelectedTableStore'
 import LocalNavbar from '~/components/LocalNavbar.vue'
 import { usePropertyStore } from '#imports'
 import { USeparator } from '#components'
-import QueryExecutor from '~/components/infsys_components/database/QueryExecutor.vue'
+import QueryExecutor from '~/components/database/QueryExecutor.vue'
 
 /* 2. Stores */
 const informationSystemStore = useInformationSystemStore()
@@ -27,7 +27,6 @@ const systemId = route.params.id
 const systems = informationSystemStore.systems
 
 /* 5. Local state (ref, reactive) */
-const system = ref<InformationSystem | null>(null)
 const selectedTableData = ref<any[]>([])
 const tableInfo = ref<any[]>([])
 const columnNames = ref<string[]>([])
@@ -40,6 +39,14 @@ let formState = reactive<Record<string, any>>({})
 
 
 /* 6. Computed */
+const system = computed(() => {
+    const id = parseInt(systemId as string, 10)
+    if (selectedSystemStore.selectedSystem?.id === id) {
+        return selectedSystemStore.selectedSystem
+    }
+    return systems.find(sys => sys.id === id) || null
+})
+
 const tableNames = computed(() => {
     if (!system.value?.db || typeof system.value.db.query !== 'function') return []
     try {
@@ -130,10 +137,14 @@ watch(tableDataHash, () => {
     reloadTableData()
 }, { flush: 'post' })
 
+watch(system, async (newSystem) => {
+    if (newSystem && selectedSystemStore.selectedSystem?.id !== newSystem.id) {
+        selectedSystemStore.setSelectedSystem(newSystem as InformationSystem)
+        await selectedSystemStore.initializeDb()
+    }
+}, { immediate: true })
+
 /* 8. Methods */
-function initializeSystem() {
-    system.value = systems.find(sys => sys.id === parseInt(systemId as string, 10)) || null
-}
 
 // Helper to detect array type
 function isArrayType(type: string) {
@@ -144,7 +155,8 @@ function isArrayType(type: string) {
 
 // Fetch possible values for array columns
 async function fetchColumnValues(tableName: string, columns: string[]) {
-    if (!system.value?.db) return
+    const db = system.value?.db
+    if (!db) return
     columns.forEach(col => {
         let sourceTable = tableName
         let valueField = col
@@ -154,7 +166,7 @@ async function fetchColumnValues(tableName: string, columns: string[]) {
             valueField = 'název'
         }
         try {
-            const res = system.value?.db.query(`SELECT DISTINCT "${valueField}" FROM "${sourceTable}"`)
+            const res = db.query(`SELECT DISTINCT "${valueField}" FROM "${sourceTable}"`)
             let values: string[] = []
             res?.results?.forEach(row => {
                 const val = row[valueField]
@@ -290,7 +302,7 @@ function handleOpenEditor(column: any) {
 
 /* 9. Lifecycle */
 onMounted(() => {
-    initializeSystem()
+    // System initialization is handled by computed property and watcher
 })
 </script>
 

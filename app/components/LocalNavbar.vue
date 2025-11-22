@@ -19,9 +19,20 @@
                         <span class="mobile-hidden">Helper</span>
                     </UButton>
                     -->
+                    <UPopover>
+                        <UButton label="Helper" color="neutral" variant="subtle" />
+
+                        <template #content>
+                            <div style="min-width: 300px; border: 1px transparent; border-radius: 8px; padding: 10px;">
+                                <UButton @click="printTableData" variant="soft" style="width: 100%;">Print database table names</UButton>
+                            
+                            </div>
+                        </template>
+                    </UPopover>
+
                     <UButton icon="i-heroicons-table-cells" variant="outline"
                         @click="navigateTo(`/systems/${selectedSystemStore.selectedId}/database`)" size="md">{{
-                        t('database') }}</UButton>
+                            t('database') }}</UButton>
 
                     <UBadge color="red" variant="outline" size="xl">
                         {{ $t('score') }}: {{ scoreStore.score }}
@@ -49,8 +60,9 @@
                         @click="highlightStore.toggleHighlight">
                         <span class="mobile-hidden">{{ highlightStore.isHighlightMode ? $t('disable_highlight') :
                             $t('enable_highlight')
-                            }}</span>
+                        }}</span>
                     </UButton>
+
 
                     <UButton :icon="highlightStore.isEditModeActive ? 'i-lucide-pencil' : 'i-lucide-pencil-off'"
                         :label="highlightStore.isEditModeActive ? $t('disable_edit') : $t('enable_edit')" color="yellow"
@@ -58,8 +70,10 @@
                         @click="highlightStore.toggleEdit">
                         <span class="mobile-hidden">{{ highlightStore.isEditModeActive ? $t('disable_edit') :
                             $t('enable_edit')
-                            }}</span>
+                        }}</span>
                     </UButton>
+
+
                 </div>
 
                 <!-- Third row of items -->
@@ -142,8 +156,8 @@
                                     <UButton size="md" :label="$t('leave_system')" color="red" variant="outline"
                                         icon="i-heroicons-arrow-right-on-rectangle" @click="leaveSystem" />
                                     <!-- TODO: Implement saving -->
-                                    <UButton size="md" disabled :label="$t('leave_and_save')" color="yellow" variant="outline"
-                                        icon="i-heroicons-document-check" @click="leaveAndSave" />
+                                    <UButton size="md" disabled :label="$t('leave_and_save')" color="yellow"
+                                        variant="outline" icon="i-heroicons-document-check" @click="leaveAndSave" />
                                     <UButton size="md" :label="$t('stay_in_system')" color="neutral" variant="outline"
                                         icon="i-heroicons-x-mark" @click="stayInSystem" />
                                 </div>
@@ -157,8 +171,8 @@
 
     <!-- Floating Button -->
     <UPopover v-model:open="tasksPopoverOpen" arrow style="z-index: 10001;">
-        <UButton style="z-index: 10001;" icon="i-lucide-list-todo" :label="selectedTaskStore.selectedTask?.title || $t('tasks')" color="lime"
-            variant="solid" size="xl"
+        <UButton style="z-index: 10001;" icon="i-lucide-list-todo"
+            :label="selectedTaskStore.selectedTask?.title || $t('tasks')" color="lime" variant="solid" size="xl"
             :class="['fixed bottom-15 right-15 rounded-full shadow-lg', { 'task-button-animation': selectedTaskStore.selectedTask }]">
             <span class="mobile-hidden">{{ selectedTaskStore.selectedTask?.title || $t('tasks') }}</span>
         </UButton>
@@ -304,6 +318,15 @@ async function handleHelperClick() {
     console.log("Current error components:", errorComponentStore.errorComponents);
 }
 
+async function printTableData() {
+    if (selectedSystemStore.selectedSystem) {
+        const tableNames: string[] = selectedSystemStore?.selectedSystem?.db?.getAllTableNames();
+        for (const tableName of tableNames) {
+            const data = await selectedSystemStore.selectedSystem.db.query(`SELECT * FROM ${tableName} LIMIT 5`);
+            console.log(`Table: ${tableName}`, data);
+        }
+    }
+}
 
 
 // Wrapper methods with toasts

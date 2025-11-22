@@ -23,7 +23,7 @@ export default class DbHandler {
         this.db = null;
     }
 
-    public static async fromJSON(json: any): Promise<DbHandler> {
+    public static async fromJSON(json: any, csvData?: Record<string, string>): Promise<DbHandler> {
 
         const SQL = await initSqlJs({
             // github pages:
@@ -37,12 +37,34 @@ export default class DbHandler {
 
         console.log("JSON 1", json);
 
-        dbHandler.tableNameMap = dbHandler.getTableNameMap(json.tables);
+        // Ensure we are using the configData tables if available, as they contain IDs
+        const tables = json.configData?.tables || json.tables;
+        dbHandler.tableNameMap = dbHandler.getTableNameMap(tables);
 
-        dbHandler.createTables(json.tables);
+        dbHandler.createTables(tables);
 
-        await dbHandler.insertData(json);
+        await dbHandler.insertData(json, csvData);
         return dbHandler;
+    }
+
+    public static async fromBuffer(buffer: Uint8Array, json: any): Promise<DbHandler> {
+        const dbHandler = new DbHandler();
+        await dbHandler.initFromBuffer(buffer, json);
+        return dbHandler;
+    }
+
+    public async initFromBuffer(buffer: Uint8Array, json: any): Promise<void> {
+        const SQL = await initSqlJs({
+            locateFile: () => '/information-system-learning-app/sql-wasm.wasm'
+        });
+        this.db = new SQL.Database(buffer);
+        // Ensure we are using the configData tables if available, as they contain IDs
+        const tables = json.configData?.tables || json.tables;
+        this.tableNameMap = this.getTableNameMap(tables);
+    }
+
+    public exportDatabase(): Uint8Array {
+        return this.db.export();
     }
 
     public async init(json: any, csvData?: Record<string, string>): Promise<void> {
@@ -57,17 +79,36 @@ export default class DbHandler {
         this.db = new SQL.Database();
         console.log("JSON 2", json.tables);
 
-        this.tableNameMap = this.getTableNameMap(json.tables);
+        // Ensure we are using the configData tables if available, as they contain IDs
+        const tables = json.configData?.tables || json.tables;
+        this.tableNameMap = this.getTableNameMap(tables);
 
         // Create tables and insert data
-        this.createTables(json.tables);
+        this.createTables(tables);
         await this.insertData(json, csvData);
     }
 
     private getTableNameMap(tables: any[]): Map<string, string> {
         const map = new Map<string, string>();
+        if (!tables) return map;
         tables.forEach(table => {
-            map.set(table.id, table.name);
+            if (table.id) {
+                map.set(table.id, table.name);
+            } else {
+                // Fallback: if id is missing, try to infer it from name or use name as id
+                // This handles cases where tables array comes from InformationSystem.tables (which lacks id)
+                // We assume standard table names map to standard IDs
+                const standardTables = [
+                    'participants', 'meals', 'sessions', 'supervisors', 'allergens',
+                    'allergens_meals', 'meals_participants', 'meals_supervisors',
+                    'participants_allergens', 'supervisors_allergens',
+                    'sessions_supervisors', 'sessions_participants', 'meals_book'
+                ];
+                // Simple heuristic: if name matches a standard ID, use it
+                // Or if we can't determine, we might be in trouble.
+                // But ideally, we should always use configData which has IDs.
+                console.warn(`Table ${table.name} is missing ID. Map might be incomplete.`);
+            }
         });
         return map;
     }

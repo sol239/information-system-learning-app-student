@@ -51,9 +51,7 @@ const correctHtmlTemplate = computed(() => participantsComponent.value?.html?.['
 const correctNavigateJs = computed(() => participantsComponent.value?.js?.['js'] || participantsComponent.value?.js?.['default'] || '')
 
 const sqlQuery = computed(() => ComponentHandler.getComponentValue(componentId, 'sql', correctSqlQuery.value))
-
 const htmlTemplate = computed(() => ComponentHandler.getComponentValue(componentId, 'html', correctHtmlTemplate.value))
-
 const navigateJs = computed(() => ComponentHandler.getComponentValue(componentId, 'js', correctNavigateJs.value))
 
 const participantsCount = computed(() => {
