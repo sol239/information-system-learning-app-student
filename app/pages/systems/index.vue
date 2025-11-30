@@ -36,6 +36,8 @@ const previewSystemName = ref<string | null>(null)
 const open = ref(false)
 const confirmClearOpen = ref(false)
 const systemToDelete = ref<number | null>(null)
+const isDuplicateId = ref(false)
+const duplicateSystemId = ref<number | null>(null)
 
 /* 9. Computed */
 const flexJustifyClass = computed(() => informationSystemStore.systems.length === 1 ? 'justify-start' : 'justify-center')
@@ -50,13 +52,17 @@ watch(value, async (newZipFile) => {
   if (!newZipFile) {
     loadedSystemTitle.value = null
     previewSystemName.value = null
+    isDuplicateId.value = false
+    duplicateSystemId.value = null
     return
   }
 
   // Reset loaded state when new file is selected
   loadedSystemTitle.value = null
+  isDuplicateId.value = false
+  duplicateSystemId.value = null
 
-  // Extract system name from ZIP file for preview
+  // Extract system name and id from ZIP file for preview
   try {
     const zip = await JSZip.loadAsync(newZipFile as File);
     const configEntry = Object.values(zip.files).find(file => file.name.endsWith('config.json'));
@@ -65,12 +71,29 @@ watch(value, async (newZipFile) => {
       const configText = await configEntry.async('text');
       const configData = JSON.parse(configText);
       previewSystemName.value = configData.name || 'Unknown System';
+      const systemId = configData.id;
+      if (systemId !== undefined) {
+        isDuplicateId.value = informationSystemStore.systems.some(sys => sys.id === systemId);
+        if (isDuplicateId.value) {
+          duplicateSystemId.value = systemId;
+        }
+      }
     } else {
       previewSystemName.value = 'Invalid ZIP - no config.json found';
     }
   } catch (error) {
     console.error('Error reading ZIP file:', error);
     previewSystemName.value = 'Error reading ZIP file';
+  }
+})
+
+watch(open, (newOpen) => {
+  if (!newOpen) {
+    value.value = null
+    loadedSystemTitle.value = null
+    previewSystemName.value = null
+    isDuplicateId.value = false
+    duplicateSystemId.value = null
   }
 })
 
@@ -176,6 +199,18 @@ async function uploadSystem() {
     if (system) {
       console.log('Loaded system from zip:', system)
       console.log('System name:', system.name)
+
+      // Check if a system with the same ID already exists
+      const existingSystem = informationSystemStore.systems.find(sys => sys.id === system.id)
+      if (existingSystem) {
+        toast.add({
+          title: t('upload_error'),
+          description: t('system_with_same_id_exists', { id: system.id }),
+          color: 'red'
+        })
+        return
+      }
+
       informationSystemStore.addSystem(system)
       loadedSystemTitle.value = system.name
       console.log('loadedSystemTitle set to:', loadedSystemTitle.value)
@@ -318,7 +353,10 @@ async function uploadSystem() {
               </div>
             </div>
 
-            <UButton v-if="value && !loadedSystemTitle" icon="i-lucide-upload" color="teacher" variant="solid"
+            <UAlert v-if="isDuplicateId" color="red" variant="outline" icon="i-lucide-alert-triangle" :title="t('system_with_same_id_exists')">
+            </UAlert>
+
+            <UButton v-if="value && !loadedSystemTitle && !isDuplicateId" icon="i-lucide-upload" color="teacher" variant="solid"
               class="upload-system-button w-full" @click="uploadSystem">
               {{ t('upload_system') }}
             </UButton>

@@ -293,10 +293,11 @@
     "are_you_sure": "Jste si jisti?",
     "clear_systems_warning": "Tato akce trvale odstraní všechny systémy. Tuto akci nelze vrátit zpět.",
     "clear_all": "Vymazat vše",
-    "settings": "Nastavení",
     "settings_description": "Přizpůsobte si preference aplikace a zkratky",
     "language_settings": "Nastavení jazyka",
     "select_language": "Vyberte jazyk",
-    "keyboard_shortcuts": "Klávesové zkratky"
+    "keyboard_shortcuts": "Klávesové zkratky",
+    "system_with_same_id_exists": "Systém se stejným ID již existuje",
+    "invalid_zip_no_config": "Neplatný ZIP - nebyl nalezen config.json"
 
 }
