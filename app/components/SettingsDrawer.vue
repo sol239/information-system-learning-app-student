@@ -5,7 +5,7 @@
     </UButton>
 
     <template #content>
-      <UCard class="p-4 min-w-96">
+      <UCard class="p-4 min-w-96 max-h-screen overflow-y-auto">
         <template #header>
           <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold">{{ t('settings') }}</h3>

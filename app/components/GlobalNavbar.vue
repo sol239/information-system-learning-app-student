@@ -17,7 +17,7 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 /* 3. Context hooks */
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 /* 4. Constants (non-reactive) */
 // none
@@ -35,7 +35,11 @@ const { t } = useI18n()
 // none
 
 /* 9. Computed */
-const items = computed<NavigationMenuItem[]>(() => [
+const items = computed<NavigationMenuItem[]>(() => {
+  // Access locale.value to make this computed reactive to locale changes
+  void locale.value
+
+  return [
   {
     label: t('home'),
     icon: 'i-heroicons-home',
@@ -55,7 +59,8 @@ const items = computed<NavigationMenuItem[]>(() => [
     data_target: 'settings',
   },
 
-])
+  ]
+})
 
 const isOnSystemDetailPage = computed(() => {
   return route.path.startsWith('/systems/') && route.params.id

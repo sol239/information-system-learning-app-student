@@ -221,7 +221,7 @@ const informationSystemStore = useInformationSystemStore()
 const componentCodeStore = useComponentCodeStore()
 
 /* 3. Context hooks */
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 /* 4. Constants (non-reactive) */
 const toast = useToast()
@@ -242,7 +242,11 @@ const exitPopoverOpen = ref(false)
 const teacherDrawerOpen = ref(false)
 const studentDrawerOpen = ref(false)
 
-const localItems = ref<NavigationMenuItem[]>([
+const localItems = computed<NavigationMenuItem[]>(() => {
+    // Access locale.value so the computed updates when the locale changes
+    void locale.value
+
+    return [
     {
         label: t('dashboard'),
         icon: 'i-heroicons-chart-bar-20-solid',
@@ -281,7 +285,8 @@ const localItems = ref<NavigationMenuItem[]>([
     },
 
 
-])
+    ]
+})
 
 /* 9. Computed */
 // none
