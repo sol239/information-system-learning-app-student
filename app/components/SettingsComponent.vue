@@ -53,7 +53,6 @@
               {{ t('appearance_settings') }}
             </h2>
           </div>
-
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
               <span class="text-sm font-medium text-gray-900 dark:text-white">{{ t('task_menu_sidebar') }}</span>
@@ -61,6 +60,14 @@
             </div>
             <USwitch color="orange" :model-value="taskMenuStore.taskMenuDisplayedAsSidebar"
               @update:model-value="taskMenuStore.toggleTaskMenuDisplay" />
+          </div>
+          <!-- Dark Mode Switch -->
+          <div class="flex items-center justify-between mt-4">
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ t('dark_mode') }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('dark_mode_description') }}</span>
+            </div>
+            <UColorModeSwitch color="orange" />
           </div>
         </div>
       </UCard>
@@ -96,8 +103,9 @@
 <script setup lang="ts">
 /* 1. Imports */
 import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useSettingsStore, useTaskMenuStore } from "#imports"
+
 
 /* 2. Stores */
 const settingsStore = useSettingsStore()
