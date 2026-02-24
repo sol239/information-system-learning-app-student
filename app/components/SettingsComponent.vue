@@ -59,7 +59,7 @@
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('task_menu_sidebar_description') }}</span>
             </div>
             <USwitch color="orange" :model-value="taskMenuStore.taskMenuDisplayedAsSidebar"
-              @update:model-value="taskMenuStore.toggleTaskMenuDisplay" />
+              :disabled="taskMenuStore.isSmallScreen" @update:model-value="taskMenuStore.toggleTaskMenuDisplay" />
           </div>
           <!-- Dark Mode Switch -->
           <div class="flex items-center justify-between mt-4">

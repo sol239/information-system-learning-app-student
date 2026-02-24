@@ -1,9 +1,14 @@
 <template>
-  <div class="flex items-center w-full justify-between text-lg py-4 px-4 text-black"
-    style="border-bottom: 1px; border-color: #05df72; border-bottom-style: solid;">
-    <!-- Navigation Menu on the left/center -->
-    <UNavigationMenu :items="items" class="global-nav-menu flex-grow justify-start" style="z-index: 10000;" />
-  </div>
+  <nav class="navbar-container">
+    <ul class="nav-list">
+      <li v-for="item in items" :key="item.to">
+        <NuxtLink :to="item.to" class="nav-link" :class="{ 'active': route.path === item.to }">
+          <UIcon v-if="item.icon" :name="item.icon" class="nav-icon" />
+          <span class="nav-label">{{ item.label }}</span>
+        </NuxtLink>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 
@@ -11,7 +16,6 @@
 /* 1. Imports */
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import type { NavigationMenuItem } from '@nuxt/ui'
 
 /* 2. Stores */
 // none
@@ -36,7 +40,7 @@ const { t, locale } = useI18n()
 // none
 
 /* 9. Computed */
-const items = computed<NavigationMenuItem[]>(() => {
+const items = computed(() => {
   // Access locale.value to make this computed reactive to locale changes
   void locale.value
 
@@ -45,27 +49,22 @@ const items = computed<NavigationMenuItem[]>(() => {
       label: t('home'),
       icon: 'i-heroicons-home',
       to: '/',
-      data_target: 'home',
     },
     {
       label: t('systems'),
       icon: 'i-heroicons-computer-desktop',
       to: '/systems',
-      data_target: 'systems',
     },
     {
       label: t('settings'),
       icon: 'i-heroicons-cog',
       to: '/settings',
-      data_target: 'settings',
     },
     {
       label: t('teacher'),
       icon: 'i-heroicons-user-group',
       to: '/teacher',
-      data_target: 'teacher',
     }
-
   ]
 })
 
@@ -85,3 +84,109 @@ const isOnSystemDetailPage = computed(() => {
 /* 13. defineExpose */
 // none
 </script>
+
+<style scoped>
+.navbar-container {
+  width: 100%;
+  border-bottom: 2px solid #05df72;
+  background-color: transparent;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background-color: rgba(5, 223, 114, 0.1);
+  color: #05df72;
+}
+
+.nav-link.active {
+  background-color: rgba(5, 223, 114, 0.15);
+  color: #05df72;
+  box-shadow: inset 0 0 0 1px rgba(5, 223, 114, 0.2);
+}
+
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Base styles: 0–359px (small phones) */
+.nav-label {
+  display: none;
+}
+
+@media (min-width: 360px) {
+  .nav-label {
+    display: inline;
+  }
+
+  .nav-list {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .navbar-container {
+    padding: 0.75rem 1.5rem;
+  }
+
+  .nav-list {
+    gap: 1rem;
+  }
+
+  .nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .nav-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-container {
+    padding: 1rem 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nav-list {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+}
+</style>

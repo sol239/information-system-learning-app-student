@@ -7,7 +7,7 @@
 
                 <!-- Left Section: Navigation Menu -->
                 <nav
-                    class="flex items-center gap-1 p-1 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200/50 dark:border-gray-700/50">
+                    class="flex flex-wrap items-center gap-1 p-1 bg-gray-100/50 dark:bg-gray-800/50 rounded-lg border border-gray-200/50 dark:border-gray-700/50">
                     <NuxtLink v-for="item in localItems" :key="item.label" :to="item.to as any"
                         class="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 group relative"
                         :class="[
