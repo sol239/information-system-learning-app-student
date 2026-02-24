@@ -58,6 +58,9 @@
     "new_tasks_added": "New tasks added ({count})",
     "all_tasks_completed": "All tasks have been successfully completed",
     "task_selected": "Task selected",
+
+        "dark_mode": "Dark Mode"
+        ,"dark_mode_description": "Switches the app appearance between light and dark mode."
     "components_repaired": "Components repaired",
     "task_completed": "Task completed",
     "check_repair_task": "Evaluate",

@@ -300,4 +300,10 @@
     "system_with_same_id_exists": "Systém se stejným ID již existuje",
     "invalid_zip_no_config": "Neplatný ZIP - nebyl nalezen config.json"
 
+    ,"dark_mode": "Tmavý režim"
+    ,"dark_mode_description": "Přepíná vzhled aplikace mezi světlým a tmavým režimem."
+
+    ,"task_menu_sidebar": "Zobrazit úkoly jako postranní panel"
+    ,"task_menu_sidebar_description": "Přepíná zobrazení úkolů mezi postranním panelem a horní lištou."
+
 }
