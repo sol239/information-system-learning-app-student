@@ -33,7 +33,6 @@ export default defineNuxtConfig({
     // baseURL: './'
     baseURL: '/information-system-learning-app', 
   },
-  target: "static",
   ui: {
     theme: {
       colors: [
@@ -44,7 +43,8 @@ export default defineNuxtConfig({
         'lime',
         'green',
         'sky',
-        'violet'
+        'violet',
+        'orange',
       ]
     }
   }

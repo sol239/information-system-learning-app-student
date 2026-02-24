@@ -36,12 +36,8 @@
             <label for="locale-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t('select_language') }}
             </label>
-            <USelect
-              v-model="locale"
-              :items="localeOptions"
-              class="settings-language-select w-full max-w-xs"
-              @update:model-value="onLocaleChange"
-            />
+            <USelect v-model="locale" color="sky" :items="localeOptions"
+              class="settings-language-select w-full max-w-xs" @update:model-value="onLocaleChange" />
           </div>
         </div>
       </UCard>
@@ -59,14 +55,12 @@
           </div>
 
           <div class="flex items-center justify-between">
-             <div class="flex flex-col">
-                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ t('task_menu_sidebar') }}</span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('task_menu_sidebar_description') }}</span>
-             </div>
-             <USwitch 
-                :model-value="taskMenuStore.taskMenuDisplayedAsSidebar" 
-                @update:model-value="taskMenuStore.toggleTaskMenuDisplay" 
-             />
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ t('task_menu_sidebar') }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('task_menu_sidebar_description') }}</span>
+            </div>
+            <USwitch color="orange" :model-value="taskMenuStore.taskMenuDisplayedAsSidebar"
+              @update:model-value="taskMenuStore.toggleTaskMenuDisplay" />
           </div>
         </div>
       </UCard>
@@ -84,11 +78,8 @@
           </div>
 
           <div class="grid gap-4">
-            <div
-              v-for="[action, shortcut] in settingsStore.shortcuts"
-              :key="action"
-              class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
-            >
+            <div v-for="[action, shortcut] in settingsStore.shortcuts" :key="action"
+              class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
               <span class="text-base font-medium text-gray-900 dark:text-white">{{ t(action) }}</span>
               <UKbd size="lg" variant="solid" class="bg-teacher-500 border-teacher-500 text-white">
                 {{ shortcut }}
