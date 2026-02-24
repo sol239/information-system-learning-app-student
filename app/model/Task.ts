@@ -1,5 +1,5 @@
 import { ActivityType } from "./Task/ActivityType";
-import { EvaluationType } from "./Task/EvaluationType";
+import { FinishType } from "./Task/FinishType";
 
 export class Task {
   constructor(
@@ -10,8 +10,8 @@ export class Task {
     public completed: boolean = false,
     public activityDescription: string = '',
     public activityType: ActivityType,
-    public evaluationDescription: string = '',
-    public evaluationType: EvaluationType = EvaluationType.AFTER_ACTIVITY,
+    public finishDescription: string = '',
+    public finishType: FinishType = FinishType.AFTER_ACTIVITY,
     public elementClass: Set<string> = new Set(),
     public answer: string = '',
     public round: number = 1,
@@ -41,13 +41,13 @@ export class Task {
     // isEditable: support both keys
     const isEditable = json['is_editable'] ?? json.isEditable ?? false;
 
-    // Handle activityType and evaluationType from JSON
+    // Handle activityType and finishType from JSON
     const activityType = json.activityType ?? json.type ?? ActivityType.REPAIR;
-    const evaluationType = json.evaluationType ?? EvaluationType.AFTER_ACTIVITY;
+    const finishType = json.finishType ?? json.evaluationType ?? FinishType.AFTER_ACTIVITY;
 
     // Handle descriptions
     const activityDescription = json.activityDescription ?? '';
-    const evaluationDescription = json.evaluationDescription ?? '';
+    const finishDescription = json.finishDescription ?? json.evaluationDescription ?? '';
 
     return new Task(
       json.id,
@@ -57,8 +57,8 @@ export class Task {
       json.completed ?? false,
       activityDescription,
       activityType as ActivityType,
-      evaluationDescription,
-      evaluationType as EvaluationType,
+      finishDescription,
+      finishType as FinishType,
       elementClassSet,
       json.answer ?? '',
       json.round ?? 1,
