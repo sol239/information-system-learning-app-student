@@ -257,10 +257,10 @@ function handleSort(field: string) {
 function getHeader(label: string, field: string) {
     const isCurrentField = currentSort.value.field === field
     const currentOrder = isCurrentField ? currentSort.value.order : null
-    
+
     // Use formatted column name directly (no translation)
     const formattedLabel = formatColumnName(field)
-    
+
     return h(
         'button',
         {
@@ -367,7 +367,7 @@ async function refreshDatabase() {
             color: 'primary',
             icon: 'i-lucide-check-circle'
         })
-    } catch(error) {
+    } catch (error) {
         console.error(error)
         toast.add({
             title: t('refresh_database_error') || 'Database refresh error',
@@ -439,11 +439,11 @@ defineExpose({
 
         <!-- Replace UTable with native HTML table -->
         <UCard>
-            <table class="w-full border border-white" style="background-color: #0f172b;">
+            <table id="database-table" class="w-full border border-gray-300 dark:border-white database-table">
                 <thead>
-                    <tr style="background-color: #0f172b;">
+                    <tr class="database-table-tr">
                         <th v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
-                            class="border border-white px-4 py-2 text-left text-white" style="background-color: #0f172b;">
+                            class="border border-gray-300 dark:border-white px-4 py-2 text-left database-table-text">
                             <span :id="`table-${col.id}`" v-if="typeof col.header === 'function'">
                                 <component :is="col.header()" />
                             </span>
@@ -452,17 +452,17 @@ defineExpose({
                             </span>
                         </th>
                         <th v-if="columnNames.includes('od') && columnNames.includes('do')"
-                            class="border border-white px-4 py-2 text-left text-white" style="background-color: #0f172b;">
+                            class="border border-gray-300 dark:border-white px-4 py-2 text-left database-table-text">
                             {{ t('days_count') }}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(row, rowIndex) in paginatedResults" :key="row.id || rowIndex"
-                        class="hover:bg-gray-700" style="background-color: #0f172b;">
+                        class="hover:bg-gray-100 dark:hover:bg-gray-700 database-table-tr">
 
                         <td v-for="col in autoColumns.filter(col => col.id !== 'action')" :key="col.id"
-                            class="border border-white px-4 py-2 text-white" style="background-color: #0f172b;">
+                            class="border border-gray-300 dark:border-white px-4 py-2 database-table-text">
                             <!-- Formátování pro sloupce 'od' a 'do' -->
                             <template v-if="col.id === 'od' || col.id === 'do'">
                                 {{ formatDate(row[col.id!]) }}
@@ -482,7 +482,8 @@ defineExpose({
                             </template>
                         </td>
                         <!-- Nový sloupec 'délka' -->
-                        <td v-if="columnNames.includes('od') && columnNames.includes('do')" class="border border-white px-4 py-2 text-white" style="background-color: #0f172b;">
+                        <td v-if="columnNames.includes('od') && columnNames.includes('do')"
+                            class="border border-gray-300 dark:border-white px-4 py-2 database-table-text">
                             {{ getDaysLength(row['od'], row['do']) }}
                         </td>
                         <!--
@@ -495,7 +496,8 @@ defineExpose({
                         -->
                     </tr>
                     <tr v-if="paginatedResults.length === 0">
-                        <td :colspan="autoColumns.filter(col => col.id !== 'action').length + (columnNames.includes('od') && columnNames.includes('do') ? 1 : 0)" class="text-center text-gray-400 py-4">
+                        <td :colspan="autoColumns.filter(col => col.id !== 'action').length + (columnNames.includes('od') && columnNames.includes('do') ? 1 : 0)"
+                            class="text-center text-gray-400 py-4">
                             {{ t('no_data') }}
                         </td>
                     </tr>
@@ -505,30 +507,21 @@ defineExpose({
             <!-- Pagination Controls -->
             <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
                 <div class="text-sm text-gray-300">
-                    {{ t('showing') }} {{ startIndex + 1 }} {{ t('to') }} {{ endIndex }} {{ t('of') }} {{ filteredAndSortedData.length }} {{ t('results') }}
+                    {{ t('showing') }} {{ startIndex + 1 }} {{ t('to') }} {{ endIndex }} {{ t('of') }} {{
+                        filteredAndSortedData.length }} {{ t('results') }}
                 </div>
                 <div class="flex items-center gap-2">
-                    <UButton 
-                        @click="currentPage = Math.max(1, currentPage - 1)" 
-                        :disabled="currentPage === 1"
-                        size="sm"
-                        color="neutral"
-                        variant="outline"
-                    >
+                    <UButton @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1" size="sm"
+                        color="neutral" variant="outline">
                         {{ t('previous') }}
                     </UButton>
-                    
+
                     <span class="text-sm text-gray-300">
                         {{ t('page') }} {{ currentPage }} {{ t('of') }} {{ totalPages }}
                     </span>
-                    
-                    <UButton 
-                        @click="currentPage = Math.min(totalPages, currentPage + 1)" 
-                        :disabled="currentPage === totalPages"
-                        size="sm"
-                        color="neutral"
-                        variant="outline"
-                    >
+
+                    <UButton @click="currentPage = Math.min(totalPages, currentPage + 1)"
+                        :disabled="currentPage === totalPages" size="sm" color="neutral" variant="outline">
                         {{ t('next') }}
                     </UButton>
                 </div>
@@ -559,5 +552,29 @@ defineExpose({
 
 .sort-header.desc:after {
     content: ' \u25BC';
+}
+
+.database-table {
+    background-color: #f3f4f6;
+}
+
+.dark .database-table {
+    background-color: #020618;
+}
+
+.database-table-tr {
+    background-color: #f3f4f6;
+}
+
+.dark .database-table-tr {
+    background-color: #020618;
+}
+
+.database-table-text {
+    color: #1f2937;
+}
+
+.dark .database-table-text {
+    color: #ffffff;
 }
 </style>
