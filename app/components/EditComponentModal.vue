@@ -27,17 +27,20 @@
           <div v-if="section.key !== 'sql'" class="entries-container">
             <div v-for="entry in section.entries" :key="entry.key" class="entry-wrapper">
               <div v-if="section.entries.length > 1" class="entry-title">{{ entry.key }}</div>
-              <textarea :value="getEntryValue(section.key, entry.key)"
-                @input="(event) => onEntryInput(event, section.key, entry.key)" class="code-editor"
-                :class="getSectionEditorClass(section.key)" spellcheck="false" />
+              <vue-monaco-editor :language="getMonacoLanguage(section.key)" :theme="monacoTheme"
+                :value="getEntryValue(section.key, entry.key)"
+                @change="(value: string | undefined) => onEntryInputStr(value, section.key, entry.key)"
+                :options="editorOptions" class="code-editor monaco-editor-wrapper"
+                :class="getSectionEditorClass(section.key)" height="300px" />
             </div>
           </div>
 
           <!-- Show selected SQL entry -->
           <div v-else-if="section.key === 'sql'" class="sql-editor-container">
-            <textarea :value="getSelectedSqlValue()"
-              @input="(event) => onEntryInput(event, section.key, selectedSqlKey)" class="code-editor"
-              :class="[getSectionEditorClass(section.key), { 'invalid-sql': !sqlValid }]" spellcheck="false" />
+            <vue-monaco-editor language="sql" :theme="monacoTheme" :value="getSelectedSqlValue()"
+              @change="(value: string | undefined) => onEntryInputStr(value, section.key, selectedSqlKey)"
+              :options="editorOptions" class="code-editor monaco-editor-wrapper"
+              :class="[getSectionEditorClass(section.key), { 'invalid-sql': !sqlValid }]" height="300px" />
           </div>
         </div>
       </div>
@@ -67,6 +70,7 @@ import { highlight } from '@nuxt/ui/runtime/utils/fuse.js'
 import { useHighlightStore } from '#imports'
 import type { Component } from '~/model/Component'
 import { ComponentHandler } from '~/composables/ComponentHandler'
+import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 
 /* 2. Stores */
 const informationSystemStore = useInformationSystemStore()
@@ -80,6 +84,18 @@ const { t } = useI18n()
 const availableTables: string[] = selectedSystem?.db?.getAllTableNames() || []
 const toast = useToast()
 
+const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
+const monacoTheme = computed(() => isDark.value ? 'vs-dark' : 'vs-light')
+
+const editorOptions = {
+  minimap: { enabled: false },
+  wordWrap: "on",
+  automaticLayout: true,
+  scrollBeyondLastLine: false,
+  fontSize: 14,
+  fontFamily: "'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace",
+}
 
 /* 5. Props */
 
@@ -108,7 +124,8 @@ const sectionComputedValues = computed(() => {
 
   const sections = ['html', 'css', 'js', 'sql', 'additionals']
   sections.forEach(section => {
-    const sectionData = editedComponent[section as keyof Component] as Record<string, string>
+    if (!editedComponent) return
+    const sectionData = editedComponent[section as keyof Component] as Record<string, string> | undefined
     if (sectionData && Object.keys(sectionData).length > 0) {
       result[section] = {}
       Object.keys(sectionData).forEach(key => {
@@ -131,8 +148,8 @@ const sectionComputedValues = computed(() => {
 // Get all available sections dynamically from the component
 const getComponentSections = (): string[] => {
   if (!editedComponent) return []
-  return ['html', 'css', 'js', 'sql', 'additionals'].filter(section => {
-    const sectionData = editedComponent[section as keyof Component] as Record<string, string>
+  return (['html', 'css', 'js', 'sql', 'additionals'] as const).filter(section => {
+    const sectionData = editedComponent[section] as Record<string, string> | undefined
     return sectionData && Object.keys(sectionData).length > 0
   })
 }
@@ -140,8 +157,8 @@ const getComponentSections = (): string[] => {
 // Get all keys for a specific section
 const getSectionKeys = (section: string): string[] => {
   if (!editedComponent) return []
-  const sectionData = editedComponent[section as keyof Component] as Record<string, string>
-  return sectionData ? Object.keys(sectionData) : []
+  const sectionData = editedComponent[section as keyof Component] as Record<string, string> | undefined
+  return sectionData ? Object.keys(sectionData as object) : []
 }
 
 // Initialize section entries from component or error components
@@ -160,7 +177,7 @@ const initializeSectionEntries = () => {
       }
       // Otherwise use computed values from ComponentHandler
       else {
-        const componentValue = editedComponent?.[section as keyof Component] as Record<string, string>
+        const componentValue = editedComponent ? (editedComponent[section as keyof Component] as Record<string, string> | undefined) : undefined
         if (componentValue && componentValue[key]) {
           const baseValue = componentValue[key]
           const actualValue = ComponentHandler.getComponentValue(
@@ -178,7 +195,7 @@ const initializeSectionEntries = () => {
 
   // Set default SQL key directly from sectionEntries
   if (sectionEntries.value['sql'] && Object.keys(sectionEntries.value['sql']).length > 0) {
-    selectedSqlKey.value = Object.keys(sectionEntries.value['sql'])[0]
+    selectedSqlKey.value = Object.keys(sectionEntries.value['sql'])[0] || ''
   }
 }
 
@@ -251,34 +268,47 @@ function getSectionEditorClass(section: string): string {
   return classes[section] || 'default-editor'
 }
 
-function onEntryInput(event: Event, section: string, entryKey: string) {
-  const value = (event.target as HTMLTextAreaElement)?.value || ''
+function getMonacoLanguage(section: string): string {
+  switch (section) {
+    case 'html': return 'html'
+    case 'css': return 'css'
+    case 'js':
+    case 'additionals': return 'javascript'
+    case 'sql': return 'sql'
+    default: return 'plaintext'
+  }
+}
+
+function onEntryInputStr(value: string | undefined, section: string, entryKey: string) {
+  const safeValue = value || ''
 
   // Ensure section exists in sectionEntries
   if (!sectionEntries.value[section]) {
     sectionEntries.value[section] = {}
   }
 
-  sectionEntries.value[section][entryKey] = value
-  console.log(`Current ${section.toUpperCase()} ${entryKey}:`, value)
+  sectionEntries.value[section][entryKey] = safeValue
+  console.log(`Current ${section.toUpperCase()} ${entryKey}:`, safeValue)
 
   // Special handling for SQL validation
   if (section === 'sql') {
     try {
       if (selectedSystem && typeof selectedSystem.db?.validateSql === 'function') {
-        console.log('Validating SQL: >', value, "<")
-        const isSqlValid = selectedSystem.db.validateSql(value)
+        const isSqlValid = selectedSystem.db.validateSql(safeValue)
         sqlValid.value = isSqlValid
-        console.log('SQL Valid:', isSqlValid)
       } else {
         sqlValid.value = true
-        console.warn('selectedSystem or validateSql is not available')
       }
     } catch (err) {
       sqlValid.value = true
       console.error('Error validating SQL:', err)
     }
   }
+}
+
+function onEntryInput(event: Event, section: string, entryKey: string) {
+  const value = (event.target as HTMLTextAreaElement)?.value || ''
+  onEntryInputStr(value, section, entryKey)
 }
 
 function selectSqlEntry(entryKey: string) {
