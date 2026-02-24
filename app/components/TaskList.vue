@@ -1,16 +1,13 @@
 <template>
   <!-- Collapsed sidebar view -->
-  <div 
-    v-if="taskMenuStore.taskMenuDisplayedAsSidebar && taskMenuStore.sidebarCollapsed" 
-    class="collapsed-sidebar"
-    @click="taskMenuStore.toggleSidebarCollapsed"
-  >
+  <div id="collapsed-sidebar" v-if="taskMenuStore.taskMenuDisplayedAsSidebar && taskMenuStore.sidebarCollapsed"
+    class="collapsed-sidebar" @click="taskMenuStore.toggleSidebarCollapsed">
     <UIcon name="i-heroicons-chevron-left" class="w-6 h-6 text-gray-400" />
   </div>
 
   <!-- Full task list view -->
-  <div v-else class="max-w-md mx-auto mt-8">
-    <UCard class="bg-slate-950">
+  <div id="task-list" v-else class="task-list">
+    <UCard class="bg-transparent">
 
       <template #header>
         <div class="flex items-center justify-between">
@@ -19,17 +16,11 @@
           <!-- Centered Tasks title -->
           <h2 class="text-3xl font-semibold text-center flex-1 mt-4">{{ t('tasks') }}</h2>
           <!-- Collapse button when displayed as sidebar -->
-          <UButton 
-            v-if="taskMenuStore.taskMenuDisplayedAsSidebar" 
-            class="mt-4" 
-            color="neutral" 
-            variant="ghost"
-            icon="i-heroicons-chevron-right" 
-            size="md"
-            @click="taskMenuStore.toggleSidebarCollapsed"
-          />
+          <UButton v-if="taskMenuStore.taskMenuDisplayedAsSidebar" class="mt-4" color="neutral" variant="ghost"
+            icon="i-heroicons-chevron-right" size="md" @click="taskMenuStore.toggleSidebarCollapsed" />
           <!-- Back button on the right -->
-          <UButton v-else-if="selectedTask" class="mt-4" color="lime" @click="selectTask(selectedTask.id)" icon="i-heroicons-arrow-left" size="md">
+          <UButton v-else-if="selectedTask" class="mt-4" color="lime" @click="selectTask(selectedTask.id)"
+            icon="i-heroicons-arrow-left" size="md">
             {{ t('back_to_tasks') }}
           </UButton>
           <!-- Empty space when no back button to keep title centered -->
@@ -126,7 +117,7 @@
             </div>
 
             <!-- TODO 1.1: Questions form for repaired components -->
-             <!--
+            <!--
             <div class="mb-4">
               <UForm :state="questionsForm">
                 <div v-for="(question, idx) in questions" :key="idx" class="mb-2 flex items-center gap-2">
@@ -142,21 +133,21 @@
               <!-- Kind of task: select -->
               <template v-if="selectedTask.kind === 'select' && !selectedTask.completed">
                 <UButton variant="outline" color="lime"
-                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.length === 0"
+                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.size === 0"
                   @click="handleSubmit">
                   {{ t('submit') }}
                 </UButton>
 
-                <UButton v-if="selectedTask.answer !== 'none'" variant="outline" color="lime"
-                  :disabled="!selectedTask.componentsRepaired" @click="evaluate()">
+                <UButton variant="outline" color="lime"
+                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.size === 0"
+                  @click="evaluate()">
                   {{ t('check_repair_task') }}
                 </UButton>
               </template>
 
               <!-- Kind of task: type-correct -->
               <template v-if="selectedTask.kind === 'type-correct' && !selectedTask.completed">
-                <UButton variant="outline" :disabled="selectedTask.completed" color="lime"
-                  @click="handleSubmit">
+                <UButton variant="outline" :disabled="selectedTask.completed" color="lime" @click="handleSubmit">
                   {{ t('submit') }}
                 </UButton>
               </template>
@@ -164,7 +155,7 @@
               <!-- Kind of task: repair -->
               <template v-if="selectedTask.kind === 'repair' && !selectedTask.completed">
                 <UButton color="lime"
-                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.length === 0"
+                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.size === 0"
                   variant="outline" @click="handleSubmit">
                   {{ t('check_repair_task') }}
                 </UButton>
@@ -173,7 +164,7 @@
               <!-- Button for repaired components -->
               <template v-if="selectedTask.componentsRepaired && !selectedTask.completed">
                 <UButton type="submit" color="lime"
-                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.length === 0"
+                  :disabled="selectedTask.completed || selectedTask.componentsRepaired || !highlightStore.selectedIds || highlightStore.selectedIds.size === 0"
                   variant="outline">
                   {{ t('check_repair_task') }}
                 </UButton>
@@ -199,7 +190,9 @@
             <UCard class="flex-1">
               <div class="flex items-center justify-between">
                 <span class="text-lg font-medium">{{ task.title }}</span>
-                <UButton style="margin-left: 10px;" color="lime" size="sm" @click="selectTask(task.id)">{{ t('select_task') }}</UButton>
+                <UButton style="margin-left: 10px;" color="lime" size="sm" @click="selectTask(task.id)">{{
+                  t('select_task') }}
+                </UButton>
               </div>
             </UCard>
           </div>
@@ -456,11 +449,13 @@ async function handleSubmit() {
     console.log("Task kind: type-correct, isMatch:", isMatch)
   } else if (selectedTask.value.kind === 'repair') {
     isMatch = await TaskAnswerEval.evaluateTaskAnswer(selectedTask.value?.answer || '')
-    if (system && selectedTask.value) {
+    if (system?.tasks && selectedTask.value) {
       const idx = system.tasks.findIndex(t => t.id === selectedTask.value!.id)
-      system.tasks[idx].completed = isMatch
-      if (isMatch) {
-        await evaluate();
+      if (idx !== -1 && system.tasks[idx]) {
+        system.tasks[idx].completed = isMatch
+        if (isMatch) {
+          await evaluate();
+        }
       }
     }
   } else if (selectedTask.value.kind === 'select-options') {
@@ -505,14 +500,18 @@ async function evaluate() {
   if (idx !== -1) {
     console.log(selectedSystemStore.selectedSystem)
 
-    system.tasks[idx].componentsRepaired = true
+    if (system?.tasks[idx]) {
+      system.tasks[idx].componentsRepaired = true
+    }
 
     highlightStore.isHighlightMode = false
     highlightStore.highlightHandler.clearSelection()
 
-    if (selectedTaskStore.selectedTask?.answer === "none" || system.tasks[idx].completed) {
-      system.tasks[idx].completed = true
-      
+    if (selectedTaskStore.selectedTask?.answer === "none" || system?.tasks?.[idx]?.completed) {
+      if (system?.tasks?.[idx]) {
+        system.tasks[idx].completed = true
+      }
+
       // Clean up error components and reset component code when task is completed
       if (selectedTask.value.kind === 'select' && highlightStore.selectedIds) {
         for (let id of highlightStore.selectedIds) {
@@ -525,7 +524,7 @@ async function evaluate() {
           }
         }
       }
-      
+
       taskCompleted.value = true
       setTimeout(() => {
         taskCompleted.value = false
@@ -542,9 +541,9 @@ async function evaluate() {
       console.log("Evaluating task answer:", selectedTask.value.answer)
       const response = await TaskAnswerEval.evaluateTaskAnswer(selectedTask.value?.answer || '')
       console.log("Task answer evaluation result:", response)
-      if (response) {
+      if (response && system?.tasks?.[idx]) {
         system.tasks[idx].completed = true
-        
+
         // Clean up error components and reset component code when task is completed
         if (selectedTask.value.kind === 'select' && highlightStore.selectedIds) {
           for (let id of highlightStore.selectedIds) {
@@ -557,7 +556,7 @@ async function evaluate() {
             }
           }
         }
-        
+
         taskCompleted.value = true
         setTimeout(() => {
           taskCompleted.value = false
@@ -753,19 +752,37 @@ onMounted(() => {
   opacity: 0;
 }
 
+.task-list {
+  background-color: #f3f4f6;
+  height: 100%;
+  width: 100%;
+}
+
+.dark .task-list {
+  background-color: #020618;
+}
+
 .collapsed-sidebar {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: #0f172a;
+  background-color: #f3f4f6;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
+.dark .collapsed-sidebar {
+  background-color: #020618;
+}
+
 .collapsed-sidebar:hover {
-  background-color: #1e293b;
+  background-color: #e5e7eb;
+}
+
+.dark .collapsed-sidebar:hover {
+  background-color: #0f172a;
 }
 
 .collapsed-sidebar:hover .w-6 {
