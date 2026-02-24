@@ -25,7 +25,7 @@
     "title": "Ukázkový úkol č. 1",
     "description": "Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.",
     "status": "pending",
-    "kind": "repair",
+    "type": "repair",
     "answer": "stats-participants-sql == SELECT COUNT(*) as count FROM účastníci && stats-meals-sql == SELECT COUNT(*) as count FROM jídla",
     "elementClass": [],
     "round": 1,
@@ -57,7 +57,7 @@
 - `title` - název úkolu
 - `description` - popis úkolu, co má uživatel udělat
 - `status` - stav úkolu, může nabývat hodnot `pending`, `active`, `completed` - není potřeba měnit.
-- `kind` - typ úkolu, může nabývat hodnot `repair`, `select` a v budoucnu i `select-options` a `select-type`.
+- `type` - typ úkolu, může nabývat hodnot `repair`, `select` a v budoucnu i `select-options` a `select-type`.
     - **repair** - uživatel má opravit chyby v komponentách, které jsou uvedeny v `error-components`
     - **select** - uživatel má označit chybné komponenty, které jsou uvedeny v `error-components`
     - **select-options** - uživatel má označit správnou odpověď z možností, které jsou uvedeny v `answer`
