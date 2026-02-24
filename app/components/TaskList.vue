@@ -16,8 +16,9 @@
           <!-- Centered Tasks title -->
           <h2 class="text-3xl font-semibold text-center flex-1 mt-4">{{ t('tasks') }}</h2>
           <!-- Collapse button when displayed as sidebar -->
-          <UButton v-if="taskMenuStore.taskMenuDisplayedAsSidebar" class="mt-4" color="neutral" variant="ghost"
-            icon="i-heroicons-chevron-right" size="md" @click="taskMenuStore.toggleSidebarCollapsed" />
+          <UButton v-if="taskMenuStore.taskMenuDisplayedAsSidebar" class="mt-4 hover:bg-gray-200 dark:hover:bg-gray-800"
+            color="neutral" variant="ghost" icon="i-heroicons-chevron-right" size="md"
+            @click="taskMenuStore.toggleSidebarCollapsed" />
           <!-- Back button on the right -->
           <UButton v-else-if="selectedTask" class="mt-4" color="lime" @click="selectTask(selectedTask.id)"
             icon="i-heroicons-arrow-left" size="md">
@@ -782,11 +783,16 @@ onMounted(() => {
 }
 
 .dark .collapsed-sidebar:hover {
-  background-color: #0f172a;
+  background-color: #1e293b;
 }
 
 .collapsed-sidebar:hover .w-6 {
-  color: #9ae600;
+  color: #374151;
+  stroke-width: 3px;
+}
+
+.dark .collapsed-sidebar:hover .w-6 {
+  color: #f3f4f6;
 }
 
 .task-completed-fade-enter-to,
