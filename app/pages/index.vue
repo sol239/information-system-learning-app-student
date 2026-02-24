@@ -21,7 +21,7 @@
 
             <div class="flex flex-wrap gap-4">
               <UButton to="/systems" size="lg" color="sky" variant="solid" icon="i-heroicons-computer-desktop" class="redirect_to_systems">
-                Browse Systems
+                {{ t('systems') }}
               </UButton>
 
               <UButton 
