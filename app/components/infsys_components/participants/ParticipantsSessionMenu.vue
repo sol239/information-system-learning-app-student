@@ -2,10 +2,10 @@
     <div class="highlightable" :id="'participants-session-menu'"
         @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participants-session-menu', $event)">
         <div class="component-wrapper">
-            <USelect size="xl" v-model="value" :items="filterSessionsItems"
+            <USelect color="sky" size="xl" v-model="value" :items="filterSessionsItems"
                 :disabled="highlightStore.isEditModeActive" />
-            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                :componentId="'sessions-list'" class="edit-button" />
+            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="'sessions-list'"
+                class="edit-button" />
         </div>
     </div>
 </template>
