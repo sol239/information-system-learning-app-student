@@ -77,6 +77,19 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
     return selectedSystemStore.selectedSystem?.actualComponentMap.find(c => c.id === id)
   }
 
+  /** Returns a Set of every unique tag present across all default components. */
+  function getAllTags(): Set<string> {
+    const tags = new Set<string>()
+    for (const component of state.defaultComponentMap) {
+      if (Array.isArray(component.tags)) {
+        for (const tag of component.tags) {
+          tags.add(tag)
+        }
+      }
+    }
+    return tags
+  }
+
   function resetComponent(id: string) {
     console.log("Resetting component with id:", id)
     const defaultComp = getDefaultComponent(id)
@@ -113,10 +126,10 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
   function getComponentCodeByType(componentId: string, codeType: 'html' | 'css' | 'js' | 'sql', specificKey?: string): string {
     const component = getComponentById(componentId) || getDefaultComponent(componentId)
     if (!component) return ''
-    
+
     const codeMap = component[codeType]
     if (!codeMap) return ''
-    
+
     // If specific key is provided, use it; otherwise try the codeType or 'default'
     const key = specificKey || codeType || 'default'
     return codeMap[key] || codeMap['default'] || ''
@@ -124,11 +137,11 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
 
   function updateComponentCodeByType(componentId: string, codeType: 'html' | 'css' | 'js' | 'sql', code: string, specificKey?: string) {
     let component = getComponentById(componentId)
-    
+
     if (!component) {
       const defaultComponent = getDefaultComponent(componentId)
       if (!defaultComponent) return
-      
+
       // Create a copy of default component for actual use
       component = {
         ...defaultComponent,
@@ -141,7 +154,7 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
         selectedSystemStore.selectedSystem.actualComponentMap.push(component)
       }
     }
-    
+
     const key = specificKey || codeType || 'default'
     component[codeType][key] = code
     // Save complete system to IndexedDB
@@ -175,6 +188,7 @@ export const useComponentCodeStore = defineStore('componentCode', () => {
     getComponentById,
     updateComponent,
     getComponentCodeByType,
-    updateComponentCodeByType
+    updateComponentCodeByType,
+    getAllTags
   }
 })
