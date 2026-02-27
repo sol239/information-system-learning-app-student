@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="container mx-auto px-4 py-8">
-                    <h1 class="text-4xl font-bold mb-4">{{ t('meals') }}</h1>
+            <h1 class="text-4xl font-bold mb-4">{{ t('meals') }}</h1>
 
             <!-- Meals Controls -->
             <div class="flex justify-between items-center mb-6">
@@ -24,9 +24,10 @@
                                     <h3 class="text-xl font-semibold text-gray-900">
                                         {{ meal.title }}
                                     </h3>
-                                    <UBadge size="xl" color="green" variant="soft">
+                                    <div
+                                        style="display: inline-flex; align-items: center; padding: 0.25rem 1rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #f0fdf4; color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.1); white-space: nowrap;">
                                         {{ meal.description }}
-                                    </UBadge>
+                                    </div>
                                 </div>
                             </div>
 
@@ -36,7 +37,7 @@
                                 <AllergensList :mealId="meal.id" />
                             </div>
 
-                            
+
 
                             <!-- Meal Actions -->
                             <div class="meal-actions mt-6 pt-4 border-t border-gray-200">
@@ -46,12 +47,12 @@
                                     </UButton>
                                     <DeleteMealButton :mealId="meal.id" />
 
-                                    
+
                                 </div>
                             </div>
-                            
-                            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                :componentId="'meals'" class="edit-button" />
+
+                            <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="'meals'"
+                                class="edit-button" />
                         </div>
                     </div>
                 </div>
@@ -92,7 +93,7 @@ import { InformationSystem } from '~/model/InformationSystem'
 import { ComponentManager } from '#imports'
 
 definePageMeta({
-  layout: 'system'
+    layout: 'system'
 });
 
 const route = useRoute()

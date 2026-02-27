@@ -395,7 +395,7 @@
         "title",
         "description",
         "status",
-        "type",
+        "activityType",
         "answer",
         "elementClass",
         "round"
@@ -425,27 +425,74 @@
           ],
           "description": "Stav úkolu"
         },
-        "type": {
+        "activityType": {
           "type": "string",
           "enum": [
             "select",
             "type-correct",
-            "action"
+            "repair",
+            "select-options"
           ],
           "description": "Typ úkolu"
+        },
+        "activityDescription": {
+          "type": "string",
+          "description": "Popis aktivity"
+        },
+        "finishType": {
+          "type": "string",
+          "enum": [
+            "after_activity",
+            "finish_database_update"
+          ],
+          "description": "Typ dokončení úkolu"
+        },
+        "finishDescription": {
+          "type": "string",
+          "description": "Popis po dokončení úkolu"
         },
         "answer": {
           "type": "string",
           "description": "Odpověď nebo očekávaná hodnota pro úkol"
         },
         "elementClass": {
-          "type": "string",
+          "type": [
+            "string",
+            "array"
+          ],
           "description": "CSS třída elementu souvisejícího s úkolem"
         },
         "round": {
           "type": "integer",
           "minimum": 1,
           "description": "Kolo, ve kterém je úkol zařazen"
+        },
+        "isEditable": {
+          "type": "boolean",
+          "description": "Zda je úkol editovatelný"
+        },
+        "errorComponents": {
+          "type": "array",
+          "description": "Chybné komponenty úkolu"
+        },
+        "componentsIdsToFind": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ID komponent k nalezení"
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Zpětná vazba po dokončení úkolu"
+        },
+        "pointsReward": {
+          "type": "integer",
+          "description": "Počet bodů za splnění úkolu"
+        },
+        "failPenalty": {
+          "type": "integer",
+          "description": "Penalizace za nesplnění úkolu"
         }
       }
     },

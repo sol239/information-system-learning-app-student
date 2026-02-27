@@ -218,9 +218,7 @@
                                     <h3 class="text-xl font-semibold text-gray-900">
                                         {{ participant.name }}
                                     </h3>
-                                    <UBadge size="lg" color="sky" variant="soft">
-                                        {{ t('age') }}: {{ participant.age }}
-                                    </UBadge>
+                                    <span v-html="getParticipantAgeBadgeHtml(participant.age)" />
                                 </div>
                                 <div class="flex items-center gap-2 text-base font-semibold text-gray-700">
                                     <UIcon name="i-heroicons-envelope" class="w-4 h-4" />
@@ -256,7 +254,7 @@
 
                             </div>
                             <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                :componentId="'participants-list'" class="edit-button" />
+                                :componentId="'participants-badge'" class="edit-button" />
                         </div>
                     </div>
 
@@ -641,7 +639,7 @@ import ParticipantsFilterInput from '~/components/infsys_components/participants
 import ParticipantAllergenCount from '~/components/infsys_components/participants/ParticipantAllergenCount.vue'
 
 definePageMeta({
-  layout: 'system'
+    layout: 'system'
 });
 
 const selectedSystemStore = useSelectedSystemStore()
@@ -662,6 +660,17 @@ watch(system, (newSystem) => {
         selectedSystemStore.setSelectedSystem(newSystem)
     }
 }, { immediate: true })
+
+// participants-badge HTML from component store
+const participantsBadgeComponent = computed(() => componentCodeStore.getComponentById('participants-badge') || componentCodeStore.getDefaultComponent('participants-badge'))
+const participantsBadgeHtmlTemplate = computed(() => {
+    const html = participantsBadgeComponent.value?.html?.['html'] || ''
+    return ComponentHandler.getComponentValue('participants-badge', 'html', html)
+})
+function getParticipantAgeBadgeHtml(age: number | string): string {
+    const label = `${t('age')}: ${age}`
+    return participantsBadgeHtmlTemplate.value.replace('{{age}}', label)
+}
 
 
 const value = ref('all')

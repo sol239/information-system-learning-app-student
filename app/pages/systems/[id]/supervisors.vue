@@ -5,7 +5,7 @@
         <div class="container mx-auto px-4 py-8">
 
             <h1 class="text-4xl font-bold mb-4">{{ t('supervisors') }}</h1>
-            
+
             <div class="flex items-center gap-4 mb-6">
 
                 <!-- Session Select Menu-->
@@ -45,7 +45,8 @@
                         <SupervisorsFilterInput v-model="filterText" />
                     </div>
                     <!-- Add Supervisor Button (right) -->
-                    <UButton size="xl" color="violet" variant="outline" @click="createNewParticipant" icon="i-heroicons-plus">
+                    <UButton size="xl" color="violet" variant="outline" @click="createNewParticipant"
+                        icon="i-heroicons-plus">
                         {{ t('add_supervisor') }}
                     </UButton>
                 </div>
@@ -217,9 +218,7 @@
                                     <h3 class="text-xl font-semibold text-gray-900">
                                         {{ supervisor.name }}
                                     </h3>
-                                    <UBadge size="lg" color="violet" variant="soft">
-                                        {{ t('age') }}: {{ supervisor.age }}
-                                    </UBadge>
+                                    <span v-html="getSupervisorAgeBadgeHtml(supervisor.age)" />
                                 </div>
                                 <div class="flex items-center gap-2 text-base font-semibold text-gray-700">
                                     <UIcon name="i-heroicons-envelope" class="w-4 h-4" />
@@ -255,7 +254,7 @@
 
                             </div>
                             <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-                                :componentId="'supervisors-list'" class="edit-button" />
+                                :componentId="'supervisors-badge'" class="edit-button" />
                         </div>
                     </div>
 
@@ -593,7 +592,8 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-3 pt-4">
-                                    <UButton type="submit" color="violet" :loading="isSubmitting" :disabled="hasEditParticipantErrors">
+                                    <UButton type="submit" color="violet" :loading="isSubmitting"
+                                        :disabled="hasEditParticipantErrors">
                                         {{ t('save_changes') }}
                                     </UButton>
                                     <UButton variant="outline" color="violet" @click="resetForm">
@@ -639,7 +639,7 @@ import SupervisorsFilterInput from '~/components/infsys_components/supervisors/S
 import SupervisorAllergenCount from '~/components/infsys_components/supervisors/SupervisorAllergenCount.vue'
 
 definePageMeta({
-  layout: 'system'
+    layout: 'system'
 });
 
 const selectedSystemStore = useSelectedSystemStore()
@@ -665,6 +665,17 @@ watch(system, (newSystem) => {
 const sessionsListComponent = computed(() => componentCodeStore.getComponentById('sessions-list') || componentCodeStore.getDefaultComponent('sessions-list'))
 const correctSessionsListSql = computed(() => sessionsListComponent.value?.sql?.['sql'] || '')
 const sessionsListSql = computed(() => ComponentHandler.getComponentValue('sessions-list', 'sql', correctSessionsListSql.value))
+
+// supervisors-badge HTML from component store
+const supervisorsBadgeComponent = computed(() => componentCodeStore.getComponentById('supervisors-badge') || componentCodeStore.getDefaultComponent('supervisors-badge'))
+const supervisorsBadgeHtmlTemplate = computed(() => {
+    const html = supervisorsBadgeComponent.value?.html?.['html'] || ''
+    return ComponentHandler.getComponentValue('supervisors-badge', 'html', html)
+})
+function getSupervisorAgeBadgeHtml(age: number | string): string {
+    const label = `${t('age')}: ${age}`
+    return supervisorsBadgeHtmlTemplate.value.replace('{{age}}', label)
+}
 
 const value = ref('all')
 // Holds Participant records (name kept for compatibility with existing computed chains)

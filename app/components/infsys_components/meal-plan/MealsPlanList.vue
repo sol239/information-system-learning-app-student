@@ -19,15 +19,18 @@
                             </h2>
                         </div>
                         <div class="flex items-center gap-3">
-                            <UBadge size="xl" color="sky" variant="soft">
+                            <div
+                                style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #f0f9ff; color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.1); white-space: nowrap;">
                                 {{ formatDate(dates[0]) }} - {{ formatDate(dates[dates.length - 1]) }}
-                            </UBadge>
-                            <UBadge size="xl" color="green" variant="soft">
+                            </div>
+                            <div
+                                style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #f0fdf4; color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.1); white-space: nowrap;">
                                 {{ t('unique_meals_count') }} {{ getTotalMealsCount(sessionId) }}
-                            </UBadge>
-                            <UBadge size="xl" color="violet" variant="soft">
+                            </div>
+                            <div
+                                style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #f5f3ff; color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.1); white-space: nowrap;">
                                 {{ t('portions') }} {{ getTotalPortionsCount(sessionId) }}
-                            </UBadge>
+                            </div>
                             <UIcon :name="expanded[sessionId] ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
                                 class="w-5 h-5 text-gray-500 transition-transform hover:text-gray-700" />
                         </div>
@@ -47,12 +50,14 @@
                                     </h3>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <UBadge size="xl" color="primary" variant="soft">
+                                    <div
+                                        style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: rgba(59, 130, 246, 0.1); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.1); white-space: nowrap;">
                                         {{ t('unique_meals_count') }} {{ getMealsCount(sessionId, date) }}
-                                    </UBadge>
-                                    <UBadge size="xl" color="violet" variant="soft">
+                                    </div>
+                                    <div
+                                        style="display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #f5f3ff; color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.1); white-space: nowrap;">
                                         {{ t('portions') }} {{ getPortionsCount(sessionId, date) }}
-                                    </UBadge>
+                                    </div>
                                     <UIcon
                                         :name="dateExpanded[date] ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
                                         class="w-5 h-5 text-gray-500 transition-transform hover:text-gray-700" />
@@ -74,18 +79,19 @@
                                                 <!-- Debug: Show meal ID -->
                                                 <div v-if="getMealAllergenNames(meals[0]?.mealId || 0).length > 0"
                                                     class="flex flex-wrap gap-1">
-                                                    <UBadge
-                                                        v-for="allergen in getMealAllergenNames(meals[0]?.mealId || 0)"
-                                                        :key="allergen" size="sm" color="red" variant="soft">
+                                                    <div v-for="allergen in getMealAllergenNames(meals[0]?.mealId || 0)"
+                                                        :key="allergen"
+                                                        style="display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; font-size: 0.75rem; font-weight: 600; border-radius: 9px; background-color: #fef2f2; color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.1); white-space: nowrap;">
                                                         {{ allergen }}
-                                                    </UBadge>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3">
-                                            <UBadge size="xl" color="yellow" variant="solid">
+                                            <div
+                                                style="display: inline-flex; align-items: center; padding: 0.25rem 1rem; font-size: 1rem; font-weight: 600; border-radius: 9px; background-color: #eab308; color: #ffffff; white-space: nowrap;">
                                                 {{ meals[0]?.whenServed }}
-                                            </UBadge>
+                                            </div>
                                             <!--
                                             <UBadge size="xl" color="sky" variant="solid">
                                                 {{ meals[0]?.participants?.length || 0 }} {{ t('participants') }}
@@ -156,12 +162,15 @@
                                                 </div>
                                                 <div class="highlightable relative" :id="'meal-supervisor-delete'">
                                                     <UButton
-                                                    @click="highlightStore.isHighlightMode ? highlightStore.highlightHandler.selectElement('meal-supervisor-delete', $event) : removeSupervisorFromMeal(supervisor, meals[0].mealName, sessionId, date)"
-                                                    size="xs" color="red" variant="ghost" class="delete-supervisor-btn">
-                                                    <UIcon name="i-heroicons-trash" class="w-4 h-4" />
-                                                </UButton>
+                                                        @click="highlightStore.isHighlightMode ? highlightStore.highlightHandler.selectElement('meal-supervisor-delete', $event) : removeSupervisorFromMeal(supervisor, meals[0].mealName, sessionId, date)"
+                                                        size="xs" color="red" variant="ghost"
+                                                        class="delete-supervisor-btn">
+                                                        <UIcon name="i-heroicons-trash" class="w-4 h-4" />
+                                                    </UButton>
                                                     <div class="absolute top-0 right-0">
-                                                        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="'meal-supervisor-delete'" />
+                                                        <EditComponentModalOpenButton
+                                                            v-if="highlightStore.isEditModeActive"
+                                                            :componentId="'meal-supervisor-delete'" />
                                                     </div>
                                                 </div>
                                             </div>

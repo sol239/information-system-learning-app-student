@@ -1,10 +1,13 @@
 <template>
     <div class="p-4">
-        <div class="flex items-center mb-2">
-            <UCheckbox color="lime" :model-value="selectedTask.completed" disabled class="mr-2 mb-1" />
+        <div class="flex items-center mb-2 gap-2">
+            <UCheckbox color="lime" :model-value="selectedTask.completed" disabled class="mb-1" />
+            <component :is="getTaskIcon(selectedTask)" class="w-6 h-6 text-gray-500 mb-1" />
             <h3 class="text-2xl font-bold mb-1">{{ selectedTask.title }}</h3>
         </div>
-        <p class="mb-2 text-lg">{{ selectedTask.description }}</p>
+        <p v-if="selectedTask.description" class="mb-2 text-lg">{{ selectedTask.description }}</p>
+        <p v-if="selectedTask.activityDescription" class="mb-2 text-lg">{{ selectedTask.activityDescription }}</p>
+        <p v-if="selectedTask.finishDescription" class="mb-2 text-lg">{{ selectedTask.finishDescription }}</p>
 
         <!-- Custom Progress Steps -->
         <div class="flex items-center justify-between mb-8 mt-8">
@@ -63,7 +66,7 @@
 
         <div>
             <!-- Input for type-correct tasks -->
-            <div v-if="selectedTask.activityType === ActivityType.TYPE_CORRECT">
+            <div v-if="selectedTask.finishType === FinishType.TYPE_CORRECT">
                 <UInput v-model="answer" placeholder="Enter your answer" class="mt-2 mb-4" />
             </div>
 
@@ -85,7 +88,7 @@
                 </template>
 
                 <!-- Type of task: type-correct -->
-                <template v-if="selectedTask.activityType === ActivityType.TYPE_CORRECT && !selectedTask.completed">
+                <template v-if="selectedTask.finishType === FinishType.TYPE_CORRECT && !selectedTask.completed">
                     <UButton variant="outline" :disabled="selectedTask.completed" color="lime" @click="$emit('submit')">
                         {{ t('submit') }}
                     </UButton>
@@ -121,8 +124,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ActivityType } from '~/model/Task/ActivityType'
-import type { Task } from '~/model/Task'
+import { ActivityType } from '~/model/Task/Activity/ActivityType'
+import { FinishType } from '~/model/Task/Finish/FinishType'
+import RepairIcon from '~/components/task_icons/RepairIcon.vue'
+import SelectIcon from '~/components/task_icons/SelectIcon.vue'
+import SelectOptionsIcon from '~/components/task_icons/SelectOptionsIcon.vue'
+import TypeCorrectIcon from '~/components/task_icons/TypeCorrectIcon.vue'
+import type { Task } from '~/model/Task/Task'
 import { useHighlightStore } from '#imports'
 
 const props = defineProps<{
@@ -143,4 +151,12 @@ const answer = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
 })
+
+function getTaskIcon(task: Task) {
+    if (task.finishType === FinishType.TYPE_CORRECT) return TypeCorrectIcon;
+    if (task.activityType === ActivityType.REPAIR) return RepairIcon;
+    if (task.activityType === ActivityType.SELECT) return SelectIcon;
+    if (task.activityType === ActivityType.SELECT_OPTIONS) return SelectOptionsIcon;
+    return null;
+}
 </script>

@@ -2,12 +2,23 @@
     <div class="highlightable relative" :id="'participant-allergens'"
         @click="highlightStore.isHighlightMode && highlightStore.highlightHandler.selectElement('participant-allergens', $event)">
         <!-- Allergies Badge -->
-        <UBadge size="lg" :color="allergenCount > 0 ? 'red' : 'green'"
-            variant="soft" class="mt-2">
+        <div :style="{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '0.25rem 0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            borderRadius: '9px',
+            backgroundColor: allergenCount > 0 ? '#fef2f2' : '#f0fdf4',
+            color: allergenCount > 0 ? '#dc2626' : '#16a34a',
+            border: '1px solid ' + (allergenCount > 0 ? 'rgba(220, 38, 38, 0.1)' : 'rgba(22, 163, 74, 0.1)'),
+            whiteSpace: 'nowrap',
+            marginTop: '0.5rem'
+        }">
             {{ t("allergens") }}: {{ allergenCount }}
-        </UBadge>
-        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive"
-            :componentId="'participant-allergen-count'" class="absolute -top-1 -right-1 z-10" />
+        </div>
+        <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="'participant-allergen-count'"
+            class="absolute -top-1 -right-1 z-10" />
     </div>
 </template>
 

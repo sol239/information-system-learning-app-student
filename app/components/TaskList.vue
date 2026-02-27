@@ -11,17 +11,17 @@
 
       <template #header>
         <div class="flex items-center justify-between">
-          <!-- Tasks title -->
-          <h2 class="text-3xl font-semibold text-left mt-4 ml-4">{{ t('tasks') }}</h2>
+          <div class="flex items-center gap-2">
+            <!-- Back button on the left of title if task is selected -->
+            <UButton v-if="selectedTask" class="mt-4" color="lime" variant="ghost" @click="selectTask(selectedTask.id)"
+              icon="i-heroicons-arrow-left" size="md" />
+            <!-- Tasks title -->
+            <h2 class="text-3xl font-semibold text-left mt-4 ml-4">{{ t('tasks') }}</h2>
+          </div>
           <!-- Collapse button when displayed as sidebar -->
           <UButton v-if="taskMenuStore.taskMenuDisplayedAsSidebar" class="mt-4 hover:bg-gray-200 dark:hover:bg-gray-800"
             color="neutral" variant="ghost" icon="i-heroicons-chevron-right" size="md"
             @click="taskMenuStore.toggleSidebarCollapsed" />
-          <!-- Back button on the right -->
-          <UButton v-else-if="selectedTask" class="mt-4" color="lime" @click="selectTask(selectedTask.id)"
-            icon="i-heroicons-arrow-left" size="md">
-            {{ t('back_to_tasks') }}
-          </UButton>
         </div>
       </template>
 
@@ -53,7 +53,10 @@
             <UCheckbox color="lime" :model-value="task.completed" disabled class="mr-2" />
             <UCard class="flex-1">
               <div class="flex items-center justify-between">
-                <span class="text-lg font-medium">{{ task.title }}</span>
+                <div class="flex items-center gap-2">
+                  <component :is="getTaskIcon(task)" class="w-5 h-5 text-gray-500" />
+                  <span class="text-lg font-medium">{{ task.title }}</span>
+                </div>
                 <UButton style="margin-left: 10px;" color="lime" size="sm" @click="selectTask(task.id)">{{
                   t('select_task') }}
                 </UButton>
@@ -76,10 +79,15 @@ import { useSelectedComponentStore } from '~/stores/useSelectedComponentStore'
 import { ComponentHandler, TaskAnswerEval, TaskQueue, useScoreStore } from '#imports'
 import { useErrorComponentStore } from '#imports'
 import { useHighlightStore } from '#imports'
-import { Task } from '~/model/Task'
+import { Task } from '~/model/Task/Task'
 import type { StepperItem } from '@nuxt/ui'
 import { useComponentCodeStore } from '#imports'
-import { ActivityType } from '~/model/Task/ActivityType'
+import { ActivityType } from '~/model/Task/Activity/ActivityType'
+import { FinishType } from '~/model/Task/Finish/FinishType'
+import RepairIcon from '~/components/task_icons/RepairIcon.vue'
+import SelectIcon from '~/components/task_icons/SelectIcon.vue'
+import SelectOptionsIcon from '~/components/task_icons/SelectOptionsIcon.vue'
+import TypeCorrectIcon from '~/components/task_icons/TypeCorrectIcon.vue'
 
 /* 2. Stores */
 const selectedSystemStore = useSelectedSystemStore()
@@ -194,6 +202,18 @@ watch(selectedTask, (task) => {
 
 /* 11. Methods */
 /**
+ * Returns the icon component based on the task type.
+ * @param task - The task object
+ */
+function getTaskIcon(task: Task) {
+  if (task.finishType === FinishType.TYPE_CORRECT) return TypeCorrectIcon;
+  if (task.activityType === ActivityType.REPAIR) return RepairIcon;
+  if (task.activityType === ActivityType.SELECT) return SelectIcon;
+  if (task.activityType === ActivityType.SELECT_OPTIONS) return SelectOptionsIcon;
+  return null;
+}
+
+/**
  * Handles the repair action for a task.
  * @param event - The mouse event
  */
@@ -304,7 +324,7 @@ async function handleSubmit() {
     if (isMatch) {
       await evaluate();
     }
-  } else if (selectedTask.value.activityType === ActivityType.TYPE_CORRECT) {
+  } else if (selectedTask.value.finishType === FinishType.TYPE_CORRECT) {
     const expected = selectedTask.value.answer.trim()
     const actual = form.value.answer.trim()
     isMatch = expected === actual

@@ -1,6 +1,9 @@
 <template>
     <div>
-        <UBadge v-for="allergen in allergens" :key="allergen.id" :label="getAllergenName(allergen.id)" color="red" variant="soft" class="mr-1 mb-1" />
+        <div v-for="allergen in allergens" :key="allergen.id"
+            style="display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500; border-radius: 9px; background-color: #fef2f2; color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.1); white-space: nowrap; margin-right: 0.25rem; margin-bottom: 0.25rem;">
+            {{ getAllergenName(allergen.id) }}
+        </div>
         <span v-if="allergens.length === 0" class="text-sm text-green-600">
             <UIcon name="i-heroicons-check-circle" class="w-4 h-4 inline mr-1" />
             {{ t('no_allergens') }}
@@ -72,7 +75,7 @@ function getAllergenName(allergenId: number): string {
 
     const queryResult = system?.db.query(allergensQuery.value, [allergenId])
     console.log("ALLERGEN QUERY:", allergensQuery.value, allergenId)
-        console.log("ALLERGEN RESULT:", queryResult)
+    console.log("ALLERGEN RESULT:", queryResult)
     if (queryResult?.success && queryResult.results.length > 0) {
         const allergen = queryResult.results[0]
         return allergen.name

@@ -273,7 +273,7 @@ async function uploadSystem() {
   <div class="max-w-5xl mx-auto py-12 px-4 sm:px-6">
     <div class="grid grid-cols-1 gap-8">
 
-    <!-- Header Section -->
+      <!-- Header Section -->
       <UCard class="border-t-4 border-teacher-500 shadow-lg dark:bg-gray-900/50">
         <div class="flex flex-col md:flex-row items-start gap-6">
           <div class="hidden md:flex p-3 bg-teacher-500/10 rounded-lg text-teacher-500">
@@ -286,15 +286,18 @@ async function uploadSystem() {
             </h1>
 
             <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-              <p class="systems-page-description text-lg text-gray-600 dark:text-gray-300 max-w-prose leading-relaxed flex-1">
+              <p
+                class="systems-page-description text-lg text-gray-600 dark:text-gray-300 max-w-prose leading-relaxed flex-1">
                 {{ t('manage_your_systems_description') }}
               </p>
 
               <div class="flex flex-wrap gap-4">
-                <UButton class="add-new-system-button" icon="i-lucide-plus-circle" size="lg" color="teacher" @click="open = true">
+                <UButton class="add-new-system-button" icon="i-lucide-plus-circle" size="lg" color="teacher"
+                  @click="open = true">
                   {{ t('add_new_system') }}
                 </UButton>
-                <UButton class="clear-all-systems-button" icon="i-lucide-trash-2" size="lg" color="red" variant="outline" @click="confirmClearSystems">
+                <UButton class="clear-all-systems-button" icon="i-lucide-trash-2" size="lg" color="red"
+                  variant="outline" @click="confirmClearSystems">
                   {{ t('clear_systems') }}
                 </UButton>
               </div>
@@ -369,11 +372,12 @@ async function uploadSystem() {
               </div>
             </div>
 
-            <UAlert v-if="isDuplicateId" color="red" variant="outline" icon="i-lucide-alert-triangle" :title="t('system_with_same_id_exists')">
+            <UAlert v-if="isDuplicateId" color="red" variant="outline" icon="i-lucide-alert-triangle"
+              :title="t('system_with_same_id_exists')">
             </UAlert>
 
-            <UButton v-if="value && !loadedSystemTitle && !isDuplicateId" icon="i-lucide-upload" color="teacher" variant="solid"
-              class="upload-system-button w-full" @click="uploadSystem">
+            <UButton v-if="value && !loadedSystemTitle && !isDuplicateId" icon="i-lucide-upload" color="teacher"
+              variant="solid" class="upload-system-button w-full" @click="uploadSystem">
               {{ t('upload_system') }}
             </UButton>
           </div>

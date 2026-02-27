@@ -1,4 +1,4 @@
-import type { Task } from "~/model/Task";
+import type { Task } from "~/model/Task/Task";
 import { useSelectedTaskStore } from "#imports";
 import { useSelectedSystemStore } from "#imports";
 import { useInformationSystemStore } from "#imports";

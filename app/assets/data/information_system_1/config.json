@@ -74,14 +74,19 @@
         {
             "id": 1,
             "title": "Ukázkový úkol č. 1",
-            "description": "Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.",
+            "description": "",
+            "componentsRepaired": false,
+            "completed": false,
             "status": "pending",
-            "type": "repair",
+            "activityDescription": "Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.",
+            "activityType": "repair",
+            "finishDescription": "",
+            "finishType": "after-activity",
             "answer": "stats-participants-sql == SELECT COUNT(*) as count FROM účastníci && stats-meals-sql == SELECT COUNT(*) as count FROM jídla",
             "elementClass": [],
             "round": 1,
-            "is_editable": false,
-            "error-components": [
+            "isEditable": false,
+            "errorComponents": [
                 {
                     "id": "stats-participants",
                     "variables": {
@@ -101,21 +106,29 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Správně jsi opravil/a SQL dotazy dvou komponent. Komponenta, která měla zobrazovat počet účastníku chybně zobrazovala počet vedoucích a komponenta, která měla zobrazovat počet jídel, zobrazovala počet turnusů. Opravil/a jsi to tak, že jsi změnil/a SQL dotazy na správné."
+            "componentsIdsToFind": [],
+            "feedback": "Správně jsi opravil/a SQL dotazy dvou komponent. Komponenta, která měla zobrazovat počet účastníku chybně zobrazovala počet vedoucích a komponenta, která měla zobrazovat počet jídel, zobrazovala počet turnusů. Opravil/a jsi to tak, že jsi změnil/a SQL dotazy na správné.",
+            "pointsReward": 0,
+            "failPenalty": 1
         },
         {
             "id": 2,
             "title": "Ukázkový úkol č. 2",
-            "description": "Zkontrolujte, zda se v nástěnce správně zobrazují statistiky o počtu jídel. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.",
+            "description": "",
+            "componentsRepaired": false,
+            "completed": false,
             "status": "pending",
-            "type": "select",
+            "activityDescription": "Zkontrolujte, zda se v nástěnce správně zobrazují statistiky o počtu jídel. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.",
+            "activityType": "select",
+            "finishDescription": "",
+            "finishType": "after-activity",
             "answer": "none",
             "elementClass": [
                 "stats-supervisors"
             ],
             "round": 1,
-            "is_editable": false,
-            "error-components": [
+            "isEditable": false,
+            "errorComponents": [
                 {
                     "id": "stats-supervisors",
                     "variables": {
@@ -126,21 +139,29 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Správně jsi zvolil/a komponentu, která zobrazovala chybně počet vedoucích."
+            "componentsIdsToFind": [],
+            "feedback": "Správně jsi zvolil/a komponentu, která zobrazovala chybně počet vedoucích.",
+            "pointsReward": 0,
+            "failPenalty": 1
         },
         {
             "id": 3,
             "title": "Ukázkový úkol č. 3",
-            "description": "Upravte účastníka: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
+            "description": "",
+            "componentsRepaired": false,
+            "completed": false,
             "status": "pending",
-            "type": "repair",
-            "answer": "tbl-účastníci == name:Tereza Svobodová Nováková",
+            "activityDescription": "Upravte účastníka: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.",
+            "activityType": "repair",
+            "finishDescription": "",
+            "finishType": "after-database-update",
+            "answer": "tbl-účastníci == name: Tereza Svobodová Nováková",
             "elementClass": [
                 "table-form-účastníci-alergeny"
             ],
-            "is_editable": false,
+            "isEditable": false,
             "round": 1,
-            "error-components": [
+            "errorComponents": [
                 {
                     "id": "validation-name",
                     "variables": {
@@ -149,30 +170,10 @@
                     "error-component-name": ""
                 }
             ],
-            "feedback": "Správně jsi opravil/a JS kód, tak aby povoloval více mezer ve jménu než jedna. Šlo to vyřešit různě např. pomocí `length >= 2` místo `length == 2` nebo `length > 1`. apod."
-        },
-        {
-            "id": 4,
-            "title": "Ukázkový úkol č. 4 - Není hotový!!",
-            "description": "Přidejte vedoucímu Petr Novotný alergeny Lepek a Korýši. Pokud naleznete na nějakou chybu tak vyberte komponentu, která je chybná. Poté přidejte alergeny tomuto vedoucímu.",
-            "status": "pending",
-            "type": "select",
-            "answer": "tbl-účastníci == jméno:Petr Novotný;alergeny:Lepek,Koryši",
-            "elementClass": "stats-supervisors",
-            "is_editable": false,
-            "round": 1111111,
-            "error-components": [
-                {
-                    "id": "supervisors-edit-allergens",
-                    "variables": {
-                        "html": "",
-                        "sql": "SELECT COUNT(*) as count FROM alergeny",
-                        "js": ""
-                    },
-                    "error-component-name": ""
-                }
-            ],
-            "feedback": "Správně jsi odpověděl, že komponenta využívala špatný SQL dotaz."
+            "componentsIdsToFind": [],
+            "feedback": "Správně jsi opravil/a JS kód, tak aby povoloval více mezer ve jménu než jedna. Šlo to vyřešit různě např. pomocí `length >= 2` místo `length == 2` nebo `length > 1`. apod.",
+            "pointsReward": 0,
+            "failPenalty": 1
         }
     ]
 }

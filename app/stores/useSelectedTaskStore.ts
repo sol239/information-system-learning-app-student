@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import type { Task } from '~/model/Task'
+import type { Task } from '~/model/Task/Task'
 import { ComponentHandler } from '~/composables/ComponentHandler'
 import { useSelectedSystemStore } from './useSelectedSystemStore'
 

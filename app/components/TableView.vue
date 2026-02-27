@@ -470,10 +470,10 @@ defineExpose({
                             <!-- Special rendering for array data columns (like roles, alergeny, etc.) -->
                             <template v-else-if="isArrayColumn(row[col.id!])">
                                 <div class="flex flex-wrap gap-1">
-                                    <UBadge v-for="(item, index) in parseArrayData(row[col.id!])" :key="index"
-                                        size="md">
+                                    <div v-for="(item, index) in parseArrayData(row[col.id!])" :key="index"
+                                        style="display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500; border-radius: 9px; background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; white-space: nowrap;">
                                         {{ item }}
-                                    </UBadge>
+                                    </div>
                                 </div>
                             </template>
                             <!-- Default rendering for other columns -->

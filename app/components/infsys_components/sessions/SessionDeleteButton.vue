@@ -6,11 +6,8 @@
       <div v-html="renderedHtml" class="delete-button-content" @click.stop="handleDelete"></div>
 
       <!-- Edit button positioned absolutely -->
-      <EditComponentModalOpenButton
-        v-if="highlightStore.isEditModeActive"
-        :componentId="componentId"
-        class="edit-button"
-      />
+      <EditComponentModalOpenButton v-if="highlightStore.isEditModeActive" :componentId="componentId"
+        class="edit-button" />
     </div>
   </div>
 </template>
@@ -27,7 +24,7 @@ import { useHighlightWatchers } from '~/composables/highlightWatchers'
 import '~/assets/css/highlight.css'
 
 interface Props {
-    sessionId: number
+  sessionId: number
 }
 
 const props = defineProps<Props>()
@@ -70,51 +67,54 @@ const renderedHtml = computed(() => {
 useHighlightWatchers(highlightStore.highlightHandler, highlightStore)
 
 const handleDelete = async () => {
-    if (!selectedSystemStore.selectedSystem?.db) {
-        console.error('Database not available')
-        return
-    }
+  if (!selectedSystemStore.selectedSystem?.db) {
+    console.error('Database not available')
+    return
+  }
 
-    isDeleting.value = true
+  isDeleting.value = true
 
-    try {
-        // Execute SQL statements in order (due to foreign key constraints)
-        selectedSystemStore.selectedSystem.db.exec(sqlQuery1.value, [props.sessionId])
-        selectedSystemStore.selectedSystem.db.exec(sqlQuery2.value, [props.sessionId])
-        selectedSystemStore.selectedSystem.db.exec(sqlQuery3.value, [props.sessionId])
+  try {
+    // Execute SQL statements in order (due to foreign key constraints)
+    selectedSystemStore.selectedSystem.db.exec(sqlQuery1.value, [props.sessionId])
+    selectedSystemStore.selectedSystem.db.exec(sqlQuery2.value, [props.sessionId])
+    selectedSystemStore.selectedSystem.db.exec(sqlQuery3.value, [props.sessionId])
 
-        // Refresh the sessions data in the store
-        selectedSystemStore.loadSessions()
+    // Refresh the sessions data in the store
+    selectedSystemStore.loadSessions()
 
-        toast.add({
-            title: t('session_deleted_success'),
-            color: 'primary',
-            icon: 'i-heroicons-check'
-        })
-    } catch (error) {
-        console.error('Error deleting session:', error)
-        toast.add({
-            title: t('error_deleting_session'),
-            color: 'red',
-            icon: 'i-heroicons-exclamation-triangle'
-        })
-    } finally {
-        isDeleting.value = false
-    }
+    toast.add({
+      title: t('session_deleted_success'),
+      color: 'primary',
+      icon: 'i-heroicons-check'
+    })
+  } catch (error) {
+    console.error('Error deleting session:', error)
+    toast.add({
+      title: t('error_deleting_session'),
+      color: 'red',
+      icon: 'i-heroicons-exclamation-triangle'
+    })
+  } finally {
+    isDeleting.value = false
+  }
 }
 </script>
 
 <style>
 .delete-button-wrapper {
-  position: relative; /* Needed for absolute positioning of the button */
+  position: relative;
+  /* Needed for absolute positioning of the button */
   display: inline-block;
 }
 
 
 .edit-button {
   position: absolute;
-  top: 0.25rem;   /* Adjust distance from top */
-  right: 0.25rem; /* Adjust distance from right */
+  top: 0.25rem;
+  /* Adjust distance from top */
+  right: 0.25rem;
+  /* Adjust distance from right */
   z-index: 10;
 }
 </style>
