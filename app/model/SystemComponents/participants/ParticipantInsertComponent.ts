@@ -1,16 +1,15 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const participantInsertComponent = (selectedSystemStore: any) => new Component({
+export const participantInsertComponent = new Component({
     id: "participant-insert",
     name: "Participant Insert",
     tags: ["participants"],
     description: `SQL for inserting a participant.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            INSERT INTO ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} (name, email, personal_number, phone, address, age)
+    html: "",
+    css: "",
+    js: "",
+    sql: `
+            INSERT INTO ucastnici (jmeno, email, rodne_cislo, telefon, adresa, vek)
             VALUES (?, ?, ?, ?, ?, ?)
-        ` }
+        `
 });

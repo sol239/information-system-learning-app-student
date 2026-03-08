@@ -1,14 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const mealPlanParticipantAllergensComponent = (selectedSystemStore: any) => new Component({
+export const mealPlanParticipantAllergensComponent = new Component({
     id: "meal-plan-participant-allergen-list",
     name: "Meal Plan Participant Allergen List",
     tags: ["meals"],
     description: `Component for getting meal plan allergens related to participants.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql-1": `SELECT a.name, mp.participant_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens_meals')} AS am JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} AS m ON am.meal_id = m.meal_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens')} AS a ON a.allergen_id = am.allergen_id JOIN ${selectedSystemStore.selectedSystem?.db?.getTableName('meals_participants')} AS mp ON mp.meal_id = m.meal_id WHERE am.meal_id = ?`,
-    }
+    html: "",
+    css: "",
+    js: "",
+    sql: `SELECT a.jmeno AS jmeno, mp.id_ucastnika AS id_ucastnika FROM jidla_alergeny AS am JOIN jidla AS m ON am.id_jidla = m.id_jidla JOIN alergeny AS a ON a.id_alergenu = am.id_alergenu JOIN ucastnici_jidla AS mp ON mp.id_jidla = m.id_jidla WHERE am.id_jidla = ?`
 });

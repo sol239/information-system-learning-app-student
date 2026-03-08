@@ -1,18 +1,16 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const participantGetIdComponent = (selectedSystemStore: any) => new Component({
+export const participantGetIdComponent = new Component({
     id: "participant-get-id",
     name: "Participant Get ID",
     tags: ["participants"],
     description: `SQL for getting participant ID after insert.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            SELECT participant_id FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}
-            WHERE name = ? AND email = ?
-            ORDER BY participant_id DESC LIMIT 1
+    html: "",
+    css: "",
+    js: "",
+    sql: `
+            SELECT id_ucastnika AS id_ucastnika FROM ucastnici
+            WHERE jmeno = ? AND email = ?
+            ORDER BY id_ucastnika DESC LIMIT 1
         `
-    }
 });

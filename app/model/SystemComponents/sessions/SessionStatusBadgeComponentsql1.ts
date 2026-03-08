@@ -1,19 +1,16 @@
 import { Component } from "~/model/Component";
 
-export const sessionStatusBadgeComponent = (selectedSystemStore: any) => new Component({
-  id: "session-status-badge",
-  name: "Session Status Badge",
+export const sessionStatusBadgeComponentsql1 = new Component({
+  id: "session-status-badge-sql-1",
+  name: "Session Status Badge (sql-1)",
     tags: ["sessions"],
   description: `Badge component showing the status of a session based on capacity and participant count.`,
-  html: {
-    "html": `
-        <div class="status-badge status-{{ color }}">
-      <span class="status-text">{{ status }}</span>
+  html: `
+        <div class="status-badge status-{{ barva }}">
+      <span class="status-text">{{ stav }}</span>
     </div>
-    `
-  },
-  css: {
-    "css": `.status-badge {
+    `,
+  css: `.status-badge {
     display: inline-flex;
     align-items: center;
     padding: 0.25rem 0.75rem;
@@ -51,11 +48,7 @@ export const sessionStatusBadgeComponent = (selectedSystemStore: any) => new Com
   .status-text {
     white-space: nowrap;
   }
-`
-  },
-  js: { "js": `if (capacity === 0) return 0; return Math.round((participantCount / capacity) * 100);` },
-  sql: {
-    "sql-1": `SELECT capacity FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')} WHERE session_id = ?;`,
-    "sql-2": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} WHERE session_id = ?`,
-  }
+`,
+  js: ``,
+  sql: `SELECT t.kapacita AS kapacita, COUNT(tu.id_ucastnika) AS pocet_ucastniku, CASE WHEN COUNT(tu.id_ucastnika) >= t.kapacita THEN 'red' WHEN COUNT(tu.id_ucastnika) * 100 / t.kapacita >= 70 THEN 'yellow' WHEN COUNT(tu.id_ucastnika) > 0 THEN 'green' ELSE 'neutral' END AS barva, CASE WHEN COUNT(tu.id_ucastnika) >= t.kapacita THEN 'Obsazeno' WHEN COUNT(tu.id_ucastnika) * 100 / t.kapacita >= 70 THEN 'Skoro plno' WHEN COUNT(tu.id_ucastnika) > 0 THEN 'Volné' ELSE 'Prázdné' END AS stav FROM turnusy t LEFT JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu WHERE t.id_turnusu = ? GROUP BY t.id_turnusu`
 });

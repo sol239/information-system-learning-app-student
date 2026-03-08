@@ -1,20 +1,17 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const sessionDayCountBadgeComponent = (selectedSystemStore: any) => new Component({
+export const sessionDayCountBadgeComponent = new Component({
     id: "session-day-count-badge",
     name: "Session Day Count Badge",
     tags: ["sessions"],
     description: `Badge showing the count of days for a session.`,
-    html: {
-        "html": `
+    html: `
       <div class="badge primary medium">
         <span class="icon">📅</span>
-        <span>{{ label }}: {{ dayCount }}</span>
+        <span>{{ pocet_dni }} dní</span>
       </div>
-    `
-    },
-    css: {
-        "css": `.badge {
+    `,
+    css: `.badge {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
@@ -46,12 +43,7 @@ export const sessionDayCountBadgeComponent = (selectedSystemStore: any) => new C
     .icon {
       font-size: 1.2rem; /* balanced icon size */
     }
-    `
-    },
-    js: {
-        "js": `const timeDifference = end.getTime() - start.getTime(); return Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;`
-    },
-    sql: {
-        "sql": `SELECT from_date, to_date FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')} WHERE session_id = ?`,
-    }
+    `,
+    js: ``,
+    sql: `SELECT CAST(julianday(substr(datum_do,1,10)) - julianday(substr(datum_od,1,10)) + 1 AS INTEGER) AS pocet_dni FROM turnusy WHERE id_turnusu = ?`
 });

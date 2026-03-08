@@ -1,17 +1,15 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const supervisorInsertComponent = (selectedSystemStore: any) => new Component({
+export const supervisorInsertComponent = new Component({
     id: "supervisor-insert",
     name: "Supervisor Insert",
     tags: ["supervisors"],
     description: `SQL for inserting a supervisor.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            INSERT INTO ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')} (name, email, personal_number, phone, address, age)
+    html: "",
+    css: "",
+    js: "",
+    sql: `
+            INSERT INTO vedouci (jmeno, email, rodne_cislo, telefon, adresa, vek)
             VALUES (?, ?, ?, ?, ?, ?)
         `
-    }
 });

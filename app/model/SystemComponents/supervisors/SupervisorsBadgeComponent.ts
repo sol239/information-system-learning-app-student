@@ -1,15 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const supervisorsBadgeComponent = (selectedSystemStore: any) => new Component({
+export const supervisorsBadgeComponent = new Component({
     id: "supervisors-badge",
     name: "Supervisors Badge",
     tags: ["supervisors"],
     description: `SQL for getting all supervisors.`,
-    html: {
-        "html": `<div class="supervisors-badge">{{age}}</div>`
-    },
-    css: {
-        "css": `.supervisors-badge {
+    html: `<div class="supervisors-badge">{{age}}</div>`,
+    css: `.supervisors-badge {
             display: inline-flex;
             align-items: center;
             padding: 0.25rem 0.75rem;
@@ -20,13 +17,11 @@ export const supervisorsBadgeComponent = (selectedSystemStore: any) => new Compo
             color: #7c3aed;
             border: 1px solid rgba(124, 58, 237, 0.1);
             white-space: nowrap;
-        }`
-    },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            SELECT supervisor_id, name, email, personal_number, phone, address, age
-            FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')}
-            ORDER BY supervisor_id
-        ` }
+        }`,
+    js: "",
+    sql: `
+            SELECT id_vedouciho AS id_vedouciho, jmeno AS jmeno, email, rodne_cislo AS rodne_cislo, telefon AS telefon, adresa AS adresa, vek AS vek
+            FROM vedouci
+            ORDER BY id_vedouciho
+        `
 });

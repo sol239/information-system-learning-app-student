@@ -1,19 +1,17 @@
 import { Component } from "~/model/Component";
 
-export const sessionDeleteButtonComponent = (selectedSystemStore: any) => new Component({
-  id: "session-delete-button",
-  name: "Session Delete Button",
+export const sessionDeleteButtonComponentsql1 = new Component({
+  id: "session-delete-button-sql-1",
+  name: "Session Delete Button (sql-1)",
   tags: ["sessions"],
   description: `Button component for deleting a session with confirmation and proper cleanup.`,
-  html: {
-    "html": `
+  html: `
         <button class="delete-button" onclick="handleDelete()">
       <span class="delete-icon">🗑️</span>
       <span class="delete-text">{{ deleteLabel }}</span>
     </button>
-    ` },
-  css: {
-    "css": `  .delete-button {
+    `,
+  css: `  .delete-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -47,11 +45,7 @@ export const sessionDeleteButtonComponent = (selectedSystemStore: any) => new Co
   .delete-text {
     white-space: nowrap;
   }
-` },
-  js: { "js": `` },
-  sql: {
-    "sql-1": `DELETE FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_participants')} WHERE session_id = ?`,
-    "sql-2": `DELETE FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions_supervisors')} WHERE session_id = ?`,
-    "sql-3": `DELETE FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')} WHERE session_id = ?`,
-  }
+`,
+  js: ``,
+  sql: `DELETE FROM turnusy_ucastnici WHERE id_turnusu = ?`
 });

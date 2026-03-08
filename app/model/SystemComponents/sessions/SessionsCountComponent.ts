@@ -1,12 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const sessionsCountComponent = (selectedSystemStore: any) => new Component({
+export const sessionsCountComponent = new Component({
     id: "sessions-count",
     name: "Sessions Count",
     tags: ["sessions"],
     description: `SQL for counting sessions.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: { "sql": `SELECT COUNT(*) as count FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('sessions')}` }
+    html: "",
+    css: "",
+    js: "",
+    sql: `SELECT COUNT(*) as count FROM turnusy`
 });

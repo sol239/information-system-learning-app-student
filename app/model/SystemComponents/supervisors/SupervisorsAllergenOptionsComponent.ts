@@ -1,12 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const supervisorsAllergenOptionsComponent = (selectedSystemStore: any) => new Component({
+export const supervisorsAllergenOptionsComponent = new Component({
     id: "supervisors-allergen-options",
     name: "Supervisors Allergen Options",
     tags: ["supervisors"],
     description: `SQL for getting allergen options (same table).`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: { "sql": `SELECT allergen_id, name from ${selectedSystemStore.selectedSystem?.db?.getTableName('allergens')}` }
+    html: "",
+    css: "",
+    js: "",
+    sql: `SELECT id_alergenu AS id_alergenu, jmeno AS jmeno from alergeny`
 });

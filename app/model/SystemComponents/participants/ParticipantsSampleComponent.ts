@@ -1,12 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const participantsSampleComponent = (selectedSystemStore: any) => new Component({
+export const participantsSampleComponent = new Component({
     id: "participants-sample",
     name: "Participants Sample",
     tags: ["participants"],
     description: `SQL for getting participants sample.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: { "sql": `SELECT participant_id, name, email FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')} ORDER BY participant_id DESC LIMIT 3` }
+    html: "",
+    css: "",
+    js: "",
+    sql: `SELECT id_ucastnika AS id_ucastnika, jmeno AS jmeno, email FROM ucastnici ORDER BY id_ucastnika DESC LIMIT 3`
 });

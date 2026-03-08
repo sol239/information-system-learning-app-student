@@ -1,17 +1,16 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const participantUpdateComponent = (selectedSystemStore: any) => new Component({
+export const participantUpdateComponent = new Component({
     id: "participant-update",
     name: "Participant Update",
     tags: ["participants"],
     description: `SQL for updating a participant.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            UPDATE ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}
-            SET name = ?, email = ?, personal_number = ?, phone = ?, address = ?, age = ?
-            WHERE participant_id = ?
-        ` }
+    html: "",
+    css: "",
+    js: "",
+    sql: `
+            UPDATE ucastnici
+            SET jmeno = ?, email = ?, rodne_cislo = ?, telefon = ?, adresa = ?, vek = ?
+            WHERE id_ucastnika = ?
+        `
 });

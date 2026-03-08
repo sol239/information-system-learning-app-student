@@ -1,14 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const whenServedComponent = (selectedSystemStore: any) => new Component({
+export const whenServedComponent = new Component({
     id: "meals-when-served",
     name: "Meals When Served",
     tags: ["meals"],
     description: `Component for getting unique when_served values.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `SELECT DISTINCT when_served FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('meals')} ORDER BY when_served`
-    }
+    html: "",
+    css: "",
+    js: "",
+    sql: `SELECT DISTINCT doba_podavani AS doba_podavani FROM jidla ORDER BY doba_podavani`
 });

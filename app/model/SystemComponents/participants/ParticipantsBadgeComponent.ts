@@ -1,15 +1,12 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const participantsBadgeComponent = (selectedSystemStore: any) => new Component({
+export const participantsBadgeComponent = new Component({
     id: "participants-badge",
     name: "Participants Badge",
     tags: ["participants"],
     description: `SQL for getting all participants.`,
-    html: {
-        "html": `<div class="participants-badge">{{age}}</div>`
-    },
-    css: {
-        "css": `.participants-badge {
+    html: `<div class="participants-badge">{{age}}</div>`,
+    css: `.participants-badge {
             display: inline-flex;
             align-items: center;
             padding: 0.25rem 0.75rem;
@@ -20,13 +17,11 @@ export const participantsBadgeComponent = (selectedSystemStore: any) => new Comp
             color: #0284c7;
             border: 1px solid rgba(2, 132, 199, 0.1);
             white-space: nowrap;
-        }`
-    },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            SELECT participant_id, name, email, personal_number, phone, address, age
-            FROM ${selectedSystemStore.selectedSystem?.db?.getTableName('participants')}
-            ORDER BY participant_id
-        ` }
+        }`,
+    js: "",
+    sql: `
+            SELECT id_ucastnika AS id_ucastnika, jmeno AS jmeno, email, rodne_cislo AS rodne_cislo, telefon AS telefon, adresa AS adresa, vek AS vek
+            FROM ucastnici
+            ORDER BY id_ucastnika
+        `
 });

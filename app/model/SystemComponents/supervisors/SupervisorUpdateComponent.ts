@@ -1,18 +1,16 @@
-import { Component } from "~/model/Component";
+﻿import { Component } from "~/model/Component";
 
-export const supervisorUpdateComponent = (selectedSystemStore: any) => new Component({
+export const supervisorUpdateComponent = new Component({
     id: "supervisor-update",
     name: "Supervisor Update",
     tags: ["supervisors"],
     description: `SQL for updating a supervisor.`,
-    html: { "html": "" },
-    css: { "css": "" },
-    js: { "js": "" },
-    sql: {
-        "sql": `
-            UPDATE ${selectedSystemStore.selectedSystem?.db?.getTableName('supervisors')}
-            SET name = ?, email = ?, personal_number = ?, phone = ?, address = ?, age = ?
-            WHERE supervisor_id = ?
+    html: "",
+    css: "",
+    js: "",
+    sql: `
+            UPDATE vedouci
+            SET jmeno = ?, email = ?, rodne_cislo = ?, telefon = ?, adresa = ?, vek = ?
+            WHERE id_vedouciho = ?
         `
-    }
 });
