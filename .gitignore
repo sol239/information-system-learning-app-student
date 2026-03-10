@@ -49,6 +49,10 @@ logs
 # Demo systems
 /systems
 
+# Demo starter vue file
+app/pages/demo.vue
+
 /cypress/screenshots
 /cypress/videos
+
 
