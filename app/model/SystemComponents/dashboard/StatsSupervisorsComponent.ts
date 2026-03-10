@@ -44,5 +44,9 @@ export const statsSupervisorsComponent = new Component({
 }
 `,
   js: ``,
-  sql: `SELECT COUNT(*) as pocet_vedoucich FROM vedouci`
+  js_click: ``,
+  sql: {
+    "stats-supervisors": `SELECT COUNT(*) as pocet_vedoucich FROM vedouci`
+  },
+  sql_click: {}
 });

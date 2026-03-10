@@ -8,7 +8,9 @@ export class Component {
     html: string;
     css: string;
     js: string;
-    sql: string;
+    js_click: string;
+    sql: Record<string, string>;
+    sql_click: Record<string, string>;
     tags: string[];
     edited: boolean = false;
 
@@ -19,7 +21,9 @@ export class Component {
         html,
         css,
         js,
+        js_click = "",
         sql,
+        sql_click = {},
         tags = [],
         edited
     }: {
@@ -29,7 +33,9 @@ export class Component {
         html: string;
         css: string;
         js: string;
-        sql: string;
+        js_click?: string;
+        sql: Record<string, string>;
+        sql_click?: Record<string, string>;
         tags?: string[];
         edited?: boolean;
     }) {
@@ -39,7 +45,9 @@ export class Component {
         this.html = html;
         this.css = css;
         this.js = js;
+        this.js_click = js_click;
         this.sql = sql;
+        this.sql_click = sql_click;
         this.edited = (edited as boolean) ?? false;
 
         // Auto-generate technology tags based on content
@@ -47,7 +55,9 @@ export class Component {
         if (html?.trim()) techTags.push('html');
         if (css?.trim()) techTags.push('css');
         if (js?.trim()) techTags.push('js');
-        if (sql?.trim()) techTags.push('sql');
+        if (js_click?.trim()) techTags.push('js');
+        if (sql && Object.keys(sql).length > 0) techTags.push('sql');
+        if (sql_click && Object.keys(sql_click).length > 0) techTags.push('sql');
 
         this.tags = [...new Set([...tags, ...techTags])];
     }

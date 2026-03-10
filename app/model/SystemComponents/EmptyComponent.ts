@@ -7,6 +7,8 @@ export const emptyComponent = new Component({
     html: "",
     css: "",
     js: "",
-    sql: "",
+    js_click: "",
+    sql: {},
+    sql_click: {},
     tags: [],
 });

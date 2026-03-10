@@ -15,7 +15,7 @@
                         <h3 class="text-xl font-semibold text-gray-900">
                             {{ t('session') }} {{ sessionId }}
                         </h3>
-                        <ComponentWrapper :component="statusBadgeComponent" :generalVariables="{ sessionId: sessionId }" />
+                        <ComponentWrapper :component="statusBadgeComponent" :generalVariables="[new Variable('sessionId', sessionId)]" />
                     </div>
                 </div>
             </div>
@@ -36,6 +36,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ComponentWrapper from '~/components/ComponentWrapper.vue';
+import { Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
 import { DatabaseHandler } from '~/utils/DatabaseHandler';
 

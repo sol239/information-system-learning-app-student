@@ -7,16 +7,22 @@ import type { ComponentVariables } from "~/model/ComponentVariables";
 
 export class SqlHandler {
 
+    public static ReplaceSqlForVariablesInRecord(variables: ComponentVariables, sqlRecord: Record<string, string>): Record<string, string> {
+        const result: Record<string, string> = {};
+        for (const [key, sql] of Object.entries(sqlRecord)) {
+            result[key] = this.ReplaceSqlForVariables(variables, sql);
+        }
+        return result;
+    }
+
     public static ReplaceSqlForVariables(variables: ComponentVariables, sql: string): string {
         if (!sql) return "";
 
         let result = sql;
-        const allVariables = {
-            ...(variables.generalVariables || {}),  // lowest priority — overridden by JS vars
-            ...(variables.jsVariables || {})
-        };
+        // Merge with priority: general < js (later entries win)
+        const allVariables = [...(variables.generalVariables ?? []), ...(variables.jsVariables ?? [])];
 
-        for (const [key, value] of Object.entries(allVariables)) {
+        for (const { name: key, variable: value } of allVariables) {
             const escapedKey = key.replace(/([\\$])/g, '\\$1');
             const regex = new RegExp(`(?:\\{\\{\\s*)?(?<![a-zA-Z0-9_$])${escapedKey}(?![a-zA-Z0-9_$])(?:\\s*\\}\\})?`, 'g');
 
@@ -33,6 +39,17 @@ export class SqlHandler {
         }
 
         return result;
+    }
+
+    public static GetSqlVariableNamesFromRecord(sqlRecord: Record<string, string>, tableColumnMap: Record<string, ColumnDefinition[]>, results: QueryExecResult[]): TableMap[] {
+        let allTableMaps: TableMap[] = [];
+
+        for (const [queryName, sql] of Object.entries(sqlRecord)) {
+            const tableMapsForQuery = this.GetSqlVariableNames(sql, tableColumnMap, results);
+            allTableMaps = [...allTableMaps, ...tableMapsForQuery];
+        }
+        return allTableMaps;
+
     }
 
     // TODO: all column names with no distinction between tables --->fix

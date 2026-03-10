@@ -1,9 +1,11 @@
+import * as ts from "typescript";
 import type { VariableType } from "~/model/types/VariableType";
+import { Variable } from "~/model/ComponentVariables";
 
 export class JsHandler {
-    public static getSqlVariablesIntoJs(sqlVariables: Record<string, VariableType | VariableType[]>): string {
+    public static getSqlVariablesIntoJs(sqlVariables: Variable[]): string {
         let result: string = "";
-        for (const [key, variable] of Object.entries(sqlVariables)) {
+        for (const { name: key, variable } of sqlVariables) {
             const isArray = Array.isArray(variable);
             const samples = isArray ? (variable as any[]) : [variable];
 
@@ -34,52 +36,57 @@ export class JsHandler {
         return result;
     }
 
-    public static getJsVariables(jsCode: string): Record<string, VariableType | VariableType[]> {
-        const result: Record<string, VariableType | VariableType[]> = {};
+    public static getJsVariables(jsCode: string, userCodeOnly?: string): Variable[] {
+        const result: Variable[] = [];
         if (!jsCode) return result;
 
-        // remove single line and multi-line comments
-        const cleanCode = jsCode
-            .replace(/\/\*[\s\S]*?\*\//g, '')
-            .replace(/\/\/.*/g, '');
+        // Step 1: collect declared variable names via AST — only from user-written code
+        const sourceForNames = ts.createSourceFile(
+            'virtual-file.js',
+            userCodeOnly ?? jsCode,
+            ts.ScriptTarget.Latest,
+            true
+        );
 
-        // check for const and let declarations
-        const regex = /(?:const|let)\s+([a-zA-Z_$][0-9a-zA-Z_$]*)(?:\s*:\s*[^=]+)?\s*=\s*([\s\S]+?)(?=;|\n\s*(?:const|let|console|return|if|for|while|function)\b|$)/g;
-        let match;
+        const declaredNames: string[] = [];
 
-        while ((match = regex.exec(cleanCode)) !== null) {
-            const varName = match[1];
-            if (!varName) continue;
-
-            const rawValue = match[2]?.trim();
-            if (!rawValue) continue;
-
-            let parsedValue: any;
-            try {
-                parsedValue = new Function(`return ${rawValue}`)();
-            } catch (e) {
-                parsedValue = rawValue;
+        function visitNode(node: ts.Node) {
+            if (ts.isVariableDeclaration(node) && node.name && ts.isIdentifier(node.name)) {
+                declaredNames.push(node.name.text);
             }
+            ts.forEachChild(node, visitNode);
+        }
+        visitNode(sourceForNames);
 
-            if (typeof parsedValue === "number" || typeof parsedValue === "string") {
-                result[varName] = parsedValue;
-            } else if (parsedValue instanceof Date) {
-                result[varName] = parsedValue;
-            } else if (typeof parsedValue === "boolean") {
-                result[varName] = parsedValue ? 1 : 0;
-            } else if (Array.isArray(parsedValue)) {
-                result[varName] = parsedValue
-                    .filter(v => typeof v === "string" || typeof v === "number" || typeof v === "boolean" || v instanceof Date)
-                    .map(v => typeof v === "boolean" ? (v ? 1 : 0) : v) as VariableType[];
-            } else if (typeof parsedValue === "object" && parsedValue !== null) {
-                try {
-                    result[varName] = JSON.stringify(parsedValue);
-                } catch {
-                    result[varName] = String(parsedValue);
-                }
+        if (declaredNames.length === 0) return result;
+
+        // Step 2: execute the code and read variable values at runtime
+        // Strip TypeScript type annotations so new Function can run it as plain JS
+        const strippedCode = ts.transpileModule(jsCode, {
+            compilerOptions: { target: ts.ScriptTarget.ES2017 }
+        }).outputText;
+
+        const exportObject = declaredNames.map(n => `"${n}": typeof ${n} !== 'undefined' ? ${n} : undefined`).join(', ');
+        const fn = new Function(`${strippedCode}\nreturn ({ ${exportObject} });`);
+        const evaluated: Record<string, any> = fn();
+
+        for (const name of declaredNames) {
+            const value = evaluated[name];
+            if (value === undefined) continue;
+
+            let finalValue: VariableType | VariableType[];
+
+            if (typeof value === 'number' || typeof value === 'string' || value instanceof Date) {
+                finalValue = value;
+            } else if (Array.isArray(value)) {
+                finalValue = (value as any[]).filter(v =>
+                    typeof v === 'string' || typeof v === 'number' || v instanceof Date
+                ) as VariableType[];
             } else {
-                result[varName] = String(parsedValue);
+                finalValue = String(value);
             }
+
+            result.push(new Variable(name, finalValue));
         }
 
         return result;

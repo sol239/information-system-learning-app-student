@@ -44,5 +44,9 @@ export const statsMealsComponent = new Component({
 }
 `,
   js: ``,
-  sql: `SELECT COUNT(*) as pocet_jidel FROM jidla`
+  js_click: ``,
+  sql: {
+    "stats-meals": `SELECT COUNT(*) as pocet_jidel FROM jidla`
+  },
+  sql_click: {}
 });

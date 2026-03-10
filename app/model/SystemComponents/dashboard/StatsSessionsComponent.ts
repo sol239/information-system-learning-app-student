@@ -44,5 +44,9 @@ export const statsSessionsComponent = new Component({
 }
 `,
   js: ``,
-  sql: `SELECT COUNT(*) as pocet_turnusu FROM turnusy`
+  js_click: ``,
+  sql: {
+    "stats-sessions": `SELECT COUNT(*) as pocet_turnusu FROM turnusy`
+  },
+  sql_click: {}
 });

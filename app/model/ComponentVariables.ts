@@ -1,7 +1,11 @@
 import type { VariableType } from "./types/VariableType";
 
+export class Variable {
+    constructor(public name: string, public variable: VariableType| VariableType[]) {}
+}
+
 export class ComponentVariables {
-    public generalVariables: Record<string, VariableType | VariableType[]> | undefined;
-    public sqlVariables: Record<string, VariableType | VariableType[]> | undefined;
-    public jsVariables: Record<string, VariableType | VariableType[]> | undefined;
+    public generalVariables: Variable[] = [];
+    public sqlVariables: Variable[] = [];
+    public jsVariables: Variable[] = [];
 }

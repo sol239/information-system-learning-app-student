@@ -44,5 +44,9 @@ export const statsParticipantsComponent = new Component({
 }
 `,
   js: ``,
-  sql: `SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`
+  js_click: ``,
+  sql: {
+    "stats-participants": `SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`
+  },
+  sql_click: {}
 });
