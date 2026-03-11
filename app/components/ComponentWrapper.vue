@@ -1,18 +1,18 @@
 <template>
   <div @click="handleClick"
-       :class="['component-wrapper', { 'highlight-active': highlightStore.isHighlightActive, 'is-highlighted': highlightStore.isHighlightActive && highlightStore.selectedHighlightedComponentsIds.has(props.component.id) }]">
+    :class="['component-wrapper', { 'highlight-active': highlightStore.isHighlightActive, 'is-highlighted': highlightStore.isHighlightActive && highlightStore.selectedHighlightedComponentsIds.has(props.component.id) }]">
     <div :class="['content-container', { 'edit-mode': isEditEnabled }]">
 
-            <span v-if="isEditEnabled" class="edit-icon" @click.stop="handleEdit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                    <path d="m15 5 4 4"/>
-                </svg>
-            </span>
+      <span v-if="isEditEnabled" class="edit-icon" @click.stop="handleEdit">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg>
+      </span>
 
       <div class="component-html"
-           v-html="HtmlHandler.ReplaceHtmlForVariables(componentVariables, props.component.html)"></div>
+        v-html="HtmlHandler.ReplaceHtmlForVariables(componentVariables, props.component.html)"></div>
     </div>
 
     <UModal v-model:open="isEditModalOpened" :dismissible="false" :ui="{ content: 'w-[80vw] max-w-[80vw]' }">
@@ -27,65 +27,105 @@
       <template #body>
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-2 justify-end -mt-2">
-            <UButton icon="i-lucide-minus" color="neutral" variant="ghost"
-                     @click="sizeMultiplier -= 0.05"/>
+            <UButton icon="i-lucide-minus" color="neutral" variant="ghost" @click="sizeMultiplier -= 0.05" />
             <span class="text-xs text-gray-500 font-medium w-10 text-center">{{
-                Math.round(sizeMultiplier *
-                    100)
-              }}%</span>
-            <UButton icon="i-lucide-plus" color="neutral" variant="ghost" @click="sizeMultiplier += 0.05"/>
+              Math.round(sizeMultiplier *
+                100)
+            }}%</span>
+            <UButton icon="i-lucide-plus" color="neutral" variant="ghost" @click="sizeMultiplier += 0.05" />
           </div>
 
           <div class="flex flex-row gap-2 w-full items-center">
-            <USelect
-                id="query-select"
-                v-model="selectedSqlQuery"
-                :items="sqlQueryNames"
-                placeholder="Vyberte SQL dotaz"
-                class="flex-1"
-                :disabled="Object.keys(props.component.sql ?? {}).length === 1"
-            />
+            <USelect id="query-select" v-model="selectedSqlQuery" :items="sqlQueryNames" placeholder="Vyberte SQL dotaz"
+              class="flex-1" :disabled="Object.keys(props.component.sql ?? {}).length === 1" />
             <UBadge color="neutral" variant="subtle" size="md">{{ sqlQueryNames.length }}</UBadge>
             <UButton icon="i-lucide-plus" @click="addQuery" size="md" class="aspect-square shrink-0" />
-            <UButton icon="i-lucide-minus" @click="removeQuery" size="md" color="red" variant="subtle" class="aspect-square shrink-0" :disabled="sqlQueryNames.length <= 1" />
+            <UButton icon="i-lucide-minus" @click="removeQuery" size="md" color="red" variant="subtle"
+              class="aspect-square shrink-0" :disabled="sqlQueryNames.length <= 1" />
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 w-full">
-            <CodeBlock v-model:code="editedHtml" language="html" label="HTML" height="400px"
-                       :correct="undefined" :size-multiplier="sizeMultiplier"/>
-            <CodeBlock v-model:code="editedCss" language="css" label="CSS" height="400px"
-                       :correct="undefined" :size-multiplier="sizeMultiplier"/>
-            <CodeBlock v-model:code="editedJs" language="typescript" label="JS" height="400px"
-                       :correct="undefined" :protected-prefix="sqlVarsHeader || undefined"
-                       :size-multiplier="sizeMultiplier"/>
-            <CodeBlock v-model:code="editedSql" language="sql" label="SQL" height="400px"
-                       :correct="isEditedSqlValid" :size-multiplier="sizeMultiplier"/>
+            <CodeBlock v-model:code="editedHtml" language="html" label="HTML" height="400px" :correct="undefined"
+              :size-multiplier="sizeMultiplier" />
+            <CodeBlock v-model:code="editedCss" language="css" label="CSS" height="400px" :correct="undefined"
+              :size-multiplier="sizeMultiplier" />
+            <CodeBlock v-model:code="editedJs" language="typescript" label="JS" height="400px" :correct="undefined"
+              :protected-prefix="sqlVarsHeader || undefined" :size-multiplier="sizeMultiplier" />
+            <CodeBlock v-model:code="editedSql" language="sql" label="SQL" height="400px" :correct="isEditedSqlValid"
+              :size-multiplier="sizeMultiplier" />
           </div>
 
-          <USeparator/>
+          <USeparator label="Click Actions" />
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">JS Click Action</span>
+                <UButton v-if="!editedJsClick" icon="i-lucide-plus" size="xs" variant="ghost" label="Add Action"
+                  @click="editedJsClick = '// click logic here'" />
+                <UButton v-else icon="i-lucide-trash-2" size="xs" variant="ghost" color="red"
+                  @click="editedJsClick = ''" />
+              </div>
+
+              <CodeBlock v-if="editedJsClick" v-model:code="editedJsClick" language="typescript" height="200px"
+                label="JS Click" :correct="undefined" :size-multiplier="sizeMultiplier" />
+              <div v-else
+                class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <UIcon name="i-lucide-mouse-pointer-2" class="w-5 h-5 text-gray-400" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No JS click action defined</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">SQL Click
+                  Actions</span>
+                <USelect v-if="sqlClickQueryNames.length > 0" v-model="selectedSqlClickQuery"
+                  :items="sqlClickQueryNames" placeholder="Select SQL click query" size="xs" class="flex-1"
+                  :disabled="sqlClickQueryNames.length <= 1" />
+                <div class="flex gap-1">
+                  <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addClickQuery" />
+                  <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeClickQuery"
+                    :disabled="sqlClickQueryNames.length === 0" />
+                </div>
+              </div>
+
+              <div v-if="sqlClickQueryNames.length > 0" class="flex flex-col gap-2">
+                <CodeBlock v-model:code="editedSqlClick" language="sql" height="200px" label="SQL Click"
+                  :size-multiplier="sizeMultiplier" />
+              </div>
+              <div v-else
+                class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <UIcon name="i-lucide-database-zap" class="w-5 h-5 text-gray-400" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No SQL click actions defined</p>
+              </div>
+            </div>
+          </div>
+
+          <USeparator />
 
           <div v-if="generalVariableNames.length > 0" class="mt-2 text-left">
             <p
-                class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
+              class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
               Available General variables
             </p>
             <div class="flex flex-wrap gap-2 text-left">
               <div v-for="name in generalVariableNames" :key="name" class="general-var-card text-left">
                 <span class="general-var-name">{{ name }}</span>
                 <span class="general-var-value">{{
-                    formatVariablesPreview(name, componentVariables.generalVariables)
-                  }}</span>
+                  formatVariablesPreview(name, componentVariables.generalVariables)
+                }}</span>
               </div>
             </div>
           </div>
           <div v-else class="mt-2 text-left">
             <p
-                class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
+              class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
               Available General variables
             </p>
             <div
-                class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-box" class="w-5 h-5 text-gray-400"/>
+              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <UIcon name="i-lucide-box" class="w-5 h-5 text-gray-400" />
               <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid general variables
                 found</p>
             </div>
@@ -99,8 +139,8 @@
               <div v-for="name in sqlVariableNames" :key="name" class="sql-var-card">
                 <span class="sql-var-name">{{ name }}</span>
                 <span class="sql-var-value">{{
-                    formatVariablesPreview(name, componentVariables.sqlVariables)
-                  }}</span>
+                  formatVariablesPreview(name, componentVariables.sqlVariables)
+                }}</span>
               </div>
             </div>
           </div>
@@ -109,35 +149,33 @@
               Available SQL variables
             </p>
             <div
-                class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-database-zap" class="w-5 h-5 text-gray-400"/>
+              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <UIcon name="i-lucide-database-zap" class="w-5 h-5 text-gray-400" />
               <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid SQL variables found
               </p>
             </div>
           </div>
 
           <div v-if="jsVariableNames.length > 0" class="mt-2">
-            <p
-                class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
               Available JS variables
             </p>
             <div class="flex flex-wrap gap-2">
               <div v-for="name in jsVariableNames" :key="name" class="js-var-card">
                 <span class="js-var-name">{{ name }}</span>
                 <span class="js-var-value">{{
-                    formatVariablesPreview(name, componentVariables.jsVariables)
-                  }}</span>
+                  formatVariablesPreview(name, componentVariables.jsVariables)
+                }}</span>
               </div>
             </div>
           </div>
           <div v-else class="mt-2">
-            <p
-                class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
               Available JS variables
             </p>
             <div
-                class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-code-2" class="w-5 h-5 text-gray-400"/>
+              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <UIcon name="i-lucide-code-2" class="w-5 h-5 text-gray-400" />
               <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid JS variables found
               </p>
             </div>
@@ -149,20 +187,20 @@
 </template>
 
 <script setup lang="ts">
-import type {QueryExecResult} from 'sql.js';
-import {ref, onMounted, onUnmounted, watch, computed} from 'vue';
-import {SqlHandler} from '~/core/SqlHandler';
-import {JsHandler} from '~/core/JsHandler';
-import {HtmlHandler} from '~/core/HtmlHandler';
-import {Component as SystemComponent} from '~/model/Component';
-import {ComponentVariables, Variable} from '~/model/ComponentVariables';
-import {useSystemsStore} from '~/stores/systemsStore';
-import {useHighlightStore} from '~/stores/highlightStore';
-import {DatabaseHandler} from '~/utils/DatabaseHandler';
-import {OperationResultType} from '~/utils/OperationResultType';
-import {TableMap} from '~/core/TableMap';
-import {ColumnType} from '~/utils/ColumnType';
-import type {VariableType} from '~/model/types/VariableType';
+import type { QueryExecResult } from 'sql.js';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { SqlHandler } from '~/core/SqlHandler';
+import { JsHandler } from '~/core/JsHandler';
+import { HtmlHandler } from '~/core/HtmlHandler';
+import { Component as SystemComponent } from '~/model/Component';
+import { ComponentVariables, Variable } from '~/model/ComponentVariables';
+import { useSystemsStore } from '~/stores/systemsStore';
+import { useHighlightStore } from '~/stores/highlightStore';
+import { DatabaseHandler } from '~/utils/DatabaseHandler';
+import { OperationResultType } from '~/utils/OperationResultType';
+import { TableMap } from '~/core/TableMap';
+import { ColumnType } from '~/utils/ColumnType';
+import type { VariableType } from '~/model/types/VariableType';
 
 const props = defineProps<{
   component: SystemComponent,
@@ -193,7 +231,11 @@ const jsVariableNames = computed(() => componentVariables.value.jsVariables.map(
 const generalVariableNames = computed(() => componentVariables.value.generalVariables.map(v => v.name));
 const sizeMultiplier = ref(1);
 const selectedSqlQuery = ref<string>('');
+const selectedSqlClickQuery = ref<string>('');
+const editedJsClick = ref('');
+const editedSqlClick = ref('');
 const sqlQueryNames = computed(() => Object.keys(props.component.sql ?? {}))
+const sqlClickQueryNames = computed(() => Object.keys(props.component.sql_click ?? {}))
 let db = undefined;
 
 /** Read-only JS constants generated from the current SQL query results.
@@ -228,6 +270,23 @@ function removeQuery() {
   selectedSqlQuery.value = Object.keys(props.component.sql).sort((a, b) => a.localeCompare(b))[0] || '';
 }
 
+function addClickQuery() {
+  if (!props.component.sql_click) props.component.sql_click = {};
+  const sqlRecord = props.component.sql_click;
+  const newQueryName = `clickQuery${Object.keys(sqlRecord).length + 1}`;
+  props.component.sql_click[newQueryName] = '';
+  selectedSqlClickQuery.value = newQueryName;
+  editedSqlClick.value = '';
+}
+
+function removeClickQuery() {
+  const current = selectedSqlClickQuery.value;
+  if (!current || !props.component.sql_click) return;
+  delete props.component.sql_click[current];
+  selectedSqlClickQuery.value = Object.keys(props.component.sql_click).sort((a, b) => a.localeCompare(b))[0] || '';
+  editedSqlClick.value = props.component.sql_click[selectedSqlClickQuery.value] || '';
+}
+
 /**
  * Saves the edited component code back to the component object and updates the system in the store.
  */
@@ -238,6 +297,10 @@ async function saveEdit() {
   props.component.css = editedCss.value;
   props.component.js = editedJs.value;
   props.component.sql[selectedSqlQuery.value] = editedSql.value;
+  props.component.js_click = editedJsClick.value;
+  if (props.component.sql_click && selectedSqlClickQuery.value) {
+    props.component.sql_click[selectedSqlClickQuery.value] = editedSqlClick.value;
+  }
 
   // Explicitly update component variables on save
   // TODO: is this needed?
@@ -260,6 +323,11 @@ function handleEdit() {
   editedCss.value = props.component.css;
   editedJs.value = props.component.js;
   editedSql.value = props.component.sql[selectedSqlQuery.value] || '';
+  editedJsClick.value = props.component.js_click || '';
+
+  selectedSqlClickQuery.value = Object.keys(props.component.sql_click ?? {})
+    .sort((a, b) => a.localeCompare(b))[0] || '';
+  editedSqlClick.value = props.component.sql_click[selectedSqlClickQuery.value] || '';
 
   // turns on visibility of the modal
   isEditModalOpened.value = true;
@@ -317,38 +385,38 @@ async function populateSqlVariables(sqlRecord: Record<string, string>) {
 }
 
 function handleClick() {
-    
-    // if highlight mode as active we will not execute click action
-    if (highlightStore.isHighlightActive) {
-        highlightStore.selectHighlightedComponent(props.component.id);
-        return;
-    } else {
-        // execute js code on click if exists
-        // TODO: otázka zda replacovat, anebo ne
-        if (props.component.js_click) {
-            try {
-                eval(props.component.js_click);
-            } catch (e) {
-                console.error('Error executing click JS code:', e);
-            }
-        } else {
-            console.log('No click JS code to execute for this component.');
-        }
 
-        // execute all sql
-        // TODO: otázka zda replacovat, anebo ne
-        if (props.component.sql_click) {
-            try {
-                for (const sql of Object.values(props.component.sql_click)) {
-                    DatabaseHandler.query(db, sql);
-                }
-            } catch (e) {
-                console.error('Error executing click SQL code:', e);
-            }
-        } else {
-            console.log('No click SQL code to execute for this component.');
-        }
+  // if highlight mode as active we will not execute click action
+  if (highlightStore.isHighlightActive) {
+    highlightStore.selectHighlightedComponent(props.component.id);
+    return;
+  } else {
+    // execute js code on click if exists
+    if (props.component.js_click) {
+      try {
+        const resolvedJs = HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, props.component.js_click);
+        eval(resolvedJs);
+      } catch (e) {
+        console.error('Error executing click JS code:', e);
+      }
+    } else {
+      console.log('No click JS code to execute for this component.');
     }
+
+    // execute all sql
+    if (props.component.sql_click) {
+      try {
+        for (const sql of Object.values(props.component.sql_click)) {
+          const resolvedSql = HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, sql);
+          DatabaseHandler.query(db, resolvedSql);
+        }
+      } catch (e) {
+        console.error('Error executing click SQL code:', e);
+      }
+    } else {
+      console.log('No click SQL code to execute for this component.');
+    }
+  }
 }
 
 /**
@@ -369,12 +437,12 @@ function applyStyle(css: string) {
 }
 
 // watcher - css change when componentVariables change
-watch(componentVariables, () => applyStyle(props.component.css), {deep: true});
+watch(componentVariables, () => applyStyle(props.component.css), { deep: true });
 
 // watcher - general variables
 watch(() => props.generalVariables, (newVars) => {
   componentVariables.value.generalVariables = newVars ?? [];
-}, {deep: true, immediate: true});
+}, { deep: true, immediate: true });
 
 // watcher - edited JS code
 watch(() => editedJs.value, (newJs) => {
@@ -390,7 +458,7 @@ watch(() => editedJs.value, (newJs) => {
     console.error('Error parsing JS variables:', e);
     componentVariables.value.jsVariables = [];
   }
-}, {immediate: true});
+}, { immediate: true });
 
 // watcher - edited SQL code
 watch(() => editedSql.value, async (newSql) => {
@@ -415,13 +483,17 @@ watch(selectedSqlQuery, (newQuery) => {
   editedSql.value = props.component.sql[newQuery] || '';
 });
 
+watch(selectedSqlClickQuery, (newQuery) => {
+  editedSqlClick.value = props.component.sql_click?.[newQuery] || '';
+});
+
 
 onMounted(async () => {
   db = systemsStore.selectedSystem?.database?.sqlJsDatabase ?? undefined;
 
   // preselect sql query
   selectedSqlQuery.value = Object.keys(props.component.sql ?? {})
-      .sort((a, b) => a.localeCompare(b))[0] || '';
+    .sort((a, b) => a.localeCompare(b))[0] || '';
 
   // apply styles on mount
   applyStyle(props.component.css);
