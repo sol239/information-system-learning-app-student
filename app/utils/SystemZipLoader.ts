@@ -26,6 +26,11 @@ export class SystemZipLoader {
     public jsonConfigFileContent: string | null = null;
 
     /**
+     * The content of the JSON components file.
+     */
+    public jsonComponentsContent: string | null = null;
+
+    /**
      * Loads the ZIP file and initializes the internal file structure.
      * @param zipFile The ZIP file to load.
      */
@@ -45,6 +50,8 @@ export class SystemZipLoader {
                     zipEntry.async('text').then(content => {
                         if (relativePath.endsWith('config.json')) {
                             this.jsonConfigFileContent = content;
+                        } else if (relativePath.endsWith('system_components.json')) {
+                            this.jsonComponentsContent = content;
                         } else if (relativePath.endsWith('.csv')) {
                             const filename = relativePath.split('/').pop()!.replace(/\.[^/.]+$/, '');
                             this.csvFilesContent[filename] = content;
@@ -75,6 +82,6 @@ export class SystemZipLoader {
         console.log('JSON Config Content:', this.jsonConfigFileContent);
         for (const [filename, content] of Object.entries(this.csvFilesContent)) {
             console.log(`CSV File: ${filename}, Content:`, content);
-        }   
+        }
     }
 }

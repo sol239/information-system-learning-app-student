@@ -31,7 +31,7 @@
             @click="highlightStore.toggleHighlight">
             <span class="mobile-hidden">{{ highlightStore.isHighlightActive ? $t('disable_highlight') :
                 $t('enable_highlight')
-                }}</span>
+            }}</span>
         </UButton>
 
         <UButton :icon="highlightStore.isEditModeActive ? 'i-lucide-pencil' : 'i-lucide-pencil-off'" color="yellow"
@@ -104,7 +104,6 @@ import { IndexedDbHandler } from '~/utils/IndexedDbHandler'
 
 const highlightStore = useHighlightStore()
 const systemsStore = useSystemsStore()
-const componentStore = useComponentStore()
 
 
 const { t } = useI18n()
@@ -134,7 +133,7 @@ function openComponentExplorer() {
 async function refreshComponents() {
     const system = systemsStore.selectedSystem;
     if (!system) return;
-    system.actualComponents = JSON.parse(JSON.stringify(componentStore.defaultComponents));
+    system.actualComponents = JSON.parse(JSON.stringify(system.defaultComponents));
     await systemsStore.updateSystem(system);
     toast.add({ title: t('component_refresh_success') || 'Components refreshed', color: 'primary', icon: 'i-lucide-check-circle' });
 }

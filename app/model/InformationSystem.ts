@@ -40,6 +40,11 @@ export class InformationSystem {
   public actualComponents: Component[];
 
   /**
+   * The default components for this system.
+   */
+  public defaultComponents: Component[];
+
+  /**
    * The SQLite database for this system, loaded lazily via DatabaseWrapper.
    */
   public database: DatabaseWrapper | null;
@@ -61,6 +66,7 @@ export class InformationSystem {
     description,
     tasks = [],
     actualComponents = [],
+    defaultComponents = [],
     database = null,
     configData,
     score,
@@ -71,6 +77,7 @@ export class InformationSystem {
     description: string;
     tasks?: Task[];
     actualComponents?: Component[];
+    defaultComponents?: Component[];
     database?: DatabaseWrapper | null;
     configData?: any;
     score?: Score;
@@ -81,6 +88,7 @@ export class InformationSystem {
     this.description = description;
     this.tasks = tasks;
     this.actualComponents = actualComponents;
+    this.defaultComponents = defaultComponents;
     this.database = database;
     this.configData = configData;
     this.score = score ?? new Score();
@@ -122,7 +130,7 @@ export class InformationSystem {
 
       // Initialize the database with the config data and CSV contents
       const csvEntries = Object.fromEntries(
-        Object.entries(filesContents).filter(([path]) => !path.endsWith('config.json'))
+        Object.entries(filesContents).filter(([path]) => !path.endsWith('config.json') && !path.endsWith('system_components.json'))
       );
       if (Object.keys(csvEntries).length > 0) {
         const dbResult = await SqljsDatabaseFactory.createDatabase(csvEntries);
@@ -130,6 +138,21 @@ export class InformationSystem {
           system.database = DatabaseWrapper.fromInstance(dbResult.data);
         } else {
           return new Operation(OperationResultType.ERROR, "Failed to build database: " + dbResult.message, null);
+        }
+      }
+
+      // Load default components from system_components.json if present
+      const componentsEntry = Object.entries(filesContents).find(([path]) => path.endsWith('system_components.json'));
+      if (componentsEntry) {
+        try {
+          const componentsData = JSON.parse(componentsEntry[1]);
+          system.defaultComponents = Component.arrayFromJSON(componentsData);
+          // If this is a fresh load, initialize actual components from defaults
+          if (system.actualComponents.length === 0) {
+            system.actualComponents = Component.arrayFromJSON(JSON.parse(JSON.stringify(componentsData)));
+          }
+        } catch (e) {
+          console.warn("Failed to parse system_components.json", e);
         }
       }
 

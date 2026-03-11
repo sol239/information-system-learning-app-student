@@ -16,8 +16,8 @@
         </template>
 
         <template #footer="{ close }">
-            <UButton color="teacher" icon="i-lucide-upload" :disabled="!selectedFile || systemAlreadyExists" :loading="loading"
-                @click="onUpload(close)">
+            <UButton color="teacher" icon="i-lucide-upload" :disabled="!selectedFile || systemAlreadyExists"
+                :loading="loading" @click="onUpload(close)">
                 {{ t('upload_system') }}
             </UButton>
             <UButton color="neutral" variant="outline" @click="close">{{ t('cancel') }}</UButton>
@@ -35,7 +35,6 @@ import { useSystemsStore } from '~/stores/systemsStore'
 /* 3. Context hooks */
 const { t } = useI18n()
 const systemsStore = useSystemsStore()
-const componentStore = useComponentStore()
 
 /* 8. Local state */
 const selectedFile = ref<File | null>(null)
@@ -53,7 +52,7 @@ watch(selectedFile, async (file) => {
         return
     }
     const result: Operation<SystemZipLoader | null> = await SystemZipLoader.create(file);
-    console.log("ZIP OP STATUS: " +  result.toString())
+    console.log("ZIP OP STATUS: " + result.toString())
     if (result.result === OperationResultType.SUCCESS && result.data) {
         console.log(":)")
         loader.value = result.data
@@ -84,11 +83,11 @@ async function onUpload(close: () => void) {
     try {
         const filesContents: Record<string, string> = {
             'config.json': loader.value.jsonConfigFileContent ?? '',
+            'system_components.json': loader.value.jsonComponentsContent ?? '',
             ...loader.value.csvFilesContent,
         }
         const loadResult = await InformationSystem.loadSystem(filesContents)
         if (loadResult.result === OperationResultType.SUCCESS && loadResult.data) {
-            loadResult.data.actualComponents = JSON.parse(JSON.stringify(componentStore.defaultComponents))
             await systemsStore.addSystem(loadResult.data)
         } else {
             console.error(loadResult.message)

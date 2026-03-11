@@ -1,9 +1,11 @@
 import Dexie, { type Table } from 'dexie';
 import { InformationSystem } from "~/model/InformationSystem";
+import { Component } from '~/model/Component';
 import { DatabaseWrapper } from './DatabaseWrapper';
 import { Operation } from './Operation';
 import { OperationResultType } from './OperationResultType';
 import { Score } from '~/model/Score';
+import type { GUID } from '~/model/GUID';
 
 interface StoredSystem {
     id: string;
@@ -12,6 +14,7 @@ interface StoredSystem {
     description: string;
     tasks: any[];
     actualComponents: any[];
+    defaultComponents: any[];
     databaseBinary: Uint8Array | null;
     score: { mistakesCount: number; score: number } | null;
 }
@@ -67,6 +70,7 @@ export class IndexedDbStorage {
                 description: system.description,
                 tasks: JSON.parse(JSON.stringify(system.tasks)),
                 actualComponents: JSON.parse(JSON.stringify(system.actualComponents)),
+                defaultComponents: JSON.parse(JSON.stringify(system.defaultComponents)),
                 databaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
             };
@@ -110,6 +114,7 @@ export class IndexedDbStorage {
                 description: system.description,
                 tasks: JSON.parse(JSON.stringify(system.tasks)),
                 actualComponents: JSON.parse(JSON.stringify(system.actualComponents)),
+                defaultComponents: JSON.parse(JSON.stringify(system.defaultComponents)),
                 databaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
             };
@@ -134,12 +139,13 @@ export class IndexedDbStorage {
             ? new Score(record.score.mistakesCount, record.score.score)
             : new Score();
         const system = new InformationSystem({
-            id: record.id,
+            id: record.id as GUID,
             name: record.name,
             language: record.language,
             description: record.description,
             tasks: record.tasks ?? [],
-            actualComponents: record.actualComponents ?? [],
+            actualComponents: Component.arrayFromJSON(record.actualComponents ?? []),
+            defaultComponents: Component.arrayFromJSON(record.defaultComponents ?? []),
             score,
         });
         if (record.databaseBinary) {
@@ -148,4 +154,3 @@ export class IndexedDbStorage {
         return system;
     }
 }
-
