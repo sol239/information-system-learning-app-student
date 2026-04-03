@@ -63,7 +63,7 @@ function onDividerMousedown(e: MouseEvent) {
       />
 
       <!-- Right column: toolbar + task list (desktop only) -->
-      <div class="hidden lg:flex flex-shrink-0 flex-col overflow-hidden" :style="{ width: rightPanelWidth + 'px' }">
+      <div class="hidden lg:flex flex-shrink-0 flex-col overflow-hidden" :style="{ width: rightPanelWidth + 'px', backgroundColor: '#eef6fd' }">
         <!-- Toolbar -->
         <div class="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex flex-wrap gap-1">
           <SystemToolbar />

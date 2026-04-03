@@ -1,18 +1,18 @@
 ﻿import { Component } from "~/model/Component";
 
-export const mealCardInfoComponent = new Component({
-  id: "meal-card-info",
-  name: "Meal Card Info",
-  tags: ["meals"],
-  description: `Card showing meal name and a serving-time badge. Requires generalVariable: mealId.`,
+export const kartaJidlaKomponenta = new Component({
+  id: "karta-jidla",
+  name: "Karta jídla",
+  tags: ["jídla"],
+  description: `Karta zobrazující název jídla a štítek doby podávání. Vyžaduje generalVariable: idJidla.`,
   html: `
-<div id="meal-card-header">
-  <span id="meal-name">jmeno</span>
-  <span id="meal-time-badge">doba_podavani</span>
+<div id="hlavicka-karty-jidla">
+  <span id="nazev-jidla">jmeno</span>
+  <span id="stitek-doby-podavani">doba_podavani</span>
 </div>
 `,
   css: `
-#meal-card-header {
+#hlavicka-karty-jidla {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -20,14 +20,14 @@ export const mealCardInfoComponent = new Component({
   width: 100%;
 }
 
-#meal-name {
+#nazev-jidla {
   font-size: 20px;
   font-weight: 700;
   color: #111827;
   line-height: 1.3;
 }
 
-#meal-time-badge {
+#stitek-doby-podavani {
   display: inline-flex;
   align-items: center;
   padding: 4px 14px;
@@ -43,7 +43,7 @@ export const mealCardInfoComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "meal-card-info": `SELECT jmeno, doba_podavani FROM jidla WHERE id_jidla = mealId`
+    "karta-jidla": `SELECT jmeno, doba_podavani FROM jidla WHERE id_jidla = idJidla`
   },
   sql_click: {}
 });

@@ -21,10 +21,22 @@
             <!-- Spacer -->
             <div class="flex-1" />
 
-            <!-- Add meal -->
-            <UButton color="primary" icon="i-heroicons-plus">
-                {{ t('add_meal') }}
-            </UButton>
+            <!-- Add meal modal -->
+            <ModalContainer v-model:open="createModalOpen" class="w-fit">
+                <UButton label="Přidat jídlo" color="primary" icon="i-heroicons-plus" size="md" />
+
+                <template #content>
+                    <div class="modal-container">
+                        <ComponentWrapper :component="vstupNazevComponent" />
+                        <ComponentWrapper :component="vstupDobaComponent" />
+                        <div class="flex gap-2">
+                            <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                @click="createModalOpen = false" />
+                            <ComponentWrapper :component="btnUlozitComponent" @action-completed="handleMealCreated" />
+                        </div>
+                    </div>
+                </template>
+            </ModalContainer>
         </div>
 
         <!-- Meals grid -->
@@ -36,24 +48,42 @@
             >
                 <!-- Name + serving-time badge -->
                 <ComponentWrapper
-                    :component="withVars(cardInfoComponent, [new Variable('mealId', mealId)])"
+                    :component="withVars(cardInfoComponent, [new Variable('idJidla', mealId)])"
                 />
 
                 <hr class="border-gray-100" />
 
                 <!-- Allergen pills -->
                 <ComponentWrapper
-                    :component="withVars(allergenListComponent, [new Variable('mealId', mealId)])"
+                    :component="withVars(allergenListComponent, [new Variable('idJidla', mealId)])"
                 />
 
                 <!-- Actions -->
                 <div class="flex gap-3 pt-1 border-t border-gray-100">
-                    <UButton color="success" variant="solid" class="flex-1">
-                        {{ t('view_details') }}
-                    </UButton>
-                    <UButton color="error" variant="outline" class="flex-1">
-                        {{ t('delete') }}
-                    </UButton>
+                    <ModalContainer v-model:open="editModalOpen[mealId]" class="flex-1">
+                        <UButton label="Upravit" color="neutral" variant="subtle" size="md" class="flex-1" />
+
+                        <template #content>
+                            <div class="modal-container">
+                                <ComponentWrapper
+                                    :component="withVars(editVstupNazevComponent, [new Variable('idJidla', mealId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupDobaComponent, [new Variable('idJidla', mealId)])" />
+                                <div class="flex gap-2">
+                                    <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                        @click="editModalOpen[mealId] = false" />
+                                    <ComponentWrapper
+                                        :component="withVars(editBtnUlozitComponent, [new Variable('idJidla', mealId)])"
+                                        @action-completed="handleMealUpdated(mealId)" />
+                                </div>
+                            </div>
+                        </template>
+                    </ModalContainer>
+
+                    <div class="flex-1" @click="reloadAfterDelete">
+                        <ComponentWrapper
+                            :component="withVars(smazatComponent, [new Variable('idJidla', mealId)])" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,13 +98,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ComponentWrapper from '~/components/ComponentWrapper.vue';
+import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
-import { DatabaseHandler } from '~/utils/DatabaseHandler';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -92,11 +122,26 @@ const systemId = route.params.id as string;
 systemsStore.selectedSystemId = systemId;
 
 const isDbReady = computed(() => !!systemsStore.selectedSystem?.database?.sqlJsDatabase);
+const createModalOpen = ref(false);
+const editModalOpen = reactive<Record<number, boolean>>({});
 
-// Components (registered via plugin from SystemComponents/meals/)
-const cardInfoComponent = computed(() => systemsStore.getComponentById('meal-card-info'));
-const allergenListComponent = computed(() => systemsStore.getComponentById('meal-allergen-list'));
-const countBarComponent = computed(() => systemsStore.getComponentById('meals-total-count-bar'));
+// Display components
+const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-jidla'));
+const allergenListComponent = computed(() => systemsStore.getComponentById('seznam-alergenu-jidla'));
+const countBarComponent = computed(() => systemsStore.getComponentById('celkovy-pocet-jidel'));
+
+// Create components
+const vstupNazevComponent = computed(() => systemsStore.getComponentById('vstup-nazev-jidla'));
+const vstupDobaComponent = computed(() => systemsStore.getComponentById('vstup-doba-podavani'));
+const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-jidlo'));
+
+// Edit components
+const editVstupNazevComponent = computed(() => systemsStore.getComponentById('edit-vstup-nazev-jidla'));
+const editVstupDobaComponent = computed(() => systemsStore.getComponentById('edit-vstup-doba-podavani'));
+const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-jidlo'));
+
+// Delete component
+const smazatComponent = computed(() => systemsStore.getComponentById('smazat-jidlo'));
 
 // Meal data
 interface MealRow { id: number; time: string }
@@ -107,9 +152,9 @@ const selectedTime = ref<string | null>(null);
 
 const timeFilterItems = computed(() => [
     { label: t('all_meals'), value: null },
-    { label: 'snĂ­danÄ›', value: 'snĂ­danÄ›' },
-    { label: 'obÄ›d', value: 'obÄ›d' },
-    { label: 'veÄŤeĹ™e', value: 'veÄŤeĹ™e' },
+    { label: 'snídaně', value: 'snídaně' },
+    { label: 'oběd', value: 'oběd' },
+    { label: 'večeře', value: 'večeře' },
 ]);
 
 const filteredMealIds = computed(() => {
@@ -139,6 +184,20 @@ const loadData = async () => {
     }
 };
 
+const reloadAfterDelete = () => {
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleMealCreated = () => {
+    createModalOpen.value = false;
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleMealUpdated = (mealId: number) => {
+    editModalOpen[mealId] = false;
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
 watch(() => systemsStore.selectedSystem?.database?.sqlJsDatabase, (db) => {
     if (db) loadData();
 }, { immediate: true });
@@ -149,5 +208,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
 </style>
 

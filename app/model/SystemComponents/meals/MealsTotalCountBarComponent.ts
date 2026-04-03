@@ -1,18 +1,18 @@
 import { Component } from "~/model/Component";
 
-export const mealsTotalCountBarComponent = new Component({
-  id: "meals-total-count-bar",
-  name: "Meals Total Count Bar",
-  tags: ["meals"],
-  description: `Shows total meal count in a toolbar widget.`,
+export const celkovyPocetJidelKomponenta = new Component({
+  id: "celkovy-pocet-jidel",
+  name: "Celkový počet jídel",
+  tags: ["jídla"],
+  description: `Zobrazuje celkový počet jídel ve widgetu nástrojové lišty.`,
   html: `
-<div id="meals-count-widget">
-  <span id="meals-count-icon">🍴</span>
-  <span id="meals-count-label">Meal Count: meals_total_count</span>
+<div id="widget-poctu-jidel">
+  <span id="ikona-poctu-jidel">🍴</span>
+  <span id="popisek-poctu-jidel">Počet jídel: celkovy_pocet_jidel</span>
 </div>
 `,
   css: `
-#meals-count-widget {
+#widget-poctu-jidel {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -25,14 +25,14 @@ export const mealsTotalCountBarComponent = new Component({
   font-weight: 600;
 }
 
-#meals-count-icon {
+#ikona-poctu-jidel {
   font-size: 15px;
 }
 `,
   js: ``,
   js_click: ``,
   sql: {
-    "meals-total-count-bar": `SELECT COUNT(*) AS meals_total_count FROM jidla`
+    "celkovy-pocet-jidel": `SELECT COUNT(*) AS celkovy_pocet_jidel FROM jidla`
   },
   sql_click: {}
 });

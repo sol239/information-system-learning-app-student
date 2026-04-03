@@ -1,19 +1,19 @@
 ﻿import { Component } from "~/model/Component";
 
-export const participantAllergenBadgeComponent = new Component({
-  id: "participant-allergen-badge",
-  name: "Participant Allergen Badge",
-  tags: ["participants"],
-  description: `Shows allergen count badge (green=0, pink>=1) for a participant. Requires generalVariable: participantId.`,
+export const stitekAlergenuUcastnikaKomponenta = new Component({
+  id: "stitek-alergenu-ucastnika",
+  name: "Štítek alergenů účastníka",
+  tags: ["účastníci"],
+  description: `Zobrazuje štítek s počtem alergenů účastníka (zelený=0, růžový>=1). Vyžaduje generalVariable: idUcastnika.`,
   html: `
-<div id="ptcp-allergen-badge-wrapper">ptcp_allergen_html</div>
+<div id="obal-stitku-alergenu-ucastnika">html_alergenu_ucastnika</div>
 `,
   css: `
-#ptcp-allergen-badge-wrapper {
+#obal-stitku-alergenu-ucastnika {
   display: inline-flex;
 }
 
-.ptcp-allerg-badge {
+.stitek-alergenu-ucastnika {
   display: inline-flex;
   align-items: center;
   padding: 4px 14px;
@@ -23,13 +23,13 @@ export const participantAllergenBadgeComponent = new Component({
   border: 1px solid transparent;
 }
 
-.ptcp-allerg-none {
+.stitek-alergenu-zadne {
   background-color: #dcfce7;
   border-color: #bbf7d0;
   color: #15803d;
 }
 
-.ptcp-allerg-has {
+.stitek-alergenu-ma {
   background-color: #fce7f3;
   border-color: #fbcfe8;
   color: #be185d;
@@ -38,7 +38,7 @@ export const participantAllergenBadgeComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "participant-allergen-badge": `SELECT '<span class="ptcp-allerg-badge ' || CASE WHEN COUNT(ua.id_alergenu) = 0 THEN 'ptcp-allerg-none' ELSE 'ptcp-allerg-has' END || '">Allergens: ' || COUNT(ua.id_alergenu) || '</span>' AS ptcp_allergen_html FROM ucastnici u LEFT JOIN ucastnici_alergeny ua ON u.id_ucastnika = ua.id_ucastnika WHERE u.id_ucastnika = participantId`
+    "stitek-alergenu-ucastnika": `SELECT '<span class="stitek-alergenu-ucastnika ' || CASE WHEN COUNT(ua.id_alergenu) = 0 THEN 'stitek-alergenu-zadne' ELSE 'stitek-alergenu-ma' END || '">Alergeny: ' || COUNT(ua.id_alergenu) || '</span>' AS html_alergenu_ucastnika FROM ucastnici u LEFT JOIN ucastnici_alergeny ua ON u.id_ucastnika = ua.id_ucastnika WHERE u.id_ucastnika = idUcastnika`
   },
   sql_click: {}
 });

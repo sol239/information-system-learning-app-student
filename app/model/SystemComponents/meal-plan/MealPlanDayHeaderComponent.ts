@@ -1,24 +1,24 @@
 ﻿import { Component } from "~/model/Component";
 
-export const mealPlanDayHeaderComponent = new Component({
-  id: "meal-plan-day-header",
-  name: "Meal Plan Day Header",
-  tags: ["meal-plan"],
-  description: `Day accordion header row for the meal plan. Requires generalVariable: dayDate (YYYY-MM-DD string).`,
+export const jidelnicekHlavickaDneKomponenta = new Component({
+  id: "jidelnicek-hlavicka-dne",
+  name: "Jídelníček – Hlavička dne",
+  tags: ["jídelníček"],
+  description: `Hlavička dne v akordéonu jídelníčku. Vyžaduje generalVariable: datumDne (formát YYYY-MM-DD).`,
   html: `
-<div id="mp-day-row">
-  <div id="mp-day-left">
-    <span id="mp-day-cal-icon">📅</span>
-    <span id="mp-day-date">mp_day_display</span>
+<div id="jidelnicek-radek-dne">
+  <div id="jidelnicek-dne-levy">
+    <span id="jidelnicek-dne-ikona">📅</span>
+    <span id="jidelnicek-dne-datum">zobrazeni_dne</span>
   </div>
-  <div id="mp-day-badges">
-    <span id="mp-day-meals-badge">Unique meals count mp_day_unique_meals</span>
-    <span id="mp-day-portions-badge">Portion Count mp_day_portions</span>
+  <div id="jidelnicek-dne-stitky">
+    <span id="jidelnicek-dne-jidla-stitek">Unikátních jídel: pocet_unikatnich_jidel_dne</span>
+    <span id="jidelnicek-dne-porci-stitek">Počet porcí: pocet_porci_dne</span>
   </div>
 </div>
 `,
   css: `
-#mp-day-row {
+#jidelnicek-radek-dne {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,30 +27,30 @@ export const mealPlanDayHeaderComponent = new Component({
   width: 100%;
 }
 
-#mp-day-left {
+#jidelnicek-dne-levy {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-#mp-day-cal-icon {
+#jidelnicek-dne-ikona {
   font-size: 16px;
 }
 
-#mp-day-date {
+#jidelnicek-dne-datum {
   font-size: 15px;
   font-weight: 600;
   color: #111827;
 }
 
-#mp-day-badges {
+#jidelnicek-dne-stitky {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-#mp-day-meals-badge {
+#jidelnicek-dne-jidla-stitek {
   display: inline-flex;
   align-items: center;
   padding: 3px 12px;
@@ -62,7 +62,7 @@ export const mealPlanDayHeaderComponent = new Component({
   border: 1px solid #bbf7d0;
 }
 
-#mp-day-portions-badge {
+#jidelnicek-dne-porci-stitek {
   display: inline-flex;
   align-items: center;
   padding: 3px 12px;
@@ -77,7 +77,7 @@ export const mealPlanDayHeaderComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "meal-plan-day-header": `SELECT strftime('%d. %m. %Y', 'dayDate') AS mp_day_display, COUNT(DISTINCT id_jidla) AS mp_day_unique_meals, (SELECT COUNT(*) FROM ucastnici_jidla WHERE datum_podavani = 'dayDate') + (SELECT COUNT(*) FROM jidla_vedouci WHERE datum_podavani = 'dayDate') AS mp_day_portions FROM kniha_jidel WHERE datum = 'dayDate'`
+    "jidelnicek-hlavicka-dne": `SELECT strftime('%d. %m. %Y', 'datumDne') AS zobrazeni_dne, COUNT(DISTINCT id_jidla) AS pocet_unikatnich_jidel_dne, (SELECT COUNT(*) FROM ucastnici_jidla WHERE datum_podavani = 'datumDne') + (SELECT COUNT(*) FROM jidla_vedouci WHERE datum_podavani = 'datumDne') AS pocet_porci_dne FROM kniha_jidel WHERE datum = 'datumDne'`
   },
   sql_click: {}
 });

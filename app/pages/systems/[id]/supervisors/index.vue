@@ -37,10 +37,25 @@
                 class="w-56"
             />
 
-            <!-- Add supervisor -->
-            <UButton color="primary" icon="i-heroicons-plus">
-                {{ t('add_supervisor') }}
-            </UButton>
+            <!-- Add supervisor modal -->
+            <ModalContainer v-model:open="createModalOpen" class="w-fit">
+                <UButton label="Přidat vedoucího" color="primary" icon="i-heroicons-plus" size="md" />
+
+                <template #content>
+                    <div class="modal-container">
+                        <ComponentWrapper :component="vstupJmenoComponent" />
+                        <ComponentWrapper :component="vstupEmailComponent" />
+                        <ComponentWrapper :component="vstupTelefonComponent" />
+                        <ComponentWrapper :component="vstupAdresaComponent" />
+                        <ComponentWrapper :component="vstupVekComponent" />
+                        <div class="flex gap-2">
+                            <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                @click="createModalOpen = false" />
+                            <ComponentWrapper :component="btnUlozitComponent" @action-completed="handleSupervisorCreated" />
+                        </div>
+                    </div>
+                </template>
+            </ModalContainer>
         </div>
 
         <!-- Supervisors grid -->
@@ -52,27 +67,51 @@
             >
                 <!-- Name + age + email + phone + address -->
                 <ComponentWrapper
-                    :component="withVars(cardInfoComponent, [new Variable('supervisorId', supervisorId)])"
+                    :component="withVars(cardInfoComponent, [new Variable('idVedouciho', supervisorId)])"
                 />
 
                 <!-- Session line -->
                 <ComponentWrapper
-                    :component="withVars(sessionBadgeComponent, [new Variable('supervisorId', supervisorId)])"
+                    :component="withVars(sessionBadgeComponent, [new Variable('idVedouciho', supervisorId)])"
                 />
 
                 <!-- Allergen badge -->
                 <ComponentWrapper
-                    :component="withVars(allergenBadgeComponent, [new Variable('supervisorId', supervisorId)])"
+                    :component="withVars(allergenBadgeComponent, [new Variable('idVedouciho', supervisorId)])"
                 />
 
                 <!-- Actions -->
                 <div class="flex gap-3 pt-1 border-t border-gray-100">
-                    <UButton color="primary" variant="solid" class="flex-1">
-                        {{ t('view_details') }}
-                    </UButton>
-                    <UButton color="error" variant="outline" class="flex-1">
-                        {{ t('delete') }}
-                    </UButton>
+                    <ModalContainer v-model:open="editModalOpen[supervisorId]" class="flex-1">
+                        <UButton label="Upravit" color="neutral" variant="subtle" size="md" class="flex-1" />
+
+                        <template #content>
+                            <div class="modal-container">
+                                <ComponentWrapper
+                                    :component="withVars(editVstupJmenoComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupEmailComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupTelefonComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupAdresaComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupVekComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <div class="flex gap-2">
+                                    <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                        @click="editModalOpen[supervisorId] = false" />
+                                    <ComponentWrapper
+                                        :component="withVars(editBtnUlozitComponent, [new Variable('idVedouciho', supervisorId)])"
+                                        @action-completed="handleSupervisorUpdated(supervisorId)" />
+                                </div>
+                            </div>
+                        </template>
+                    </ModalContainer>
+
+                    <div class="flex-1" @click="reloadAfterDelete">
+                        <ComponentWrapper
+                            :component="withVars(smazatComponent, [new Variable('idVedouciho', supervisorId)])" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,13 +126,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ComponentWrapper from '~/components/ComponentWrapper.vue';
+import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
-import { DatabaseHandler } from '~/utils/DatabaseHandler';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -111,12 +150,33 @@ const systemId = route.params.id as string;
 systemsStore.selectedSystemId = systemId;
 
 const isDbReady = computed(() => !!systemsStore.selectedSystem?.database?.sqlJsDatabase);
+const createModalOpen = ref(false);
+const editModalOpen = reactive<Record<number, boolean>>({});
 
-// Components (registered via plugin from SystemComponents/supervisors/)
-const cardInfoComponent = computed(() => systemsStore.getComponentById('supervisor-card-info'));
-const sessionBadgeComponent = computed(() => systemsStore.getComponentById('supervisor-session-badge'));
-const allergenBadgeComponent = computed(() => systemsStore.getComponentById('supervisor-allergen-badge'));
-const countBarComponent = computed(() => systemsStore.getComponentById('supervisors-total-count-bar'));
+// Display components
+const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-vedouciho'));
+const sessionBadgeComponent = computed(() => systemsStore.getComponentById('stitek-turnusu-vedouciho'));
+const allergenBadgeComponent = computed(() => systemsStore.getComponentById('stitek-alergenu-vedouciho'));
+const countBarComponent = computed(() => systemsStore.getComponentById('celkovy-pocet-vedoucich'));
+
+// Create components
+const vstupJmenoComponent = computed(() => systemsStore.getComponentById('vstup-jmeno-vedouciho'));
+const vstupEmailComponent = computed(() => systemsStore.getComponentById('vstup-email-vedouciho'));
+const vstupTelefonComponent = computed(() => systemsStore.getComponentById('vstup-telefon-vedouciho'));
+const vstupAdresaComponent = computed(() => systemsStore.getComponentById('vstup-adresa-vedouciho'));
+const vstupVekComponent = computed(() => systemsStore.getComponentById('vstup-vek-vedouciho'));
+const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-vedouciho'));
+
+// Edit components
+const editVstupJmenoComponent = computed(() => systemsStore.getComponentById('edit-vstup-jmeno-vedouciho'));
+const editVstupEmailComponent = computed(() => systemsStore.getComponentById('edit-vstup-email-vedouciho'));
+const editVstupTelefonComponent = computed(() => systemsStore.getComponentById('edit-vstup-telefon-vedouciho'));
+const editVstupAdresaComponent = computed(() => systemsStore.getComponentById('edit-vstup-adresa-vedouciho'));
+const editVstupVekComponent = computed(() => systemsStore.getComponentById('edit-vstup-vek-vedouciho'));
+const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-vedouciho'));
+
+// Delete component
+const smazatComponent = computed(() => systemsStore.getComponentById('smazat-vedouciho'));
 
 // Supervisor data
 interface SupervisorRow { id: number; sessionId: number | null }
@@ -172,12 +232,26 @@ const loadData = async () => {
         if (sResult.data?.[0]?.values) {
             sessions.value = sResult.data[0].values.map(row => ({
                 id: Number(row[0]),
-                label: `Session ${row[0]}`
+                label: `Turnus ${row[0]}`
             }));
         }
     } catch (e) {
         console.error('Failed to load supervisors:', e);
     }
+};
+
+const reloadAfterDelete = () => {
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleSupervisorCreated = () => {
+    createModalOpen.value = false;
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleSupervisorUpdated = (supervisorId: number) => {
+    editModalOpen[supervisorId] = false;
+    window.setTimeout(() => { loadData(); }, 50);
 };
 
 watch(() => systemsStore.selectedSystem?.database?.sqlJsDatabase, (db) => {
@@ -190,4 +264,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
 </style>

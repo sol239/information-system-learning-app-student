@@ -1,53 +1,53 @@
 ﻿import { Component } from "~/model/Component";
 
-export const supervisorCardInfoComponent = new Component({
-  id: "supervisor-card-info",
-  name: "Supervisor Card Info",
-  tags: ["supervisors"],
-  description: `Card showing name, age badge, email, phone and address for a supervisor. Requires generalVariable: supervisorId.`,
+export const kartaVedoucihoKomponenta = new Component({
+  id: "karta-vedouciho",
+  name: "Karta vedoucího",
+  tags: ["vedoucí"],
+  description: `Karta zobrazující jméno, věk, email, telefon a adresu vedoucího. Vyžaduje generalVariable: idVedouciho.`,
   html: `
-<div id="sup-card">
-  <div id="sup-card-header">
-    <span id="sup-name">jmeno</span>
-    <span id="sup-age-badge">Age: vek</span>
+<div id="karta-vedouciho">
+  <div id="karta-vedouciho-hlavicka">
+    <span id="jmeno-vedouciho">jmeno</span>
+    <span id="vek-vedouciho-stitek">Věk: vek</span>
   </div>
-  <div id="sup-email-row">
-    <span id="sup-email-icon">✉️</span>
-    <span id="sup-email">email</span>
+  <div id="email-vedouciho-radek">
+    <span id="email-vedouciho-ikona">✉️</span>
+    <span id="email-vedouciho">email</span>
   </div>
-  <div id="sup-phone-row">
-    <span id="sup-phone-icon">📞</span>
-    <span id="sup-phone">telefon</span>
+  <div id="telefon-vedouciho-radek">
+    <span id="telefon-vedouciho-ikona">📞</span>
+    <span id="telefon-vedouciho">telefon</span>
   </div>
-  <div id="sup-address-row">
-    <span id="sup-address-icon">📍</span>
-    <span id="sup-address">adresa</span>
+  <div id="adresa-vedouciho-radek">
+    <span id="adresa-vedouciho-ikona">📍</span>
+    <span id="adresa-vedouciho">adresa</span>
   </div>
 </div>
 `,
   css: `
-#sup-card {
+#karta-vedouciho {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
 
-#sup-card-header {
+#karta-vedouciho-hlavicka {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
 
-#sup-name {
+#jmeno-vedouciho {
   font-size: 20px;
   font-weight: 700;
   color: #111827;
   line-height: 1.3;
 }
 
-#sup-age-badge {
+#vek-vedouciho-stitek {
   display: inline-flex;
   align-items: center;
   padding: 3px 12px;
@@ -60,7 +60,7 @@ export const supervisorCardInfoComponent = new Component({
   flex-shrink: 0;
 }
 
-#sup-email-row, #sup-phone-row, #sup-address-row {
+#email-vedouciho-radek, #telefon-vedouciho-radek, #adresa-vedouciho-radek {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -68,7 +68,7 @@ export const supervisorCardInfoComponent = new Component({
   color: #374151;
 }
 
-#sup-email-icon, #sup-phone-icon, #sup-address-icon {
+#email-vedouciho-ikona, #telefon-vedouciho-ikona, #adresa-vedouciho-ikona {
   font-size: 14px;
   color: #6b7280;
   flex-shrink: 0;
@@ -77,7 +77,7 @@ export const supervisorCardInfoComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "supervisor-card-info": `SELECT v.jmeno, v.vek, v.email, v.telefon, v.adresa FROM vedouci v WHERE v.id_vedouciho = supervisorId`
+    "karta-vedouciho": `SELECT v.jmeno, v.vek, v.email, v.telefon, v.adresa FROM vedouci v WHERE v.id_vedouciho = idVedouciho`
   },
   sql_click: {}
 });

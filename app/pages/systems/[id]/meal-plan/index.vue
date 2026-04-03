@@ -12,7 +12,7 @@
                 @click="toggleSession(sessionId)">
                 <div class="flex-1">
                     <ComponentWrapper
-                        :component="withVars(sessionHeaderComponent, [new Variable('sessionId', sessionId)])"
+                        :component="withVars(sessionHeaderComponent, [new Variable('idTurnusu', sessionId)])"
                     />
                 </div>
                 <UIcon
@@ -31,7 +31,7 @@
                         @click="toggleDay(sessionId, date)">
                         <div class="flex-1">
                             <ComponentWrapper
-                                :component="withVars(dayHeaderComponent, [new Variable('dayDate', date)])"
+                                :component="withVars(dayHeaderComponent, [new Variable('datumDne', date)])"
                             />
                         </div>
                         <UIcon
@@ -50,7 +50,7 @@
                                 @click="toggleMeal(mealId, date)">
                                 <div class="flex-1">
                                     <ComponentWrapper
-                                        :component="withVars(mealRowComponent, [new Variable('mealId', mealId)])"
+                                        :component="withVars(mealRowComponent, [new Variable('idJidla', mealId)])"
                                     />
                                 </div>
                                 <UIcon
@@ -63,7 +63,7 @@
                             <div v-if="isMealExpanded(mealId, date)"
                                 class="px-10 py-4 bg-blue-50/40 border-t border-blue-100">
                                 <ComponentWrapper
-                                    :component="withVars(mealPeopleComponent, [new Variable('mealId', mealId), new Variable('dayDate', date)])"
+                                    :component="withVars(mealPeopleComponent, [new Variable('idJidla', mealId), new Variable('datumDne', date)])"
                                 />
                             </div>
                         </div>
@@ -89,7 +89,6 @@ import { useI18n } from 'vue-i18n';
 import ComponentWrapper from '~/components/ComponentWrapper.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
-import { DatabaseHandler } from '~/utils/DatabaseHandler';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -109,10 +108,10 @@ systemsStore.selectedSystemId = systemId;
 const isDbReady = computed(() => !!systemsStore.selectedSystem?.database?.sqlJsDatabase);
 
 // Components
-const sessionHeaderComponent = computed(() => systemsStore.getComponentById('meal-plan-session-header'));
-const dayHeaderComponent = computed(() => systemsStore.getComponentById('meal-plan-day-header'));
-const mealRowComponent = computed(() => systemsStore.getComponentById('meal-plan-meal-row'));
-const mealPeopleComponent = computed(() => systemsStore.getComponentById('meal-plan-meal-people'));
+const sessionHeaderComponent = computed(() => systemsStore.getComponentById('jidelnicek-hlavicka-turnusu'));
+const dayHeaderComponent = computed(() => systemsStore.getComponentById('jidelnicek-hlavicka-dne'));
+const mealRowComponent = computed(() => systemsStore.getComponentById('jidelnicek-radek-jidla'));
+const mealPeopleComponent = computed(() => systemsStore.getComponentById('jidelnicek-lide-jidla'));
 
 // State
 const sessionIds = ref<number[]>([]);

@@ -1,22 +1,22 @@
 import { Component } from "~/model/Component";
 
-export const participantsTotalCapacityBarComponent = new Component({
-  id: "participants-total-capacity-bar",
-  name: "Participants Total Capacity Bar",
-  tags: ["participants"],
-  description: `Shows total enrolled / total capacity and percentage across all sessions.`,
+export const celkovaKapacitaUcastnikuKomponenta = new Component({
+  id: "celkova-kapacita-ucastniku",
+  name: "Celková kapacita účastníků",
+  tags: ["účastníci"],
+  description: `Zobrazuje celkový počet zapsaných / celkovou kapacitu a procento obsazenosti.`,
   html: `
-<div id="ptcp-cap-bar-widget">
-  <span id="ptcp-cap-bar-people-icon">👥</span>
-  <span id="ptcp-cap-bar-label">Capacity: ptcp_total_enrolled/ptcp_total_capacity</span>
-  <div id="ptcp-cap-bar-bg">
-    <div id="ptcp-cap-bar-fill" style="width: ptcp_total_pct%"></div>
+<div id="widget-kapacity-ucastniku">
+  <span id="ikona-kapacity-ucastniku">👥</span>
+  <span id="popisek-kapacity-ucastniku">Kapacita: celkem_zapsanych/celkova_kapacita</span>
+  <div id="pozadi-kapacity-ucastniku">
+    <div id="vypln-kapacity-ucastniku" style="width: procento_obsazenosti_ucastniku%"></div>
   </div>
-  <span id="ptcp-cap-bar-pct">ptcp_total_pct%</span>
+  <span id="procenta-kapacity-ucastniku">procento_obsazenosti_ucastniku%</span>
 </div>
 `,
   css: `
-#ptcp-cap-bar-widget {
+#widget-kapacity-ucastniku {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -29,11 +29,11 @@ export const participantsTotalCapacityBarComponent = new Component({
   font-weight: 500;
 }
 
-#ptcp-cap-bar-people-icon {
+#ikona-kapacity-ucastniku {
   font-size: 15px;
 }
 
-#ptcp-cap-bar-bg {
+#pozadi-kapacity-ucastniku {
   width: 80px;
   height: 8px;
   background: #3f3f46;
@@ -41,13 +41,13 @@ export const participantsTotalCapacityBarComponent = new Component({
   overflow: hidden;
 }
 
-#ptcp-cap-bar-fill {
+#vypln-kapacity-ucastniku {
   height: 100%;
   background: #22c55e;
   border-radius: 9999px;
 }
 
-#ptcp-cap-bar-pct {
+#procenta-kapacity-ucastniku {
   color: #22c55e;
   font-weight: 700;
 }
@@ -55,7 +55,7 @@ export const participantsTotalCapacityBarComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "participants-total-capacity-bar": `SELECT COUNT(DISTINCT tu.id_ucastnika) AS ptcp_total_enrolled, SUM(DISTINCT t.kapacita) AS ptcp_total_capacity, (COUNT(DISTINCT tu.id_ucastnika) * 100) / SUM(DISTINCT t.kapacita) AS ptcp_total_pct FROM turnusy t LEFT JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu`
+    "celkova-kapacita-ucastniku": `SELECT COUNT(DISTINCT tu.id_ucastnika) AS celkem_zapsanych, SUM(DISTINCT t.kapacita) AS celkova_kapacita, (COUNT(DISTINCT tu.id_ucastnika) * 100) / SUM(DISTINCT t.kapacita) AS procento_obsazenosti_ucastniku FROM turnusy t LEFT JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu`
   },
   sql_click: {}
 });

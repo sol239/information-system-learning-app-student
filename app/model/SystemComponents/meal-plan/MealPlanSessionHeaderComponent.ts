@@ -1,25 +1,25 @@
 ﻿import { Component } from "~/model/Component";
 
-export const mealPlanSessionHeaderComponent = new Component({
-  id: "meal-plan-session-header",
-  name: "Meal Plan Session Header",
-  tags: ["meal-plan"],
-  description: `Session accordion header row for the meal plan. Requires generalVariable: sessionId.`,
+export const jidelnicekHlavickaTurnusuKomponenta = new Component({
+  id: "jidelnicek-hlavicka-turnusu",
+  name: "Jídelníček – Hlavička turnusu",
+  tags: ["jídelníček"],
+  description: `Hlavička turnusu v akordéonu jídelníčku. Vyžaduje generalVariable: idTurnusu.`,
   html: `
-<div id="mp-sess-row">
-  <div id="mp-sess-left">
-    <span id="mp-sess-cal-icon">📅</span>
-    <span id="mp-sess-label">Session sessionId</span>
+<div id="jidelnicek-radek-turnusu">
+  <div id="jidelnicek-turnusu-levy">
+    <span id="jidelnicek-turnusu-ikona">📅</span>
+    <span id="jidelnicek-turnusu-popisek">Turnus idTurnusu</span>
   </div>
-  <div id="mp-sess-badges">
-    <span id="mp-sess-date-badge">mp_sess_from – mp_sess_to</span>
-    <span id="mp-sess-meals-badge">Unique meals count mp_unique_meals</span>
-    <span id="mp-sess-portions-badge">Portion Count mp_portion_count</span>
+  <div id="jidelnicek-turnusu-stitky">
+    <span id="jidelnicek-turnusu-datum-stitek">datum_od_jidelnicku – datum_do_jidelnicku</span>
+    <span id="jidelnicek-turnusu-jidla-stitek">Unikátních jídel: pocet_unikatnich_jidel</span>
+    <span id="jidelnicek-turnusu-porci-stitek">Počet porcí: pocet_porci</span>
   </div>
 </div>
 `,
   css: `
-#mp-sess-row {
+#jidelnicek-radek-turnusu {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -28,30 +28,30 @@ export const mealPlanSessionHeaderComponent = new Component({
   width: 100%;
 }
 
-#mp-sess-left {
+#jidelnicek-turnusu-levy {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-#mp-sess-cal-icon {
+#jidelnicek-turnusu-ikona {
   font-size: 20px;
 }
 
-#mp-sess-label {
+#jidelnicek-turnusu-popisek {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
 }
 
-#mp-sess-badges {
+#jidelnicek-turnusu-stitky {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-#mp-sess-date-badge {
+#jidelnicek-turnusu-datum-stitek {
   display: inline-flex;
   align-items: center;
   padding: 4px 14px;
@@ -63,7 +63,7 @@ export const mealPlanSessionHeaderComponent = new Component({
   border: 1px solid #a5f3fc;
 }
 
-#mp-sess-meals-badge {
+#jidelnicek-turnusu-jidla-stitek {
   display: inline-flex;
   align-items: center;
   padding: 4px 14px;
@@ -75,7 +75,7 @@ export const mealPlanSessionHeaderComponent = new Component({
   border: 1px solid #bbf7d0;
 }
 
-#mp-sess-portions-badge {
+#jidelnicek-turnusu-porci-stitek {
   display: inline-flex;
   align-items: center;
   padding: 4px 14px;
@@ -90,7 +90,7 @@ export const mealPlanSessionHeaderComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "meal-plan-session-header": `SELECT strftime('%d. %m. %Y', t.datum_od) AS mp_sess_from, strftime('%d. %m. %Y', t.datum_do) AS mp_sess_to, COUNT(DISTINCT kj.id_jidla) AS mp_unique_meals, (SELECT COUNT(*) FROM ucastnici_jidla uj WHERE DATE(uj.datum_podavani) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)) + (SELECT COUNT(*) FROM jidla_vedouci jv WHERE DATE(jv.datum_podavani) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)) AS mp_portion_count FROM turnusy t LEFT JOIN kniha_jidel kj ON DATE(kj.datum) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do) WHERE t.id_turnusu = sessionId GROUP BY t.id_turnusu`
+    "jidelnicek-hlavicka-turnusu": `SELECT strftime('%d. %m. %Y', t.datum_od) AS datum_od_jidelnicku, strftime('%d. %m. %Y', t.datum_do) AS datum_do_jidelnicku, COUNT(DISTINCT kj.id_jidla) AS pocet_unikatnich_jidel, (SELECT COUNT(*) FROM ucastnici_jidla uj WHERE DATE(uj.datum_podavani) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)) + (SELECT COUNT(*) FROM jidla_vedouci jv WHERE DATE(jv.datum_podavani) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)) AS pocet_porci FROM turnusy t LEFT JOIN kniha_jidel kj ON DATE(kj.datum) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do) WHERE t.id_turnusu = idTurnusu GROUP BY t.id_turnusu`
   },
   sql_click: {}
 });

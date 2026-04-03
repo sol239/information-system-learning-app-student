@@ -1,36 +1,36 @@
 ﻿import { Component } from "~/model/Component";
 
-export const mealAllergenListComponent = new Component({
-  id: "meal-allergen-list",
-  name: "Meal Allergen List",
-  tags: ["meals"],
-  description: `Shows allergen pills for a meal. Requires generalVariable: mealId.`,
+export const seznamAlergenuJidlaKomponenta = new Component({
+  id: "seznam-alergenu-jidla",
+  name: "Seznam alergenů jídla",
+  tags: ["jídla"],
+  description: `Zobrazuje pilulky alergenů pro jídlo. Vyžaduje generalVariable: idJidla.`,
   html: `
-<div id="meal-allerg-section">
-  <div id="meal-allerg-label">Allergens:</div>
-  <div id="meal-allerg-pills">meal_allerg_html</div>
+<div id="sekce-alergenu-jidla">
+  <div id="popisek-alergenu-jidla">Alergeny:</div>
+  <div id="pilulky-alergenu-jidla">html_alergenu_jidla</div>
 </div>
 `,
   css: `
-#meal-allerg-section {
+#sekce-alergenu-jidla {
   display: flex;
   flex-direction: column;
   gap: 6px;
   width: 100%;
 }
 
-#meal-allerg-label {
+#popisek-alergenu-jidla {
   font-size: 13px;
   color: #6b7280;
 }
 
-#meal-allerg-pills {
+#pilulky-alergenu-jidla {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.meal-allerg-pill {
+.pilulka-alergenu-jidla {
   display: inline-flex;
   align-items: center;
   padding: 3px 12px;
@@ -45,7 +45,7 @@ export const mealAllergenListComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "meal-allergen-list": `SELECT COALESCE(GROUP_CONCAT('<span class="meal-allerg-pill">' || a.jmeno || '</span>', ''), '') AS meal_allerg_html FROM jidla j LEFT JOIN jidla_alergeny ja ON j.id_jidla = ja.id_jidla LEFT JOIN alergeny a ON ja.id_alergenu = a.id_alergenu WHERE j.id_jidla = mealId`
+    "seznam-alergenu-jidla": `SELECT COALESCE(GROUP_CONCAT('<span class="pilulka-alergenu-jidla">' || a.jmeno || '</span>', ''), '') AS html_alergenu_jidla FROM jidla j LEFT JOIN jidla_alergeny ja ON j.id_jidla = ja.id_jidla LEFT JOIN alergeny a ON ja.id_alergenu = a.id_alergenu WHERE j.id_jidla = idJidla`
   },
   sql_click: {}
 });

@@ -1,53 +1,53 @@
 ﻿import { Component } from "~/model/Component";
 
-export const participantCardInfoComponent = new Component({
-  id: "participant-card-info",
-  name: "Participant Card Info",
-  tags: ["participants"],
-  description: `Card showing name, age badge, email, session info, phone and address for a participant. Requires generalVariable: participantId.`,
+export const kartaUcastnikaKomponenta = new Component({
+  id: "karta-ucastnika",
+  name: "Karta účastníka",
+  tags: ["účastníci"],
+  description: `Karta zobrazující jméno, věk, email, telefon a adresu účastníka. Vyžaduje generalVariable: idUcastnika.`,
   html: `
-<div id="ptcp-card">
-  <div id="ptcp-card-header">
-    <span id="ptcp-name">jmeno</span>
-    <span id="ptcp-age-badge">Age: vek</span>
+<div id="karta-ucastnika">
+  <div id="karta-ucastnika-hlavicka">
+    <span id="jmeno-ucastnika">jmeno</span>
+    <span id="vek-ucastnika-stitek">Věk: vek</span>
   </div>
-  <div id="ptcp-email-row">
-    <span id="ptcp-email-icon">✉️</span>
-    <span id="ptcp-email">email</span>
+  <div id="email-ucastnika-radek">
+    <span id="email-ucastnika-ikona">✉️</span>
+    <span id="email-ucastnika">email</span>
   </div>
-  <div id="ptcp-phone-row">
-    <span id="ptcp-phone-icon">📞</span>
-    <span id="ptcp-phone">telefon</span>
+  <div id="telefon-ucastnika-radek">
+    <span id="telefon-ucastnika-ikona">📞</span>
+    <span id="telefon-ucastnika">telefon</span>
   </div>
-  <div id="ptcp-address-row">
-    <span id="ptcp-address-icon">📍</span>
-    <span id="ptcp-address">adresa</span>
+  <div id="adresa-ucastnika-radek">
+    <span id="adresa-ucastnika-ikona">📍</span>
+    <span id="adresa-ucastnika">adresa</span>
   </div>
 </div>
 `,
   css: `
-#ptcp-card {
+#karta-ucastnika {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
 
-#ptcp-card-header {
+#karta-ucastnika-hlavicka {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
 
-#ptcp-name {
+#jmeno-ucastnika {
   font-size: 20px;
   font-weight: 700;
   color: #111827;
   line-height: 1.3;
 }
 
-#ptcp-age-badge {
+#vek-ucastnika-stitek {
   display: inline-flex;
   align-items: center;
   padding: 3px 12px;
@@ -60,7 +60,7 @@ export const participantCardInfoComponent = new Component({
   flex-shrink: 0;
 }
 
-#ptcp-email-row, #ptcp-phone-row, #ptcp-address-row {
+#email-ucastnika-radek, #telefon-ucastnika-radek, #adresa-ucastnika-radek {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -68,7 +68,7 @@ export const participantCardInfoComponent = new Component({
   color: #374151;
 }
 
-#ptcp-email-icon, #ptcp-phone-icon, #ptcp-address-icon {
+#email-ucastnika-ikona, #telefon-ucastnika-ikona, #adresa-ucastnika-ikona {
   font-size: 14px;
   color: #6b7280;
   flex-shrink: 0;
@@ -77,7 +77,7 @@ export const participantCardInfoComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "participant-card-info": `SELECT u.jmeno, u.vek, u.email, u.telefon, u.adresa FROM ucastnici u WHERE u.id_ucastnika = participantId`
+    "karta-ucastnika": `SELECT u.jmeno, u.vek, u.email, u.telefon, u.adresa FROM ucastnici u WHERE u.id_ucastnika = idUcastnika`
   },
   sql_click: {}
 });

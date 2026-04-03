@@ -1,18 +1,18 @@
 import { Component } from "~/model/Component";
 
-export const supervisorsTotalCountBarComponent = new Component({
-  id: "supervisors-total-count-bar",
-  name: "Supervisors Total Count Bar",
-  tags: ["supervisors"],
-  description: `Shows total supervisors count across all sessions in a toolbar widget.`,
+export const celkovyPocetVedoucichKomponenta = new Component({
+  id: "celkovy-pocet-vedoucich",
+  name: "Celkový počet vedoucích",
+  tags: ["vedoucí"],
+  description: `Zobrazuje celkový počet vedoucích ve widgetu nástrojové lišty.`,
   html: `
-<div id="sup-count-widget">
-  <span id="sup-count-icon">👨‍🏫</span>
-  <span id="sup-count-label">Supervisors: sup_total_count</span>
+<div id="widget-poctu-vedoucich">
+  <span id="ikona-poctu-vedoucich">👨‍🏫</span>
+  <span id="popisek-poctu-vedoucich">Vedoucích: celkovy_pocet_vedoucich</span>
 </div>
 `,
   css: `
-#sup-count-widget {
+#widget-poctu-vedoucich {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -25,11 +25,11 @@ export const supervisorsTotalCountBarComponent = new Component({
   font-weight: 500;
 }
 
-#sup-count-icon {
+#ikona-poctu-vedoucich {
   font-size: 15px;
 }
 
-#sup-count-label {
+#popisek-poctu-vedoucich {
   color: #a78bfa;
   font-weight: 700;
 }
@@ -37,7 +37,7 @@ export const supervisorsTotalCountBarComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "supervisors-total-count-bar": `SELECT COUNT(*) AS sup_total_count FROM vedouci`
+    "celkovy-pocet-vedoucich": `SELECT COUNT(*) AS celkovy_pocet_vedoucich FROM vedouci`
   },
   sql_click: {}
 });

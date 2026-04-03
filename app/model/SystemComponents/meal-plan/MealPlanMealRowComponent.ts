@@ -1,24 +1,24 @@
 ﻿import { Component } from "~/model/Component";
 
-export const mealPlanMealRowComponent = new Component({
-  id: "meal-plan-meal-row",
-  name: "Meal Plan Meal Row",
-  tags: ["meal-plan"],
-  description: `Meal row for the meal plan accordion showing name, allergens and serving time. Requires generalVariable: mealId.`,
+export const jidelnicekRadekJidlaKomponenta = new Component({
+  id: "jidelnicek-radek-jidla",
+  name: "Jídelníček – Řádek jídla",
+  tags: ["jídelníček"],
+  description: `Řádek jídla v akordéonu jídelníčku s názvem, alergeny a dobou podávání. Vyžaduje generalVariable: idJidla.`,
   html: `
-<div id="mp-meal-row">
-  <div id="mp-meal-left">
-    <span id="mp-meal-icon">🍽️</span>
-    <div id="mp-meal-info">
-      <span id="mp-meal-name">mp_meal_name</span>
-      <div id="mp-meal-allergens">mp_allergen_html</div>
+<div id="jidelnicek-radek-jidla-kontejner">
+  <div id="jidelnicek-jidlo-levy">
+    <span id="jidelnicek-jidlo-ikona">🍽️</span>
+    <div id="jidelnicek-jidlo-info">
+      <span id="jidelnicek-jidlo-nazev">nazev_jidla_jidelnicku</span>
+      <div id="jidelnicek-jidlo-alergeny">html_alergenu_jidelnicku</div>
     </div>
   </div>
-  <span id="mp-meal-time-badge">mp_meal_time</span>
+  <span id="jidelnicek-jidlo-doba-stitek">doba_podavani_jidelnicku</span>
 </div>
 `,
   css: `
-#mp-meal-row {
+#jidelnicek-radek-jidla-kontejner {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,37 +26,37 @@ export const mealPlanMealRowComponent = new Component({
   width: 100%;
 }
 
-#mp-meal-left {
+#jidelnicek-jidlo-levy {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-#mp-meal-icon {
+#jidelnicek-jidlo-ikona {
   font-size: 20px;
   padding-top: 2px;
   flex-shrink: 0;
 }
 
-#mp-meal-info {
+#jidelnicek-jidlo-info {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-#mp-meal-name {
+#jidelnicek-jidlo-nazev {
   font-size: 15px;
   font-weight: 700;
   color: #111827;
 }
 
-#mp-meal-allergens {
+#jidelnicek-jidlo-alergeny {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
 }
 
-.mp-allerg-pill {
+.pilulka-alergenu-jidelnicku {
   display: inline-flex;
   align-items: center;
   padding: 2px 10px;
@@ -68,7 +68,7 @@ export const mealPlanMealRowComponent = new Component({
   color: #be185d;
 }
 
-#mp-meal-time-badge {
+#jidelnicek-jidlo-doba-stitek {
   display: inline-flex;
   align-items: center;
   padding: 5px 16px;
@@ -84,7 +84,7 @@ export const mealPlanMealRowComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "meal-plan-meal-row": `SELECT j.jmeno AS mp_meal_name, j.doba_podavani AS mp_meal_time, COALESCE(GROUP_CONCAT('<span class="mp-allerg-pill">' || a.jmeno || '</span>', ''), '') AS mp_allergen_html FROM jidla j LEFT JOIN jidla_alergeny ja ON j.id_jidla = ja.id_jidla LEFT JOIN alergeny a ON ja.id_alergenu = a.id_alergenu WHERE j.id_jidla = mealId GROUP BY j.id_jidla, j.jmeno, j.doba_podavani`
+    "jidelnicek-radek-jidla": `SELECT j.jmeno AS nazev_jidla_jidelnicku, j.doba_podavani AS doba_podavani_jidelnicku, COALESCE(GROUP_CONCAT('<span class="pilulka-alergenu-jidelnicku">' || a.jmeno || '</span>', ''), '') AS html_alergenu_jidelnicku FROM jidla j LEFT JOIN jidla_alergeny ja ON j.id_jidla = ja.id_jidla LEFT JOIN alergeny a ON ja.id_alergenu = a.id_alergenu WHERE j.id_jidla = idJidla GROUP BY j.id_jidla, j.jmeno, j.doba_podavani`
   },
   sql_click: {}
 });

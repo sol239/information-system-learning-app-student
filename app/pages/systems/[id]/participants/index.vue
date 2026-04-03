@@ -37,10 +37,25 @@
                 class="w-56"
             />
 
-            <!-- Add participant -->
-            <UButton color="primary" icon="i-heroicons-plus">
-                {{ t('add_participant') }}
-            </UButton>
+            <!-- Add participant modal -->
+            <ModalContainer v-model:open="createModalOpen" class="w-fit">
+                <UButton label="Přidat účastníka" color="primary" icon="i-heroicons-plus" size="md" />
+
+                <template #content>
+                    <div class="modal-container">
+                        <ComponentWrapper :component="vstupJmenoComponent" />
+                        <ComponentWrapper :component="vstupEmailComponent" />
+                        <ComponentWrapper :component="vstupTelefonComponent" />
+                        <ComponentWrapper :component="vstupAdresaComponent" />
+                        <ComponentWrapper :component="vstupVekComponent" />
+                        <div class="flex gap-2">
+                            <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                @click="createModalOpen = false" />
+                            <ComponentWrapper :component="btnUlozitComponent" @action-completed="handleParticipantCreated" />
+                        </div>
+                    </div>
+                </template>
+            </ModalContainer>
         </div>
 
         <!-- Participants grid -->
@@ -52,27 +67,51 @@
             >
                 <!-- Name + age + email + phone + address -->
                 <ComponentWrapper
-                    :component="withVars(cardInfoComponent, [new Variable('participantId', participantId)])"
+                    :component="withVars(cardInfoComponent, [new Variable('idUcastnika', participantId)])"
                 />
 
                 <!-- Session line -->
                 <ComponentWrapper
-                    :component="withVars(sessionBadgeComponent, [new Variable('participantId', participantId)])"
+                    :component="withVars(sessionBadgeComponent, [new Variable('idUcastnika', participantId)])"
                 />
 
                 <!-- Allergen badge -->
                 <ComponentWrapper
-                    :component="withVars(allergenBadgeComponent, [new Variable('participantId', participantId)])"
+                    :component="withVars(allergenBadgeComponent, [new Variable('idUcastnika', participantId)])"
                 />
 
                 <!-- Actions -->
                 <div class="flex gap-3 pt-1 border-t border-gray-100">
-                    <UButton color="primary" variant="solid" class="flex-1">
-                        {{ t('view_details') }}
-                    </UButton>
-                    <UButton color="error" variant="outline" class="flex-1">
-                        {{ t('delete') }}
-                    </UButton>
+                    <ModalContainer v-model:open="editModalOpen[participantId]" class="flex-1">
+                        <UButton label="Upravit" color="neutral" variant="subtle" size="md" class="flex-1" />
+
+                        <template #content>
+                            <div class="modal-container">
+                                <ComponentWrapper
+                                    :component="withVars(editVstupJmenoComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupEmailComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupTelefonComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupAdresaComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupVekComponent, [new Variable('idUcastnika', participantId)])" />
+                                <div class="flex gap-2">
+                                    <UButton label="Zrušit" color="neutral" variant="solid" size="md"
+                                        @click="editModalOpen[participantId] = false" />
+                                    <ComponentWrapper
+                                        :component="withVars(editBtnUlozitComponent, [new Variable('idUcastnika', participantId)])"
+                                        @action-completed="handleParticipantUpdated(participantId)" />
+                                </div>
+                            </div>
+                        </template>
+                    </ModalContainer>
+
+                    <div class="flex-1" @click="reloadAfterDelete">
+                        <ComponentWrapper
+                            :component="withVars(smazatComponent, [new Variable('idUcastnika', participantId)])" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,13 +126,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import ComponentWrapper from '~/components/ComponentWrapper.vue';
+import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
-import { DatabaseHandler } from '~/utils/DatabaseHandler';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -112,11 +151,33 @@ systemsStore.selectedSystemId = systemId;
 
 const isDbReady = computed(() => !!systemsStore.selectedSystem?.database?.sqlJsDatabase);
 
-// Components (registered via plugin from SystemComponents/participants/)
-const cardInfoComponent = computed(() => systemsStore.getComponentById('participant-card-info'));
-const sessionBadgeComponent = computed(() => systemsStore.getComponentById('participant-session-badge'));
-const allergenBadgeComponent = computed(() => systemsStore.getComponentById('participant-allergen-badge'));
-const capacityBarComponent = computed(() => systemsStore.getComponentById('participants-total-capacity-bar'));
+const createModalOpen = ref(false);
+const editModalOpen = reactive<Record<number, boolean>>({});
+
+// Display components
+const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-ucastnika'));
+const sessionBadgeComponent = computed(() => systemsStore.getComponentById('stitek-turnusu-ucastnika'));
+const allergenBadgeComponent = computed(() => systemsStore.getComponentById('stitek-alergenu-ucastnika'));
+const capacityBarComponent = computed(() => systemsStore.getComponentById('celkova-kapacita-ucastniku'));
+
+// Create components
+const vstupJmenoComponent = computed(() => systemsStore.getComponentById('vstup-jmeno-ucastnika'));
+const vstupEmailComponent = computed(() => systemsStore.getComponentById('vstup-email-ucastnika'));
+const vstupTelefonComponent = computed(() => systemsStore.getComponentById('vstup-telefon-ucastnika'));
+const vstupAdresaComponent = computed(() => systemsStore.getComponentById('vstup-adresa-ucastnika'));
+const vstupVekComponent = computed(() => systemsStore.getComponentById('vstup-vek-ucastnika'));
+const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-ucastnika'));
+
+// Edit components
+const editVstupJmenoComponent = computed(() => systemsStore.getComponentById('edit-vstup-jmeno-ucastnika'));
+const editVstupEmailComponent = computed(() => systemsStore.getComponentById('edit-vstup-email-ucastnika'));
+const editVstupTelefonComponent = computed(() => systemsStore.getComponentById('edit-vstup-telefon-ucastnika'));
+const editVstupAdresaComponent = computed(() => systemsStore.getComponentById('edit-vstup-adresa-ucastnika'));
+const editVstupVekComponent = computed(() => systemsStore.getComponentById('edit-vstup-vek-ucastnika'));
+const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-ucastnika'));
+
+// Delete component
+const smazatComponent = computed(() => systemsStore.getComponentById('smazat-ucastnika'));
 
 // Participant data
 interface ParticipantRow { id: number; sessionId: number }
@@ -139,9 +200,7 @@ const filteredParticipantIds = computed(() => {
     if (selectedSessionId.value !== null) {
         ids = ids.filter(p => p.sessionId === selectedSessionId.value);
     }
-    // filterText filtering is handled server-side via SQL when feasible;
-    // here we keep the id list and let ComponentWrapper render names naturally.
-    // For a simple client filter we would need names cached â€” kept minimal.
+
     return ids.map(p => p.id);
 });
 
@@ -175,12 +234,26 @@ const loadData = async () => {
         if (sResult.data?.[0]?.values) {
             sessions.value = sResult.data[0].values.map(row => ({
                 id: Number(row[0]),
-                label: `Session ${row[0]}`
+                label: `Turnus ${row[0]}`
             }));
         }
     } catch (e) {
         console.error('Failed to load participants:', e);
     }
+};
+
+const reloadAfterDelete = () => {
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleParticipantCreated = () => {
+    createModalOpen.value = false;
+    window.setTimeout(() => { loadData(); }, 50);
+};
+
+const handleParticipantUpdated = (participantId: number) => {
+    editModalOpen[participantId] = false;
+    window.setTimeout(() => { loadData(); }, 50);
 };
 
 watch(() => systemsStore.selectedSystem?.database?.sqlJsDatabase, (db) => {
@@ -191,4 +264,14 @@ onMounted(() => {
     if (systemsStore.selectedSystem?.database?.sqlJsDatabase) loadData();
 });
 </script>
+
+<style scoped>
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+</style>
 
