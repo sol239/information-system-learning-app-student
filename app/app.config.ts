@@ -8,6 +8,7 @@ export default defineAppConfig({
       lime: 'lime',
       green: 'green',
       sky: 'sky',
+      blue: 'blue',
       violet: 'violet',
       orange: 'orange',
     }

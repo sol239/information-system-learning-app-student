@@ -6,6 +6,23 @@ import initSqlJs, { type Database } from 'sql.js';
 export class SqljsDatabaseFactory {
 
     /**
+     * Creates an in-memory SQLite database by executing a raw SQL script (e.g. create_schema.sql).
+     * @param sql The full SQL script to execute.
+     */
+    public static async createDatabaseFromSql(sql: string): Promise<Operation<Database | null>> {
+        try {
+            const SQL = await initSqlJs({
+                locateFile: () => '/information-system-learning-app/sql-wasm.wasm'
+            });
+            const db = new SQL.Database();
+            db.run(sql);
+            return new Operation<Database | null>(OperationResultType.SUCCESS, "Database created successfully", db);
+        } catch (error) {
+            return new Operation<Database | null>(OperationResultType.ERROR, `Error creating database from SQL: ${error}`, null);
+        }
+    }
+
+    /**
      * Creates an in-memory SQLite database from the provided CSV file contents. 
      * @param csvFilesContent A record where the key is the CSV file name (used as the table name) and the value is the content of the CSV file as a string. 
      * @returns An Operation containing the created Database instance if successful, or an error message if there was an issue during table creation or data insertion. 

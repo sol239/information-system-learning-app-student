@@ -21,6 +21,16 @@ export class SystemZipLoader {
     public csvFilesContent: Record<string, string> = {};
 
     /**
+     * A map of Vue file names to their source content for all .vue files in the ZIP.
+     */
+    public vueFilesContent: Record<string, string> = {};
+
+    /**
+     * A map of SQL file names to their text content for all .sql files in the ZIP.
+     */
+    public sqlFilesContent: Record<string, string> = {};
+
+    /**
      * The content of the JSON configuration file.
      */
     public jsonConfigFileContent: string | null = null;
@@ -55,6 +65,12 @@ export class SystemZipLoader {
                         } else if (relativePath.endsWith('.csv')) {
                             const filename = relativePath.split('/').pop()!.replace(/\.[^/.]+$/, '');
                             this.csvFilesContent[filename] = content;
+                        } else if (relativePath.endsWith('.vue')) {
+                            const filename = relativePath.split('/').pop()!;
+                            this.vueFilesContent[filename] = content;
+                        } else if (relativePath.endsWith('.sql')) {
+                            const filename = relativePath.split('/').pop()!;
+                            this.sqlFilesContent[filename] = content;
                         }
                     })
                 );

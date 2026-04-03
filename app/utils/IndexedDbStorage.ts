@@ -6,16 +6,21 @@ import { Operation } from './Operation';
 import { OperationResultType } from './OperationResultType';
 import { Score } from '~/model/Score';
 import type { GUID } from '~/model/GUID';
+import type { Page } from '~/model/Page';
+import { Task } from '~/model/Task/Task';
 
 interface StoredSystem {
     id: string;
     name: string;
     language: string;
     description: string;
+    pages: Page[];
     tasks: any[];
+    defaultTasks: any[];
     actualComponents: any[];
     defaultComponents: any[];
     databaseBinary: Uint8Array | null;
+    defaultDatabaseBinary: Uint8Array | null;
     score: { mistakesCount: number; score: number } | null;
 }
 
@@ -25,6 +30,9 @@ class AppDatabase extends Dexie {
     constructor() {
         super('InformationSystemsDb');
         this.version(1).stores({
+            systems: 'id, name, language',
+        });
+        this.version(2).stores({
             systems: 'id, name, language',
         });
     }
@@ -63,15 +71,19 @@ export class IndexedDbStorage {
                     databaseBinary = system.database.binaryData;
                 }
             }
+            const defaultDatabaseBinary: Uint8Array | null = system.database?.defaultBinaryData ?? null;
             const record: StoredSystem = {
                 id: system.id,
                 name: system.name,
                 language: system.language,
                 description: system.description,
+                pages: JSON.parse(JSON.stringify(system.pages)),
                 tasks: JSON.parse(JSON.stringify(system.tasks)),
+                defaultTasks: JSON.parse(JSON.stringify(system.defaultTasks)),
                 actualComponents: JSON.parse(JSON.stringify(system.actualComponents)),
                 defaultComponents: JSON.parse(JSON.stringify(system.defaultComponents)),
                 databaseBinary,
+                defaultDatabaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
             };
             await db.systems.put(record);
@@ -107,15 +119,19 @@ export class IndexedDbStorage {
                     databaseBinary = system.database.binaryData;
                 }
             }
+            const defaultDatabaseBinary: Uint8Array | null = system.database?.defaultBinaryData ?? null;
             const updatedRecord: StoredSystem = {
                 id: system.id,
                 name: system.name,
                 language: system.language,
                 description: system.description,
+                pages: JSON.parse(JSON.stringify(system.pages)),
                 tasks: JSON.parse(JSON.stringify(system.tasks)),
+                defaultTasks: JSON.parse(JSON.stringify(system.defaultTasks)),
                 actualComponents: JSON.parse(JSON.stringify(system.actualComponents)),
                 defaultComponents: JSON.parse(JSON.stringify(system.defaultComponents)),
                 databaseBinary,
+                defaultDatabaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
             };
             await db.systems.put(updatedRecord);
@@ -143,13 +159,23 @@ export class IndexedDbStorage {
             name: record.name,
             language: record.language,
             description: record.description,
-            tasks: record.tasks ?? [],
+            pages: record.pages ?? [],
+            tasks: (record.tasks ?? []).map((t: any) => {
+                const task = Task.fromJSON(t);
+                if (task.activity && t.activity?.isCompleted !== undefined) {
+                    task.activity.isCompleted = t.activity.isCompleted;
+                }
+                return task;
+            }),
+            defaultTasks: (record.defaultTasks ?? record.tasks ?? []).map((t: any) => Task.fromJSON(t)),
             actualComponents: Component.arrayFromJSON(record.actualComponents ?? []),
             defaultComponents: Component.arrayFromJSON(record.defaultComponents ?? []),
             score,
         });
         if (record.databaseBinary) {
-            system.database = DatabaseWrapper.fromBinary(record.databaseBinary);
+            system.database = record.defaultDatabaseBinary
+                ? DatabaseWrapper.fromBinaries(record.databaseBinary, record.defaultDatabaseBinary)
+                : DatabaseWrapper.fromBinary(record.databaseBinary);
         }
         return system;
     }

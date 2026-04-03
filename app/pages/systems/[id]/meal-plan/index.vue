@@ -1,11 +1,211 @@
-<template>
-    
+﻿<template>
+    <div class="p-6 flex flex-col gap-5 max-w-7xl mx-auto">
+
+        <h1 class="text-4xl font-bold">{{ t('meal_plan') }}</h1>
+
+        <!-- Sessions accordion -->
+        <div v-for="sessionId in sessionIds" :key="sessionId"
+            class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+
+            <!-- Session header row -->
+            <div class="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                @click="toggleSession(sessionId)">
+                <div class="flex-1">
+                    <ComponentWrapper
+                        :component="withVars(sessionHeaderComponent, [new Variable('sessionId', sessionId)])"
+                    />
+                </div>
+                <UIcon
+                    :name="isSessionExpanded(sessionId) ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                    class="w-5 h-5 text-gray-400 flex-shrink-0"
+                />
+            </div>
+
+            <!-- Days accordion -->
+            <div v-if="isSessionExpanded(sessionId)" class="border-t border-gray-100">
+                <div v-for="date in getSessionDays(sessionId)" :key="date"
+                    class="border-b border-gray-100 last:border-b-0">
+
+                    <!-- Day header row -->
+                    <div class="flex items-center gap-3 px-6 py-3 cursor-pointer hover:bg-gray-50 transition-colors bg-gray-50/50"
+                        @click="toggleDay(sessionId, date)">
+                        <div class="flex-1">
+                            <ComponentWrapper
+                                :component="withVars(dayHeaderComponent, [new Variable('dayDate', date)])"
+                            />
+                        </div>
+                        <UIcon
+                            :name="isDayExpanded(sessionId, date) ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                            class="w-4 h-4 text-gray-400 flex-shrink-0"
+                        />
+                    </div>
+
+                    <!-- Meals accordion -->
+                    <div v-if="isDayExpanded(sessionId, date)" class="border-t border-gray-100">
+                        <div v-for="mealId in getDayMeals(sessionId, date)" :key="mealId"
+                            class="border-b border-gray-100 last:border-b-0">
+
+                            <!-- Meal row -->
+                            <div class="flex items-center gap-3 px-8 py-4 cursor-pointer hover:bg-blue-50/30 transition-colors bg-white"
+                                @click="toggleMeal(mealId, date)">
+                                <div class="flex-1">
+                                    <ComponentWrapper
+                                        :component="withVars(mealRowComponent, [new Variable('mealId', mealId)])"
+                                    />
+                                </div>
+                                <UIcon
+                                    :name="isMealExpanded(mealId, date) ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                                    class="w-4 h-4 text-gray-400 flex-shrink-0"
+                                />
+                            </div>
+
+                            <!-- People section -->
+                            <div v-if="isMealExpanded(mealId, date)"
+                                class="px-10 py-4 bg-blue-50/40 border-t border-blue-100">
+                                <ComponentWrapper
+                                    :component="withVars(mealPeopleComponent, [new Variable('mealId', mealId), new Variable('dayDate', date)])"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty state -->
+        <div v-if="sessionIds.length === 0 && isDbReady" class="text-center py-12">
+            <UIcon name="i-heroicons-book-open" class="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ t('no_meal_plan') }}</h3>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import ComponentWrapper from '~/components/ComponentWrapper.vue';
+import { ComponentVariables, Variable } from '~/model/ComponentVariables';
+import { useSystemsStore } from '~/stores/systemsStore';
+import { DatabaseHandler } from '~/utils/DatabaseHandler';
 
+function withVars(comp: any, vars: Variable[]) {
+  if (!comp) return undefined;
+  const clone = Object.create(comp);
+  clone.variables = new ComponentVariables();
+  clone.variables.generalVariables = vars;
+  return clone;
+}
+
+const route = useRoute();
+const systemsStore = useSystemsStore();
+const { t } = useI18n();
+const systemId = route.params.id as string;
+
+systemsStore.selectedSystemId = systemId;
+
+const isDbReady = computed(() => !!systemsStore.selectedSystem?.database?.sqlJsDatabase);
+
+// Components
+const sessionHeaderComponent = computed(() => systemsStore.getComponentById('meal-plan-session-header'));
+const dayHeaderComponent = computed(() => systemsStore.getComponentById('meal-plan-day-header'));
+const mealRowComponent = computed(() => systemsStore.getComponentById('meal-plan-meal-row'));
+const mealPeopleComponent = computed(() => systemsStore.getComponentById('meal-plan-meal-people'));
+
+// State
+const sessionIds = ref<number[]>([]);
+const expandedSessions = ref<number[]>([]);
+const sessionDays = ref<Record<number, string[]>>({});
+const expandedDayKeys = ref<string[]>([]);
+const dayMeals = ref<Record<string, number[]>>({});
+const expandedMealKeys = ref<string[]>([]);
+
+// Helpers
+const isSessionExpanded = (id: number) => expandedSessions.value.includes(id);
+const isDayExpanded = (sId: number, date: string) => expandedDayKeys.value.includes(`${sId}|${date}`);
+const isMealExpanded = (mId: number, date: string) => expandedMealKeys.value.includes(`${mId}|${date}`);
+const getSessionDays = (sId: number) => sessionDays.value[sId] ?? [];
+const getDayMeals = (sId: number, date: string) => dayMeals.value[`${sId}|${date}`] ?? [];
+
+// Toggle functions
+const toggleSession = async (id: number) => {
+    if (isSessionExpanded(id)) {
+        expandedSessions.value = expandedSessions.value.filter(s => s !== id);
+    } else {
+        expandedSessions.value = [...expandedSessions.value, id];
+        if (!sessionDays.value[id]) await loadDays(id);
+    }
+};
+
+const toggleDay = async (sId: number, date: string) => {
+    const key = `${sId}|${date}`;
+    if (isDayExpanded(sId, date)) {
+        expandedDayKeys.value = expandedDayKeys.value.filter(k => k !== key);
+    } else {
+        expandedDayKeys.value = [...expandedDayKeys.value, key];
+        if (!dayMeals.value[key]) await loadMeals(sId, date);
+    }
+};
+
+const toggleMeal = (mId: number, date: string) => {
+    const key = `${mId}|${date}`;
+    if (isMealExpanded(mId, date)) {
+        expandedMealKeys.value = expandedMealKeys.value.filter(k => k !== key);
+    } else {
+        expandedMealKeys.value = [...expandedMealKeys.value, key];
+    }
+};
+
+// Data loading
+const loadSessions = async () => {
+    const db = systemsStore.selectedSystem?.database;
+    if (!db) return;
+    try {
+        const result = await db.query(`SELECT id_turnusu FROM turnusy ORDER BY id_turnusu`);
+        if (result.data?.[0]?.values) {
+            sessionIds.value = result.data[0].values.map(row => Number(row[0]));
+        }
+    } catch (e) { console.error('Failed to load sessions:', e); }
+};
+
+const loadDays = async (sId: number) => {
+    const db = systemsStore.selectedSystem?.database;
+    if (!db) return;
+    try {
+        const result = await db.query(
+            `SELECT DISTINCT kj.datum FROM kniha_jidel kj JOIN turnusy t ON DATE(kj.datum) BETWEEN DATE(t.datum_od) AND DATE(t.datum_do) WHERE t.id_turnusu = ${sId} ORDER BY kj.datum`
+        );
+        if (result.data?.[0]?.values) {
+            sessionDays.value = { ...sessionDays.value, [sId]: result.data[0].values.map(row => String(row[0])) };
+        }
+    } catch (e) { console.error('Failed to load days for session', sId, e); }
+};
+
+const loadMeals = async (sId: number, date: string) => {
+    const db = systemsStore.selectedSystem?.database;
+    if (!db) return;
+    const key = `${sId}|${date}`;
+    try {
+        const result = await db.query(
+            `SELECT DISTINCT id_jidla FROM kniha_jidel WHERE datum = '${date}' ORDER BY id_jidla`
+        );
+        if (result.data?.[0]?.values) {
+            dayMeals.value = { ...dayMeals.value, [key]: result.data[0].values.map(row => Number(row[0])) };
+        }
+    } catch (e) { console.error('Failed to load meals for day', date, e); }
+};
+
+watch(() => systemsStore.selectedSystem?.database?.sqlJsDatabase, (db) => {
+    if (db) loadSessions();
+}, { immediate: true });
+
+onMounted(() => {
+    if (systemsStore.selectedSystem?.database?.sqlJsDatabase) loadSessions();
+});
 </script>
 
 <style scoped>
-
 </style>
+

@@ -4,10 +4,6 @@
             <!-- Header Section -->
             <UCard class="border-t-4 border-teacher-500 shadow-lg dark:bg-gray-900/50">
                 <div class="flex flex-col md:flex-row items-start gap-6">
-                    <div class="hidden md:flex p-3 bg-teacher-500/10 rounded-lg text-teacher-500">
-                        <UIcon name="i-heroicons-computer-desktop" class="w-10 h-10" />
-                    </div>
-
                     <div class="flex-1">
                         <h1 class="systems-page-title text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             {{ t('information_systems') }}
@@ -19,13 +15,13 @@
                                 {{ t('manage_your_systems_description') }}
                             </p>
 
-                            <div class="flex flex-wrap gap-4">
+                            <!-- <div class="flex flex-wrap gap-4">
                                 <UploadSystemZipModal />
                                 <UButton class="clear-all-systems-button" icon="i-lucide-trash-2" size="lg" color="red"
                                     variant="solid" @click="">
                                     {{ t('clear_systems') }}
                                 </UButton>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -50,12 +46,15 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
-                                <UBadge :color="dbReadyMap[system.id] ? 'green' : 'red'" variant="subtle"
+                                <!-- <UBadge :color="dbReadyMap[system.id] ? 'green' : 'red'" variant="subtle"
                                     :icon="dbReadyMap[system.id] ? 'i-lucide-database' : 'i-lucide-database'">
                                     {{ dbReadyMap[system.id] ? t('db_ready') : t('db_not_ready') }}
+                                </UBadge> -->
+                                <!-- <UButton icon="i-lucide-trash-2" color="red" variant="ghost" size="md"
+                                    @click.stop="deleteSystem(system.id)" /> -->
+                                <UBadge color="sky" variant="subtle" icon="i-lucide-clipboard-list">
+                                    {{ t('tasks') }}: {{ completedTasksCount(system) }}/{{ system.tasks?.length ?? 0 }}
                                 </UBadge>
-                                <UButton icon="i-lucide-trash-2" color="red" variant="ghost" size="md"
-                                    @click.stop="deleteSystem(system.id)" />
                             </div>
                         </div>
 
@@ -79,6 +78,8 @@
 <script setup lang="ts">
 /* 1. Imports */
 import { DatabaseWrapper } from '~/utils/DatabaseWrapper'
+import { TaskStatus } from '~/model/Task/TaskStatus'
+import type { InformationSystem } from '~/model/InformationSystem'
 
 /* 2. Stores */
 const globalSettingsStore = useGlobalSettingsStore()
@@ -91,15 +92,29 @@ const router = useRouter()
 
 /* 4. State */
 const dbReadyMap = reactive<Record<string, boolean>>({})
+const { systems: preloadedSystems, loading: preloadLoading, errors: preloadErrors, load: loadPreloaded } = usePreloadedSystems()
 
 /* 5. Lifecycle */
 onMounted(async () => {
+    // Load from IndexedDB (previously saved systems)
     const result = await IndexedDbStorage.GetStoredInformationSystems()
     if (result.result === OperationResultType.SUCCESS && result.data) {
         systemsStore.systems.splice(0, systemsStore.systems.length, ...result.data)
         for (const sys of result.data) {
             dbReadyMap[sys.id] = await DatabaseWrapper.isDatabaseInitialized(sys.database)
         }
+    }
+
+    // Load preloaded systems from public/systems/manifest.json
+    await loadPreloaded()
+    for (const sys of preloadedSystems.value) {
+        if (!systemsStore.systems.some(s => s.id === sys.id)) {
+            await systemsStore.addSystem(sys)
+            dbReadyMap[sys.id] = await DatabaseWrapper.isDatabaseInitialized(sys.database)
+        }
+    }
+    if (preloadErrors.value.length) {
+        console.warn('Preloaded systems errors:', preloadErrors.value)
     }
 })
 
@@ -129,6 +144,10 @@ async function navigateToSystem(id: string) {
 
 async function deleteSystem(id: string) {
     await systemsStore.deleteSystemById(id)
+}
+
+function completedTasksCount(system: InformationSystem): number {
+    return system.tasks?.filter(t => t.status === TaskStatus.COMPLETED).length ?? 0
 }
 
 </script>

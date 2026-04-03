@@ -3,9 +3,15 @@ import type { VariableType } from "~/model/types/VariableType";
 import { Variable } from "~/model/ComponentVariables";
 
 export class JsHandler {
-    public static getSqlVariablesIntoJs(sqlVariables: Variable[]): string {
+    public static getVariablesIntoJs(variables: Variable[]): string {
         let result: string = "";
-        for (const { name: key, variable } of sqlVariables) {
+        const uniqueVariables = new Map<string, Variable>();
+
+        for (const variable of variables) {
+            uniqueVariables.set(variable.name, variable);
+        }
+
+        for (const { name: key, variable } of uniqueVariables.values()) {
             const isArray = Array.isArray(variable);
             const samples = isArray ? (variable as any[]) : [variable];
 
@@ -36,7 +42,15 @@ export class JsHandler {
         return result;
     }
 
-    public static getJsVariables(jsCode: string, userCodeOnly?: string): Variable[] {
+    public static getSqlVariablesIntoJs(sqlVariables: Variable[]): string {
+        return this.getVariablesIntoJs(sqlVariables);
+    }
+
+    public static getJsVariables(
+        jsCode: string,
+        userCodeOnly?: string,
+        runtimeContext: Record<string, unknown> = {}
+    ): Variable[] {
         const result: Variable[] = [];
         if (!jsCode) return result;
 
@@ -67,8 +81,10 @@ export class JsHandler {
         }).outputText;
 
         const exportObject = declaredNames.map(n => `"${n}": typeof ${n} !== 'undefined' ? ${n} : undefined`).join(', ');
-        const fn = new Function(`${strippedCode}\nreturn ({ ${exportObject} });`);
-        const evaluated: Record<string, any> = fn();
+        const contextNames = Object.keys(runtimeContext);
+        const contextValues = contextNames.map(name => runtimeContext[name]);
+        const fn = new Function(...contextNames, `${strippedCode}\nreturn ({ ${exportObject} });`);
+        const evaluated: Record<string, any> = fn(...contextValues);
 
         for (const name of declaredNames) {
             const value = evaluated[name];

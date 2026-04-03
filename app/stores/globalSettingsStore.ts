@@ -1,6 +1,8 @@
+import type { R } from "vue-router/dist/router-CWoNjPRp.mjs"
 import { CsLanguage } from "~/language/CsLangauge"
 import { EnLanguage } from "~/language/EnLanguage"
 import type { Language } from "~/language/Language"
+import type { GUID } from "~/model/GUID"
 
 /**
  * Store for global settings that are not specific to any system. These settings can be used across the entire application and can be overridden by system-specific settings if needed.
@@ -11,7 +13,7 @@ export const useGlobalSettingsStore = defineStore('globalSettings', () => {
      * Langauage which is used across the application, but each system can have its own language settings. This is used for the global settings, which are not system specific.
      * When a system is created it uses this language as the default language, but it can be changed later on.
      */
-    const globalLanguage = ref<Language>(new EnLanguage)
+    const globalLanguage = ref<Language>(new CsLanguage())
 
     /**
      * Whether the task menu is displayed as a sidebar or not. If not then it is displayed as a drawer after clicking on the tasks icon.
@@ -26,11 +28,29 @@ export const useGlobalSettingsStore = defineStore('globalSettings', () => {
         new CsLanguage()
     ]
 
+    const teacherMode: Ref<boolean> = ref(false)
+    const teacherHighlightEnabled: Ref<boolean> = ref(true)
+    const selectedComponents: Ref<Set<string>> = ref(new Set())
+    const selectedTaskId: Ref<GUID | null> = ref(null)
+    const errorComponentIds: Ref<string[]> = ref([])
+    const solvedComponentIds: Ref<string[]> = ref([])
+
 
     return {
         globalLanguage,
         taskMenuDisplayedAsSidebar,
-        languages
+        languages,
+        teacherMode,
+        teacherHighlightEnabled,
+        selectedComponents,
+        selectedTaskId,
+        errorComponentIds,
+        solvedComponentIds
+
     }
 
+}, {
+    persist: {
+        pick: ['globalLanguage', 'taskMenuDisplayedAsSidebar', 'solvedComponentIds'],
+    }
 })

@@ -103,9 +103,9 @@ watch(value, async (tableName) => {
     tableQueryResult.value = null
     tablePage.value = 1
     if (!tableName) return
-    const db = systemsStore.selectedSystem?.database?.sqlJsDatabase
+    const db = systemsStore.selectedSystem?.database
     if (!db) return
-    tableQueryResult.value = await DatabaseHandler.query(db, `SELECT * FROM "${tableName}"`)
+    tableQueryResult.value = await db.query(`SELECT * FROM "${tableName}"`)
     console.log("Table query result: ", tableQueryResult.value)
 })
 const isDbReady = ref(false)
@@ -144,7 +144,7 @@ async function handleExecuteQuery() {
     try {
         const system = systemsStore.selectedSystem
         if (system && system.database) {
-            queryResult.value = await DatabaseHandler.query(system.database.sqlJsDatabase, query.value)
+            queryResult.value = await system.database.query(query.value)
             console.log("Query result: ", queryResult.value);
             if (queryResult.value.data && queryResult.value.data.length > 0) {
                 console.log("Query result[0]: ", (queryResult.value.data[0] as any).lc);

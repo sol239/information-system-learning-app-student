@@ -8,13 +8,33 @@ import { emptyComponent } from "~/model/SystemComponents/EmptyComponent"
 export const useSystemsStore = defineStore('systems', () => {
 
     const selectedSystemId = ref<string | null>(null)
+    const globalSettingsStore = useGlobalSettingsStore()
 
     const selectedSystem = computed(() => {
         return systems.value.find(system => String(system.id) === String(selectedSystemId.value))
     })
 
     const getComponentById = (componentId: string) => {
-        return selectedSystem.value?.actualComponents.find(c => c.id === componentId) ?? emptyComponent
+        const normalizedComponentId = String(componentId)
+        const solvedComponentIds = new Set(
+            (globalSettingsStore.solvedComponentIds ?? []).map(id => String(id))
+        )
+
+        // Prefer task-specific error variants only while the component is still unsolved.
+        for (const task of selectedSystem.value?.tasks ?? []) {
+            for (const component of task.errorComponents ?? []) {
+                if (
+                    String(component.id) === normalizedComponentId &&
+                    !solvedComponentIds.has(normalizedComponentId)
+                ) {
+                    return component
+                }
+            }
+        }
+
+        // otherwise return the component from the system components
+        return selectedSystem.value?.actualComponents.find(component => String(component.id) === normalizedComponentId) ?? emptyComponent
+     
     }
 
     const systems = ref<InformationSystem[]>([])

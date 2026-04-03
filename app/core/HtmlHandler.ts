@@ -2,16 +2,25 @@ import type { ComponentVariables } from "~/model/ComponentVariables";
 
 export class HtmlHandler {
     public static ReplaceHtmlForVariables(variables: ComponentVariables, html: string): string {
-        if (!html) return "";
+        return this.replaceVariables(variables, html, true);
+    }
 
-        let result = html;
+    public static ReplaceTextForVariables(variables: ComponentVariables, text: string): string {
+        return this.replaceVariables(variables, text, false);
+    }
+
+    private static replaceVariables(variables: ComponentVariables, source: string, protectSystemIds: boolean): string {
+        if (!source) return "";
+
+        let result = source;
         // Merge with priority: general < sql < js (later entries win)
         const allVariables = [...(variables.generalVariables ?? []), ...(variables.sqlVariables ?? []), ...(variables.jsVariables ?? [])];
 
         for (const { name: key, variable: value } of allVariables) {
-            // Match {{ varName }} syntax or just varName without braces
+            // Match bare varName only – no {{ }} syntax
             const escapedKey = key.replace(/([\\$])/g, '\\$1');
-            const regex = new RegExp(`(?:\\{\\{\\s*)?(?<![a-zA-Z0-9_$])${escapedKey}(?![a-zA-Z0-9_$])(?:\\s*\\}\\})?`, 'g');
+            const systemPrefixGuard = protectSystemIds ? '(?<!system-)' : '';
+            const regex = new RegExp(`${systemPrefixGuard}(?<![a-zA-Z0-9_$])${escapedKey}(?![a-zA-Z0-9_$])`, 'g');
 
             let stringValue = "";
             if (Array.isArray(value)) {
