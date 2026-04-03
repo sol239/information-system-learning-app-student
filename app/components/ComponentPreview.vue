@@ -1,21 +1,25 @@
 <template>
     <div class="preview-card">
         <div v-if="showHeader" class="preview-card__header">
-            <span class="preview-card__name">{{ component?.name }}</span>
-            <span v-if="component?.description" class="preview-card__desc">{{ component.description }}</span>
+            <span class="preview-card__name">{{ component?.name || page?.name }}</span>
+            <span v-if="component?.description || page?.description" class="preview-card__desc">
+                {{ component?.description || page?.description }}
+            </span>
         </div>
-        <div class="preview-card__body">
+        <div v-if="!page" class="preview-card__body">
             <iframe v-if="srcdoc" :srcdoc="srcdoc" class="preview-card__iframe" sandbox="allow-scripts"
                 referrerpolicy="no-referrer" scrolling="auto" />
             <div v-else class="preview-card__empty">
                 <span>No HTML content to preview</span>
             </div>
         </div>
-        <div v-if="component" class="preview-card__code-blocks">
+        <div v-if="component || page" class="preview-card__code-blocks">
+            <CodeBlock v-if="page?.vueSource" :code="page.vueSource" language="html" :label="page.vueFile" :read-only="true" height="400px" />
+            
             <CodeBlock v-if="htmlContent" :code="htmlContent" language="html" label="HTML" :read-only="true" height="150px" />
             <CodeBlock v-if="cssContent" :code="cssContent" language="css" label="CSS" :read-only="true" height="150px" />
             <CodeBlock v-if="jsContent" :code="jsContent" language="javascript" label="JS" :read-only="true" height="150px" />
-            <CodeBlock v-if="sqlContent" :code="sqlContent" language="sql" label="SQL" :read-only="true" height="150px" />
+            <CodeBlock v-if="sqlContent && Object.keys(sqlContent).length > 0" :code="JSON.stringify(sqlContent, null, 2)" language="json" label="SQL Click" :read-only="true" height="150px" />
         </div>
     </div>
 </template>
@@ -23,9 +27,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Component } from '~/model/Component';
+import type { Page } from '~/model/Page';
 
 const props = defineProps<{
-    component: Component | null | undefined;
+    component?: Component | null;
+    page?: Page | null;
     showHeader?: boolean;
 }>();
 

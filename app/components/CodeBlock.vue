@@ -7,8 +7,16 @@
                     {{ correct ? 'Correct' : 'Incorrect' }}
                 </UBadge>
             </div>
-            <div class="header-actions">
-                <!-- Add any extra actions here if needed -->
+            <div class="header-actions flex items-center justify-end gap-2">
+                <UButton
+                    color="neutral"
+                    variant="soft"
+                    icon="i-lucide-text-initial"
+                    @click="formatCode"
+                    size="sm"
+                    class="format-btn"
+                    title="Format code"
+                />
             </div>
         </div>
 
@@ -23,6 +31,15 @@
 import { computed } from 'vue'
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor'
 
+function formatCode() {
+    if (monacoEditorInstance && monacoEditorInstance.getAction) {
+        const action = monacoEditorInstance.getAction('editor.action.formatDocument');
+        if (action) {
+            action.run();
+        }
+    }
+}
+
 interface Props {
     code: string
     language: string
@@ -30,7 +47,7 @@ interface Props {
     height?: string
     readOnly?: boolean
     correct?: boolean
-    /** When set, this text is prepended to the editor as read-only SQL variable constants */
+    /** When set, this text is prepended to the editor as read-only injected variable constants */
     protectedPrefix?: string
     sizeMultiplier?: number
 }
@@ -38,7 +55,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     height: '300px',
     readOnly: false,
-    sizeMultiplier: 1
+    sizeMultiplier: 0.7
 })
 
 const emit = defineEmits(['update:code', 'change'])
@@ -123,11 +140,13 @@ const transformedLanguage = computed(() => {
     const lang = props.language.toLowerCase()
     if (lang === 'js') return 'javascript'
     if (lang === 'ts') return 'typescript'
+    if (lang === 'vue' || lang.endsWith('.vue')) return 'html'
     return lang
 })
 
 const getLanguageClass = computed(() => {
     const lang = props.language.toLowerCase()
+    if (lang === 'vue' || lang.endsWith('.vue')) return 'html-label'
     return `${lang}-label`
 })
 
@@ -233,3 +252,12 @@ function onCodeChange(value: string | undefined) {
     box-shadow: none;
 }
 </style>
+/* Icon button for formatting */
+.icon-btn.format-btn.i-lucide-text-initial {
+    font-size: 1.3em;
+    color: #64748b;
+    transition: color 0.2s;
+}
+.icon-btn.format-btn.i-lucide-text-initial:hover {
+    color: #0ea5e9;
+}

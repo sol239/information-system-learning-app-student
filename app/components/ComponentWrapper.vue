@@ -1,194 +1,42 @@
 <template>
-  <div @click="handleClick"
-    :class="['component-wrapper', { 'highlight-active': highlightStore.isHighlightActive, 'is-highlighted': highlightStore.isHighlightActive && highlightStore.selectedHighlightedComponentsIds.has(props.component.id) }]">
+  <div ref="wrapperRef" @click="handleClick" @input="handleInput"
+    :class="['component-wrapper', {
+      'highlight-active': highlightStore.isHighlightActive,
+      'is-highlighted': highlightStore.isHighlightActive && highlightStore.selectedHighlightedComponentsIds.has(props.component.id),
+      'teacher-outline': globalSettings.teacherMode && globalSettings.teacherHighlightEnabled,
+      'teacher-outline--selected': globalSettings.teacherMode && globalSettings.teacherHighlightEnabled && globalSettings.selectedComponents?.has(props.component.id),
+    }]">
     <div :class="['content-container', { 'edit-mode': isEditEnabled }]">
 
-      <span v-if="isEditEnabled" class="edit-icon" @click.stop="handleEdit">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-          <path d="m15 5 4 4" />
-        </svg>
-      </span>
+      <div v-if="!globalSettings.teacherMode">
+        <span v-if="isEditEnabled" class="edit-icon" @click.stop="handleEdit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+            <path d="m15 5 4 4" />
+          </svg>
+        </span>
+      </div>
+      <div v-else-if="globalSettings.teacherHighlightEnabled" class="teacher-mode-overlay" @click.stop="handleTeacherModeClick">
+        <UBadge :color="globalSettings.selectedComponents?.has(props.component.id) ? 'sky' : 'blue'"
+          variant="solid" size="md"
+          class="teacher-icon" style="cursor: pointer;">
+          {{ globalSettings.selectedComponents?.has(props.component.id) ? '✓ ' + props.component.name : props.component.name }}
+        </UBadge>
+      </div>
 
-      <div class="component-html"
-        v-html="HtmlHandler.ReplaceHtmlForVariables(componentVariables, props.component.html)"></div>
+      <div :class="['component-html', { 'teacher-mode-disabled': globalSettings.teacherMode && globalSettings.teacherHighlightEnabled }]"
+        v-html="resolvedComponentHtml"></div>
     </div>
 
-    <UModal v-model:open="isEditModalOpened" :dismissible="false" :ui="{ content: 'w-[80vw] max-w-[80vw]' }">
-      <template #title>
-        <div class="flex items-center gap-2">
-          <span>Edit Component</span>
-          <UBadge color="neutral" variant="subtle" size="sm" class="font-mono">{{ props.component.id }}
-          </UBadge>
-          <UButton @click="saveEdit" color="sky" :disabled="!isEditedSqlValid">Save Changes</UButton>
-        </div>
-      </template>
-      <template #body>
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-2 justify-end -mt-2">
-            <UButton icon="i-lucide-minus" color="neutral" variant="ghost" @click="sizeMultiplier -= 0.05" />
-            <span class="text-xs text-gray-500 font-medium w-10 text-center">{{
-              Math.round(sizeMultiplier *
-                100)
-            }}%</span>
-            <UButton icon="i-lucide-plus" color="neutral" variant="ghost" @click="sizeMultiplier += 0.05" />
-          </div>
-
-          <div class="flex flex-row gap-2 w-full items-center">
-            <USelect id="query-select" v-model="selectedSqlQuery" :items="sqlQueryNames" placeholder="Vyberte SQL dotaz"
-              class="flex-1" :disabled="Object.keys(props.component.sql ?? {}).length === 1" />
-            <UBadge color="neutral" variant="subtle" size="md">{{ sqlQueryNames.length }}</UBadge>
-            <UButton icon="i-lucide-plus" @click="addQuery" size="md" class="aspect-square shrink-0" />
-            <UButton icon="i-lucide-minus" @click="removeQuery" size="md" color="red" variant="subtle"
-              class="aspect-square shrink-0" :disabled="sqlQueryNames.length <= 1" />
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 w-full">
-            <CodeBlock v-model:code="editedHtml" language="html" label="HTML" height="400px" :correct="undefined"
-              :size-multiplier="sizeMultiplier" />
-            <CodeBlock v-model:code="editedCss" language="css" label="CSS" height="400px" :correct="undefined"
-              :size-multiplier="sizeMultiplier" />
-            <CodeBlock v-model:code="editedJs" language="typescript" label="JS" height="400px" :correct="undefined"
-              :protected-prefix="sqlVarsHeader || undefined" :size-multiplier="sizeMultiplier" />
-            <CodeBlock v-model:code="editedSql" language="sql" label="SQL" height="400px" :correct="isEditedSqlValid"
-              :size-multiplier="sizeMultiplier" />
-          </div>
-
-          <USeparator label="Click Actions" />
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">JS Click Action</span>
-                <UButton v-if="!editedJsClick" icon="i-lucide-plus" size="xs" variant="ghost" label="Add Action"
-                  @click="editedJsClick = '// click logic here'" />
-                <UButton v-else icon="i-lucide-trash-2" size="xs" variant="ghost" color="red"
-                  @click="editedJsClick = ''" />
-              </div>
-
-              <CodeBlock v-if="editedJsClick" v-model:code="editedJsClick" language="typescript" height="200px"
-                label="JS Click" :correct="undefined" :size-multiplier="sizeMultiplier" />
-              <div v-else
-                class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-                <UIcon name="i-lucide-mouse-pointer-2" class="w-5 h-5 text-gray-400" />
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No JS click action defined</p>
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">SQL Click
-                  Actions</span>
-                <USelect v-if="sqlClickQueryNames.length > 0" v-model="selectedSqlClickQuery"
-                  :items="sqlClickQueryNames" placeholder="Select SQL click query" size="xs" class="flex-1"
-                  :disabled="sqlClickQueryNames.length <= 1" />
-                <div class="flex gap-1">
-                  <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addClickQuery" />
-                  <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeClickQuery"
-                    :disabled="sqlClickQueryNames.length === 0" />
-                </div>
-              </div>
-
-              <div v-if="sqlClickQueryNames.length > 0" class="flex flex-col gap-2">
-                <CodeBlock v-model:code="editedSqlClick" language="sql" height="200px" label="SQL Click"
-                  :size-multiplier="sizeMultiplier" />
-              </div>
-              <div v-else
-                class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-                <UIcon name="i-lucide-database-zap" class="w-5 h-5 text-gray-400" />
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No SQL click actions defined</p>
-              </div>
-            </div>
-          </div>
-
-          <USeparator />
-
-          <div v-if="generalVariableNames.length > 0" class="mt-2 text-left">
-            <p
-              class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
-              Available General variables
-            </p>
-            <div class="flex flex-wrap gap-2 text-left">
-              <div v-for="name in generalVariableNames" :key="name" class="general-var-card text-left">
-                <span class="general-var-name">{{ name }}</span>
-                <span class="general-var-value">{{
-                  formatVariablesPreview(name, componentVariables.generalVariables)
-                }}</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="mt-2 text-left">
-            <p
-              class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">
-              Available General variables
-            </p>
-            <div
-              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-box" class="w-5 h-5 text-gray-400" />
-              <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid general variables
-                found</p>
-            </div>
-          </div>
-
-          <div v-if="sqlVariableNames.length > 0" class="mt-2">
-            <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">
-              Available SQL variables
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <div v-for="name in sqlVariableNames" :key="name" class="sql-var-card">
-                <span class="sql-var-name">{{ name }}</span>
-                <span class="sql-var-value">{{
-                  formatVariablesPreview(name, componentVariables.sqlVariables)
-                }}</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="mt-2">
-            <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">
-              Available SQL variables
-            </p>
-            <div
-              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-database-zap" class="w-5 h-5 text-gray-400" />
-              <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid SQL variables found
-              </p>
-            </div>
-          </div>
-
-          <div v-if="jsVariableNames.length > 0" class="mt-2">
-            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
-              Available JS variables
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <div v-for="name in jsVariableNames" :key="name" class="js-var-card">
-                <span class="js-var-name">{{ name }}</span>
-                <span class="js-var-value">{{
-                  formatVariablesPreview(name, componentVariables.jsVariables)
-                }}</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="mt-2">
-            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
-              Available JS variables
-            </p>
-            <div
-              class="flex flex-row items-center gap-2 py-2 px-4 w-fit bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
-              <UIcon name="i-lucide-code-2" class="w-5 h-5 text-gray-400" />
-              <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">No valid JS variables found
-              </p>
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
+    <EditComponentModal v-model:open="isEditModalOpened" :component="props.component" :variables="componentVariables"
+      @save="handleModalSave" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { QueryExecResult } from 'sql.js';
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed, reactive, nextTick } from 'vue';
 import { SqlHandler } from '~/core/SqlHandler';
 import { JsHandler } from '~/core/JsHandler';
 import { HtmlHandler } from '~/core/HtmlHandler';
@@ -197,162 +45,306 @@ import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
 import { useHighlightStore } from '~/stores/highlightStore';
 import { DatabaseHandler } from '~/utils/DatabaseHandler';
+import { DatabaseWrapper } from '~/utils/DatabaseWrapper';
 import { OperationResultType } from '~/utils/OperationResultType';
 import { TableMap } from '~/core/TableMap';
-import { ColumnType } from '~/utils/ColumnType';
 import type { VariableType } from '~/model/types/VariableType';
+import EditComponentModal from './EditComponentModal.vue'; // Adjust path as needed
+import { useSystemInputVariables } from '~/composables/useSystemInputVariables';
 
 const props = defineProps<{
-  component: SystemComponent,
-  generalVariables?: Variable[]
+  component: SystemComponent
+}>()
+
+const emit = defineEmits<{
+  'action-completed': [payload: { componentId: string; type: 'click-sql' | 'modal-sql'; sql?: string }]
 }>()
 
 const systemsStore = useSystemsStore();
 const highlightStore = useHighlightStore();
+const globalSettings = useGlobalSettingsStore()
+const toast = useToast()
+const { t } = useI18n()
+
 const styleId = `component-style-${props.component.id}`;
-
-
-const appliedCSS: ComputedRef<string> = computed(() => HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, props.component.css));
-const appliedHtml: ComputedRef<string> = computed(() => HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, props.component.html));
-
-
 const isEditEnabled = computed(() => highlightStore.isEditModeActive);
 const isEditModalOpened = ref(false);
-const editedHtml = ref('');
-const editedCss = ref('');
-const editedJs = ref('');
-const editedSql = ref('');
-const componentVariables = ref<ComponentVariables>(new ComponentVariables());
-const sqlVariables = ref<TableMap[]>([]);
-const queryResult = ref<QueryExecResult[]>([]);
-const isEditedSqlValid = ref(true);
-const sqlVariableNames = computed(() => componentVariables.value.sqlVariables.map(v => v.name));
-const jsVariableNames = computed(() => componentVariables.value.jsVariables.map(v => v.name));
-const generalVariableNames = computed(() => componentVariables.value.generalVariables.map(v => v.name));
-const sizeMultiplier = ref(1);
-const selectedSqlQuery = ref<string>('');
-const selectedSqlClickQuery = ref<string>('');
-const editedJsClick = ref('');
-const editedSqlClick = ref('');
-const sqlQueryNames = computed(() => Object.keys(props.component.sql ?? {}))
-const sqlClickQueryNames = computed(() => Object.keys(props.component.sql_click ?? {}))
-let db = undefined;
+const isActionModalOpened = ref(false);
+const isSubmittingActionModal = ref(false);
+const actionModalError = ref('');
+const modalFormState = reactive<Record<string, string | number>>({});
+const wrapperRef = ref<HTMLElement | null>(null);
 
-/** Read-only JS constants generated from the current SQL query results.
- *  Shown as a protected header in the JS editor so user code can reference them. */
-const sqlVarsHeader = computed<string>(() => {
-  const vars = componentVariables.value.sqlVariables
-  if (!vars || vars.length === 0) return ''
-  return JsHandler.getSqlVariablesIntoJs(vars)
+const componentVariables = ref<ComponentVariables>(new ComponentVariables());
+const { systemInputVariables, upsertSystemInputVariable, removeSystemInputVariable } = useSystemInputVariables();
+const ownedSystemVariableNames = new Set<string>();
+let db: DatabaseWrapper | undefined = undefined;
+let isRefreshingSqlVars = false;
+
+function mergeVariablesByName(...groups: Array<Variable[] | undefined>): Variable[] {
+  const merged = new Map<string, Variable>();
+
+  for (const group of groups) {
+    for (const variable of group ?? []) {
+      merged.set(variable.name, variable);
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
+const resolvedVariables = computed<ComponentVariables>(() => {
+  const merged = new ComponentVariables();
+  merged.generalVariables = [...(componentVariables.value.generalVariables ?? [])];
+  merged.sqlVariables = [...(componentVariables.value.sqlVariables ?? [])];
+  merged.jsVariables = mergeVariablesByName(
+    componentVariables.value.jsVariables ?? [],
+    systemInputVariables.value
+  );
+  return merged;
+});
+
+const resolvedComponentHtml = computed(() =>
+  HtmlHandler.ReplaceHtmlForVariables(resolvedVariables.value, props.component.html)
+);
+
+// JS header used for parsing variables correctly on initial load
+const jsVarsHeader = computed<string>(() => {
+  const vars = mergeVariablesByName(
+    componentVariables.value.generalVariables ?? [],
+    componentVariables.value.sqlVariables ?? [],
+    systemInputVariables.value
+  );
+  if (vars.length === 0) return '';
+  return JsHandler.getVariablesIntoJs(vars);
 })
 
-function formatVariablesPreview(name: string, variables: Variable[]): string {
-  const values = variables?.find(v => v.name === name)?.variable;
-  if (!values && values !== 0 && values !== false as any) return '—';
-  if (Array.isArray(values)) {
-    const preview = values.slice(0, 5).map(v => String(v)).join(', ');
-    return values.length > 5 ? `${preview}, … (${values.length} total)` : preview;
+function handleEdit() {
+  isEditModalOpened.value = true;
+}
+
+function handleTeacherModeClick() {
+  if (!globalSettings.selectedTaskId) return
+  const system = systemsStore.selectedSystem
+  if (!system) return
+
+  const task = system.tasks?.find(t => t.id === globalSettings.selectedTaskId)
+  if (!task) return
+
+  const componentId = props.component.id
+  if (globalSettings.selectedComponents?.has(componentId)) {
+    task.errorComponents = task.errorComponents.filter(c => c.id !== componentId)
+    globalSettings.selectedComponents.delete(componentId)
+  } else {
+    task.errorComponents.push(props.component)
+    globalSettings.selectedComponents.add(componentId)
   }
-  return String(values);
+  void systemsStore.updateSystem(system)
 }
 
-function addQuery() {
-  const sqlRecord = props.component.sql ?? {};
-  const newQueryName = `query${Object.keys(sqlRecord).length + 1}`;
-  props.component.sql[newQueryName] = '';
-  selectedSqlQuery.value = newQueryName;
+function resolveActionTemplate(template: string) {
+  return template.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_match, key: string) => {
+    const value = modalFormState[key];
+    return String(value ?? '').replace(/'/g, "''");
+  });
 }
 
-function removeQuery() {
-  const current = selectedSqlQuery.value;
-  if (!current || sqlQueryNames.value.length <= 1) return;
-  delete props.component.sql[current];
-  selectedSqlQuery.value = Object.keys(props.component.sql).sort((a, b) => a.localeCompare(b))[0] || '';
-}
+function validateActionModal() {
+  const modalConfig = props.component.modal;
+  if (!modalConfig) return null;
 
-function addClickQuery() {
-  if (!props.component.sql_click) props.component.sql_click = {};
-  const sqlRecord = props.component.sql_click;
-  const newQueryName = `clickQuery${Object.keys(sqlRecord).length + 1}`;
-  props.component.sql_click[newQueryName] = '';
-  selectedSqlClickQuery.value = newQueryName;
-  editedSqlClick.value = '';
-}
+  for (const field of modalConfig.fields) {
+    const rawValue = modalFormState[field.name];
+    const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
 
-function removeClickQuery() {
-  const current = selectedSqlClickQuery.value;
-  if (!current || !props.component.sql_click) return;
-  delete props.component.sql_click[current];
-  selectedSqlClickQuery.value = Object.keys(props.component.sql_click).sort((a, b) => a.localeCompare(b))[0] || '';
-  editedSqlClick.value = props.component.sql_click[selectedSqlClickQuery.value] || '';
-}
+    if (field.required && (value === '' || value === undefined || value === null)) {
+      return `Field "${field.label}" is required.`;
+    }
 
-/**
- * Saves the edited component code back to the component object and updates the system in the store.
- */
-async function saveEdit() {
-
-  // saving the edited component code to the component object
-  props.component.html = editedHtml.value;
-  props.component.css = editedCss.value;
-  props.component.js = editedJs.value;
-  props.component.sql[selectedSqlQuery.value] = editedSql.value;
-  props.component.js_click = editedJsClick.value;
-  if (props.component.sql_click && selectedSqlClickQuery.value) {
-    props.component.sql_click[selectedSqlClickQuery.value] = editedSqlClick.value;
+    if (field.type === 'number' && value !== '' && Number.isNaN(Number(value))) {
+      return `Field "${field.label}" must be a valid number.`;
+    }
   }
 
-  // Explicitly update component variables on save
-  // TODO: is this needed?
-  // if (editedJs.value) {
-  //     try { componentVariables.value.jsVariables = JsHandler.getJsVariables(editedJs.value); } catch (e) { }
-  // }
+  if ('from' in modalFormState && 'to' in modalFormState) {
+    const fromDate = new Date(String(modalFormState.from));
+    const toDate = new Date(String(modalFormState.to));
+    if (!Number.isNaN(fromDate.getTime()) && !Number.isNaN(toDate.getTime()) && fromDate > toDate) {
+      return 'The "from" date must be earlier than or equal to the "to" date.';
+    }
+  }
 
-  isEditModalOpened.value = false;
+  if ('capacity' in modalFormState && Number(modalFormState.capacity) < 1) {
+    return 'Capacity must be at least 1.';
+  }
+
+  return null;
+}
+
+async function executeActionSql(sql: string) {
+  console.log('Executing SQL:', sql);
+  if (!db) {
+    throw new Error('Database is not ready.');
+  }
+
+  const trimmedSql = sql.trim();
+  if (!trimmedSql) {
+    throw new Error('SQL query is empty.');
+  }
+
+  const operation = /^\s*select\b/i.test(trimmedSql)
+    ? await db.query(trimmedSql)
+    : await db.execute(trimmedSql);
+
+  if (operation.result !== OperationResultType.SUCCESS) {
+    throw new Error(operation.message);
+  }
+}
+
+async function persistDatabaseChanges() {
+  if (systemsStore.selectedSystem) {
+    await systemsStore.updateSystem(systemsStore.selectedSystem);
+  }
+}
+
+async function handleActionModalSubmit() {
+  const modalConfig = props.component.modal;
+  if (!modalConfig) return;
+
+  actionModalError.value = '';
+  const validationError = validateActionModal();
+  if (validationError) {
+    actionModalError.value = validationError;
+    return;
+  }
+
+  const sqlFieldName = modalConfig.submitSqlFieldName;
+  const sqlTemplate = sqlFieldName ? String(modalFormState[sqlFieldName] ?? '') : '';
+  const resolvedSql = resolveActionTemplate(sqlTemplate);
+
+  if (!resolvedSql.trim()) {
+    actionModalError.value = 'SQL query is empty.';
+    return;
+  }
+
+  isSubmittingActionModal.value = true;
+
+  try {
+    await executeActionSql(resolvedSql);
+    await persistDatabaseChanges();
+
+    toast.add({
+      title: modalConfig.successMessage ?? 'Action completed successfully.',
+      color: 'primary',
+      icon: 'i-heroicons-check'
+    });
+
+    isActionModalOpened.value = false;
+    emit('action-completed', { componentId: props.component.id, type: 'modal-sql', sql: resolvedSql });
+  } catch (error) {
+    actionModalError.value = error instanceof Error ? error.message : String(error);
+  } finally {
+    isSubmittingActionModal.value = false;
+  }
+}
+
+async function handleModalSave(payload: { updatedComponent: SystemComponent, updatedVariables: ComponentVariables }) {
+  // Update local component properties
+  Object.assign(props.component, payload.updatedComponent);
+
+  // Update local variables for v-html rendering
+  componentVariables.value = payload.updatedVariables;
+
+  // Apply new CSS
+  applyStyle(props.component.css);
 
   if (systemsStore.selectedSystem) {
     await systemsStore.updateSystem(systemsStore.selectedSystem);
   }
 }
 
-/**
- * Edit (pencil) icon click action, opens the edit modal and initializes the code editors with the current component code.
- */
-function handleEdit() {
-  editedHtml.value = props.component.html;
-  editedCss.value = props.component.css;
-  editedJs.value = props.component.js;
-  editedSql.value = props.component.sql[selectedSqlQuery.value] || '';
-  editedJsClick.value = props.component.js_click || '';
+function handleClick() {
+  if (globalSettings.teacherMode && globalSettings.teacherHighlightEnabled) {
+    return;
+  }
 
-  selectedSqlClickQuery.value = Object.keys(props.component.sql_click ?? {})
-    .sort((a, b) => a.localeCompare(b))[0] || '';
-  editedSqlClick.value = props.component.sql_click[selectedSqlClickQuery.value] || '';
+  if (highlightStore.isHighlightActive) {
+    highlightStore.selectHighlightedComponent(props.component.id);
+    return;
+  }
 
-  // turns on visibility of the modal
-  isEditModalOpened.value = true;
+
+  // execute js code on click if exists
+  if (props.component.js_click) {
+    try {
+      const resolvedJs = HtmlHandler.ReplaceTextForVariables(resolvedVariables.value, props.component.js_click);
+      const fullCode = jsVarsHeader.value ? `${jsVarsHeader.value}\n${resolvedJs}` : resolvedJs;
+      componentVariables.value.jsVariables = JsHandler.getJsVariables(fullCode, resolvedJs);
+    } catch (e) {
+      console.error('Error executing click JS code:', e);
+    }
+  }
+
+  // execute all sql
+  if (props.component.sql_click) {
+    void (async () => {
+      try {
+        for (const sql of Object.values(props.component.sql_click)) {
+          const resolvedSql = HtmlHandler.ReplaceTextForVariables(resolvedVariables.value, sql);
+          await executeActionSql(resolvedSql);
+        }
+
+        await persistDatabaseChanges();
+        emit('action-completed', { componentId: props.component.id, type: 'click-sql' });
+      }
+      catch (e) {
+        console.error('Error executing click SQL code:', e);
+      }
+    })();
+  }
 }
 
-/**
- * Closes the edit modal without saving changes.
- */
-function closeEdit() {
-  isEditModalOpened.value = false;
+function applyStyle(css: string) {
+  let el = document.getElementById(styleId);
+  if (!el) {
+    el = document.createElement('style');
+    el.id = styleId;
+    document.head.appendChild(el);
+  }
+  const resolvedCss = HtmlHandler.ReplaceTextForVariables(resolvedVariables.value, css);
+  el.textContent = resolvedCss;
 }
 
+// Watchers for styles and variables
+watch(() => [componentVariables.value, systemInputVariables.value], () => applyStyle(props.component.css), { deep: true });
+
+watch(() => props.component.variables?.generalVariables, (newVars) => {
+  componentVariables.value.generalVariables = newVars ?? [];
+}, { deep: true, immediate: true });
+
+watch(() => systemsStore.selectedSystem?.database?.dbNumber, async () => {
+  if (!db || !props.component.sql || isRefreshingSqlVars) return;
+  isRefreshingSqlVars = true;
+  try {
+    componentVariables.value.sqlVariables = [];
+    const replacedSql: Record<string, string> = SqlHandler.ReplaceSqlForVariablesInRecord(componentVariables.value, props.component.sql);
+    await populateSqlVariables(replacedSql);
+  } finally {
+    isRefreshingSqlVars = false;
+  }
+});
+
+// Core logic for populating variables on mount
 async function populateSqlVariables(sqlRecord: Record<string, string>) {
-  const tableMap = await DatabaseHandler.getTableColumnMap(db);
+  const tableMap = await DatabaseHandler.getTableColumnMap(db.sqlJsDatabase!);
 
   for (const [queryName, sql] of Object.entries(sqlRecord)) {
-    const result: QueryExecResult[] = (await DatabaseHandler.query(db, sql)).data ?? [];
+    const result: QueryExecResult[] = (await DatabaseHandler.query(db!.sqlJsDatabase!, sql)).data ?? [];
     const values = result.length > 0 ? Object.values(result[0].values) : [];
 
     const vars: TableMap[] = SqlHandler.GetSqlVariableNames(sql, tableMap.data ?? {}, result);
 
     if (vars === undefined || vars.length === 0) continue;
-    sqlVariables.value = [...sqlVariables.value, ...vars];
-
-    console.log("VALUES:", values)
 
     const pushIfUnique = (variable: Variable) => {
       if (!componentVariables.value.sqlVariables.some(v => v.name === variable.name)) {
@@ -384,144 +376,78 @@ async function populateSqlVariables(sqlRecord: Record<string, string>) {
   }
 }
 
-function handleClick() {
+function getVariableValue(input: HTMLInputElement): VariableType | null {
+  switch (input.type) {
+    case 'number':
+      return input.value === '' ? '' : Number(input.value);
 
-  // if highlight mode as active we will not execute click action
-  if (highlightStore.isHighlightActive) {
-    highlightStore.selectHighlightedComponent(props.component.id);
-    return;
-  } else {
-    // execute js code on click if exists
-    if (props.component.js_click) {
-      try {
-        const resolvedJs = HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, props.component.js_click);
-        eval(resolvedJs);
-      } catch (e) {
-        console.error('Error executing click JS code:', e);
-      }
-    } else {
-      console.log('No click JS code to execute for this component.');
-    }
+    case 'date':
+    case 'datetime-local':
+      return input.value === '' ? '' : new Date(input.value);
 
-    // execute all sql
-    if (props.component.sql_click) {
-      try {
-        for (const sql of Object.values(props.component.sql_click)) {
-          const resolvedSql = HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, sql);
-          DatabaseHandler.query(db, resolvedSql);
-        }
-      } catch (e) {
-        console.error('Error executing click SQL code:', e);
-      }
-    } else {
-      console.log('No click SQL code to execute for this component.');
-    }
+    default:
+      return input.value; // string
   }
 }
 
-/**
- * Applies the given CSS styles to the document head, replacing any variable placeholders with their actual values.
- * @param css
- */
-function applyStyle(css: string) {
-  let el = document.getElementById(styleId);
-  if (!el) {
-    el = document.createElement('style');
-    el.id = styleId;
-    document.head.appendChild(el);
-  }
-  console.log('[CSS] before replace:', css);
-  const resolvedCss = HtmlHandler.ReplaceHtmlForVariables(componentVariables.value, css);
-  console.log('[CSS] after replace:', resolvedCss);
-  el.textContent = resolvedCss;
+function syncSystemInput(input: HTMLInputElement) {
+  const inputIdentifier = input.name || input.id;
+  if (!inputIdentifier.startsWith('system-')) return;
+
+  const value = getVariableValue(input);
+  if (value === null) return;
+
+  const varName = inputIdentifier.replace(/^system-/, '');
+  ownedSystemVariableNames.add(varName);
+  upsertSystemInputVariable(varName, value);
 }
 
-// watcher - css change when componentVariables change
-watch(componentVariables, () => applyStyle(props.component.css), { deep: true });
+function handleInput(event: Event) {
+  const target = event.target;
 
-// watcher - general variables
-watch(() => props.generalVariables, (newVars) => {
-  componentVariables.value.generalVariables = newVars ?? [];
-}, { deep: true, immediate: true });
+  if (!(target instanceof HTMLInputElement)) return;
 
-// watcher - edited JS code
-watch(() => editedJs.value, (newJs) => {
-  if (!newJs) {
-    componentVariables.value.jsVariables = [];
-    return;
+  syncSystemInput(target);
+}
+
+function registerInitialSystemInputs() {
+  if (!wrapperRef.value) return;
+
+  const inputs = Array.from(wrapperRef.value.querySelectorAll('input'));
+  for (const input of inputs) {
+    syncSystemInput(input);
   }
-
-  try {
-    const fullCode = sqlVarsHeader.value ? `${sqlVarsHeader.value}\n${newJs}` : newJs;
-    componentVariables.value.jsVariables = JsHandler.getJsVariables(fullCode, newJs);
-  } catch (e) {
-    console.error('Error parsing JS variables:', e);
-    componentVariables.value.jsVariables = [];
-  }
-}, { immediate: true });
-
-// watcher - edited SQL code
-watch(() => editedSql.value, async (newSql) => {
-  if (!db) return;
-
-  // merge the currently edited SQL into a temp record
-  const tempSqlRecord: Record<string, string> = {
-    ...props.component.sql,
-    [selectedSqlQuery.value]: newSql
-  };
-
-  // reset and re-populate sql variables
-  componentVariables.value.sqlVariables = [];
-  sqlVariables.value = [];
-
-  const replacedSql = SqlHandler.ReplaceSqlForVariablesInRecord(componentVariables.value, tempSqlRecord);
-  await populateSqlVariables(replacedSql);
-});
-
-// watcher - when the selected SQL query changes, update the editedSql to show the code of the newly selected query
-watch(selectedSqlQuery, (newQuery) => {
-  editedSql.value = props.component.sql[newQuery] || '';
-});
-
-watch(selectedSqlClickQuery, (newQuery) => {
-  editedSqlClick.value = props.component.sql_click?.[newQuery] || '';
-});
-
+}
 
 onMounted(async () => {
-  db = systemsStore.selectedSystem?.database?.sqlJsDatabase ?? undefined;
-
-  // preselect sql query
-  selectedSqlQuery.value = Object.keys(props.component.sql ?? {})
-    .sort((a, b) => a.localeCompare(b))[0] || '';
-
-  // apply styles on mount
+  db = systemsStore.selectedSystem?.database ?? undefined;
   applyStyle(props.component.css);
 
-  // populate general variables
-  if (props.generalVariables) {
-    componentVariables.value.generalVariables = props.generalVariables;
-  }
+  componentVariables.value.generalVariables = props.component.variables?.generalVariables ?? [];
 
-  // populate JS variables from component JS code
-  if (props.component.js) {
-    try {
-      componentVariables.value.jsVariables = JsHandler.getJsVariables(props.component.js);
-    } catch (e) {
-      console.error('Error parsing JS variables:', e);
-    }
-  }
-
-  // populate SQL variables from component SQL code
   if (db && props.component.sql) {
     const replacedSql: Record<string, string> = SqlHandler.ReplaceSqlForVariablesInRecord(componentVariables.value, props.component.sql);
     await populateSqlVariables(replacedSql);
   }
-  console.log('Initial SQL variables:', sqlVariables.value);
 
+  if (props.component.js) {
+    try {
+      const fullCode = jsVarsHeader.value ? `${jsVarsHeader.value}\n${props.component.js}` : props.component.js;
+      componentVariables.value.jsVariables = JsHandler.getJsVariables(fullCode, props.component.js);
+    } catch (e) {
+      console.error('Error parsing JS variables on mount:', e);
+    }
+  }
 
-})
+  await nextTick();
+  registerInitialSystemInputs();
+});
 
+onBeforeUnmount(() => {
+  for (const variableName of ownedSystemVariableNames) {
+    removeSystemInputVariable(variableName);
+  }
+});
 </script>
 
 <style scoped>
@@ -619,109 +545,36 @@ onMounted(async () => {
   transform: scale(1.1);
 }
 
+.teacher-icon {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  opacity: 1;
+  transform: scale(1);
+}
+
 .component-html {
   display: block;
 }
 
-.sql-var-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(14, 165, 233, 0.25);
-  background: rgba(14, 165, 233, 0.06);
-  min-width: 80px;
-  transition: border-color 0.15s, background 0.15s;
+.teacher-mode-disabled {
+  pointer-events: none;
 }
 
-.sql-var-card:hover {
-  border-color: rgba(14, 165, 233, 0.5);
-  background: rgba(14, 165, 233, 0.1);
+.teacher-outline {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-.sql-var-name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #0ea5e9;
-  opacity: 0.8;
-}
-
-.sql-var-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1e293b !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
-}
-
-.js-var-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  background: rgba(16, 185, 129, 0.06);
-  min-width: 80px;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.js-var-card:hover {
-  border-color: rgba(16, 185, 129, 0.5);
-  background: rgba(16, 185, 129, 0.1);
-}
-
-.js-var-name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #10b981;
-  opacity: 0.8;
-}
-
-.js-var-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1e293b !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
-}
-
-.general-var-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  background: rgba(99, 102, 241, 0.06);
-  min-width: 80px;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.general-var-card:hover {
-  border-color: rgba(99, 102, 241, 0.5);
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.general-var-name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6366f1;
-  opacity: 0.8;
-}
-
-.general-var-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #1e293b !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
+.teacher-outline--selected {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+  background-color: rgba(56, 189, 248, 0.08);
 }
 </style>

@@ -85,6 +85,8 @@ async function onUpload(close: () => void) {
             'config.json': loader.value.jsonConfigFileContent ?? '',
             'system_components.json': loader.value.jsonComponentsContent ?? '',
             ...loader.value.csvFilesContent,
+            ...loader.value.vueFilesContent,
+            ...loader.value.sqlFilesContent,
         }
         const loadResult = await InformationSystem.loadSystem(filesContents)
         if (loadResult.result === OperationResultType.SUCCESS && loadResult.data) {

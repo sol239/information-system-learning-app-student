@@ -7,7 +7,7 @@
           <span class="nav-label">{{ item.label }}</span>
         </NuxtLink>
       </li>
-      <DebugButton />
+      <!-- <DebugButton /> -->
 
     </ul>
   </nav>
@@ -47,26 +47,26 @@ const items = computed(() => {
   void locale.value
 
   return [
-    {
-      label: t('home'),
-      icon: 'i-heroicons-home',
-      to: '/',
-    },
+    // {
+    //   label: t('home'),
+    //   icon: 'i-heroicons-home',
+    //   to: '/',
+    // },
     {
       label: t('systems'),
       icon: 'i-heroicons-computer-desktop',
       to: '/systems',
     },
-    {
-      label: t('settings'),
-      icon: 'i-heroicons-cog',
-      to: '/settings',
-    },
-    {
-      label: t('teacher'),
-      icon: 'i-heroicons-user-group',
-      to: '/teacher',
-    }
+    // {
+    //   label: t('settings'),
+    //   icon: 'i-heroicons-cog',
+    //   to: '/settings',
+    // },
+    // {
+    //   label: t('teacher'),
+    //   icon: 'i-heroicons-user-group',
+    //   to: '/teacher',
+    // }
   ]
 })
 

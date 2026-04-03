@@ -36,7 +36,7 @@
             <label for="locale-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t('select_language') }}
             </label>
-            <USelect v-model="locale" color="sky" :items="localeOptions"
+            <USelect :model-value="locale" @update:model-value="setLocale" color="sky" :items="localeOptions"
               class="settings-language-select w-full max-w-xs"/>
           </div>
         </div>
@@ -58,7 +58,7 @@
               <span class="text-sm font-medium text-gray-900 dark:text-white">{{ t('task_menu_sidebar') }}</span>
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('task_menu_sidebar_description') }}</span>
             </div>
-            <USwitch color="orange" :model-value="globalSettingsStore.taskMenuDisplayedAsSidebar" />
+            <USwitch color="orange" :model-value="globalSettingsStore.taskMenuDisplayedAsSidebar" @update:model-value="val => globalSettingsStore.taskMenuDisplayedAsSidebar = val" />
           </div>
           <!-- Dark Mode Switch -->
           <div class="flex items-center justify-between mt-4">
@@ -84,10 +84,10 @@ import { computed, ref } from 'vue'
 const globalSettingsStore = useGlobalSettingsStore()
 
 /* 3. Context hooks */
-const { locale, availableLocales, setLocale } = useI18n()
+const { locale, availableLocales, setLocale, t } = useI18n()
 
 /* 4. Constants (non-reactive) */
-const { t } = useI18n()
+// none
 
 /* 5. Props */
 // none
