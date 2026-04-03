@@ -1,3 +1,5 @@
+import { ComponentVariables } from './ComponentVariables';
+
 /**
  * A class representing a UI component.
  */
@@ -13,6 +15,7 @@ export class Component {
     sql_click: Record<string, string>;
     tags: string[];
     edited: boolean = false;
+    variables: ComponentVariables = new ComponentVariables();
 
     constructor({
                     id,
@@ -63,7 +66,11 @@ export class Component {
     }
 
     public static fromJSON(data: any): Component {
-        return new Component(data)
+        const component = new Component(data)
+        if (!component.variables || typeof component.variables.generalVariables === 'undefined') {
+            component.variables = new ComponentVariables()
+        }
+        return component
     }
 
     public static arrayFromJSON(data: any[]): Component[] {

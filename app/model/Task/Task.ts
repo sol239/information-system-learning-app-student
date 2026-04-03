@@ -1,75 +1,181 @@
+import type { IActivity } from "./Activity/IActivity";
 import { ActivityType } from "./Activity/ActivityType";
+import { RepairActivity } from "./Activity/RepairActivity";
+import { SelectActivity } from "./Activity/SelectActivity";
+import { SelectOptionsActivity } from "./Activity/SelectOptionsActivity";
 import { FinishType } from "./Finish/FinishType";
+import type { GUID } from "../GUID";
+import { TaskStatus } from "./TaskStatus";
+import { Component } from "../Component";
 
 export class Task {
   constructor(
-    public id: number,
+    public id: GUID,
     public title: string,
     public description: string,
+
     public componentsRepaired: boolean = false,
     public completed: boolean = false,
-    public activityDescription: string = '',
-    public activityType: ActivityType,
+
+    public activity?: IActivity,
+
     public finishDescription: string = '',
-    public finishType: FinishType = FinishType.AFTER_ACTIVITY,
-    public elementClass: Set<string> = new Set(),
-    public answer: string = '',
+    public finishType: FinishType = FinishType.IMMEDIATE,
+
     public round: number = 1,
-    public isEditable: boolean = false,
-    public status: string = '',
-    public errorComponents: any[] = [],
-    public componentsIdsToFind: string[] = [],
+    
+    public status: TaskStatus = TaskStatus.NOT_STARTED,
+
     public feedback: string = '',
+
     public pointsReward: number = 0,
-    public failPenalty: number = 1
+    public failPenalty: number = 1,
+
+    public activityType: ActivityType = ActivityType.REPAIR,
+    public answer: string = "",
+    public errorComponents: Component[] = [],
+    public isEditable: boolean = false,
+    public isSubstituted: boolean = false
   ) { }
 
-  static fromJSON(json: any): Task {
-    // elementClass: array or string → Set
-    let elementClassSet: Set<string>;
-    if (Array.isArray(json.elementClass)) {
-      elementClassSet = new Set(json.elementClass);
-    } else if (typeof json.elementClass === 'string') {
-      elementClassSet = json.elementClass ? new Set([json.elementClass]) : new Set();
-    } else {
-      elementClassSet = new Set();
+  public static fromJSON(data: any): Task {
+    const activityType = Task.parseActivityType(data?.activityType ?? data?.type ?? data?.kind);
+    const finishType = Task.parseFinishType(data?.finishType);
+    const status = Task.parseStatus(data?.status);
+    const errorComponents = Task.parseComponents(data?.errorComponents ?? data?.["error-components"]);
+
+    const task = new Task(
+      String(data?.id ?? "") as GUID,
+      data?.title ?? "",
+      data?.description ?? "",
+      data?.componentsRepaired ?? false,
+      data?.completed ?? status === TaskStatus.COMPLETED,
+      Task.createActivity(activityType, data?.activity, data?.description ?? "", errorComponents, data?.substituteAfterActivity ?? data?.activity?.substituteAfterActivity ?? false),
+      data?.finishDescription ?? "",
+      finishType,
+      Number(data?.round ?? 1),
+      status,
+      data?.feedback ?? "",
+      Number(data?.pointsReward ?? 0),
+      Number(data?.failPenalty ?? 1),
+      activityType,
+      data?.answer ?? "",
+      errorComponents,
+      data?.isEditable ?? data?.is_editable ?? false,
+      data?.isSubstituted ?? false
+    );
+
+    if (data?.finish) {
+      (task as any).finish = {
+        label: data.finish.label,
+        description: data.finish.description,
+        options: Array.isArray(data.finish.options) ? data.finish.options : undefined,
+        correctAnswer: data.finish.correctAnswer ?? undefined,
+      };
     }
 
-    // errorComponents: support both keys
-    const errorComponents = json['error-components'] ?? json.errorComponents ?? [];
+    return task;
+  }
 
-    // isEditable: support both keys
-    const isEditable = json['is_editable'] ?? json.isEditable ?? false;
+  private static parseComponents(data: any): Component[] {
+    if (!Array.isArray(data)) {
+      return [];
+    }
 
-    // Handle activityType and finishType from JSON
-    const activityType = json.activityType ?? json.type ?? ActivityType.REPAIR;
-    const finishType = json.finishType ?? json.evaluationType ?? FinishType.AFTER_ACTIVITY;
+    return data.map((component: any) => {
+      if (component?.variables) {
+        return Component.fromJSON({
+          id: component.id ?? "",
+          name: component["error-component-name"] ?? component.name ?? component.id ?? "",
+          description: component.description ?? "",
+          html: component.variables.html ?? "",
+          css: component.variables.css ?? "",
+          js: component.variables.js ?? "",
+          js_click: component.variables.js_click ?? "",
+          sql: Task.normalizeSql(component.variables.sql),
+          sql_click: component.variables.sql_click ?? {},
+          tags: component.tags ?? [],
+          edited: component.edited ?? false,
+        });
+      }
 
-    // Handle descriptions
-    const activityDescription = json.activityDescription ?? '';
-    const finishDescription = json.finishDescription ?? json.evaluationDescription ?? '';
+      return Component.fromJSON(component);
+    });
+  }
 
-    return new Task(
-      json.id,
-      json.title,
-      json.description,
-      json.componentsRepaired ?? false,
-      json.completed ?? false,
-      activityDescription,
-      activityType as ActivityType,
-      finishDescription,
-      finishType as FinishType,
-      elementClassSet,
-      json.answer ?? '',
-      json.round ?? 1,
-      isEditable,
-      json.status ?? '',
-      errorComponents,
-      json.componentsIdsToFind ?? [],
-      json.feedback ?? '',
-      json.pointsReward ?? 0,
-      json.failPenalty ?? 1
-    );
+  private static normalizeSql(sql: unknown): Record<string, string> {
+    if (typeof sql === "string") {
+      return { default: sql };
+    }
+
+    if (sql && typeof sql === "object") {
+      return sql as Record<string, string>;
+    }
+
+    return {};
+  }
+
+  private static createActivity(
+    activityType: ActivityType,
+    activity: any,
+    description: string,
+    activityComponents: Component[],
+    substituteAfterActivity: boolean = false
+  ): IActivity {
+    const activityDescription = activity?.description ?? description;
+    const parsedComponents = Task.parseComponents(activity?.activityComponents);
+    const components = parsedComponents.length > 0 ? parsedComponents : activityComponents;
+    const label = activity?.label;
+
+    const activityOptions = Array.isArray(activity?.options) ? activity.options : [];
+
+    let instance: IActivity;
+    switch (activityType) {
+      case ActivityType.SELECT:
+        instance = new SelectActivity(activityDescription, components, label);
+        break;
+      case ActivityType.SELECT_OPTIONS:
+        instance = new SelectOptionsActivity(activityDescription, components, label, activityOptions);
+        break;
+      case ActivityType.REPAIR:
+      default:
+        instance = new RepairActivity(activityDescription, components, label);
+    }
+    instance.substituteAfterActivity = substituteAfterActivity;
+    return instance;
+  }
+
+  private static parseActivityType(value: unknown): ActivityType {
+    if (value === ActivityType.SELECT || value === ActivityType.SELECT_OPTIONS || value === ActivityType.REPAIR) {
+      return value;
+    }
+
+    return ActivityType.REPAIR;
+  }
+
+  private static parseFinishType(value: unknown): FinishType {
+    if (
+      value === FinishType.IMMEDIATE ||
+      value === FinishType.AFTER_DATABASE_UPDATE ||
+      value === FinishType.SELECT_OPTIONS ||
+      value === FinishType.TYPE_CORRECT
+    ) {
+      return value;
+    }
+
+    return FinishType.IMMEDIATE;
+  }
+
+  private static parseStatus(value: unknown): TaskStatus {
+    if (value === TaskStatus.IN_PROGRESS || value === "active") {
+      return TaskStatus.IN_PROGRESS;
+    }
+
+    if (value === TaskStatus.COMPLETED || value === "completed") {
+      return TaskStatus.COMPLETED;
+    }
+
+    return TaskStatus.NOT_STARTED;
   }
 
 }

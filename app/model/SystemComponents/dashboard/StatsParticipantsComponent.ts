@@ -1,21 +1,21 @@
 ﻿import { Component } from "~/model/Component";
 
-export const statsParticipantsComponent = new Component({
-  id: "stats-participants",
-  name: "Stats Participants",
-  tags: ["dashboard"],
-  description: `Component for participants stats. SQL: SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`,
+export const statistikaUcastnikuKomponenta = new Component({
+  id: "statistika-ucastniku",
+  name: "Statistika účastníků",
+  tags: ["statistika", "účastníků"],
+  description: `Komponenta pro statistiku účastníků. SQL: SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`,
   html: `
-  <div id="participants-stat-card">
-    <div id="participants-stat-icon">👥</div>
-    <div id="participants-stat-content">
-      <div id="participants-stat-number">pocet_ucastniku</div>
-      <div id="participants-stat-label">účastníků</div>
+  <div id="statistika-ucastniku-karta">
+    <div id="statistika-ucastniku-ikona">👥</div>
+    <div id="statistika-ucastniku-obsah">
+      <div id="statistika-ucastniku-pocet">pocet_ucastniku</div>
+      <div id="statistika-ucastniku-popisek">účastníků</div>
     </div>
   </div>
-`,
+  `,
   css: `
-#participants-stat-card {
+#statistika-ucastniku-karta {
   background-color: #ffffff;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -27,17 +27,17 @@ export const statsParticipantsComponent = new Component({
   max-width:400px;
 }
 
-#participants-stat-icon {
+#statistika-ucastniku-ikona {
   font-size: 32px;
 }
 
-#participants-stat-number {
+#statistika-ucastniku-pocet {
   font-size: 28px;
   font-weight: bold;
   color: #111111;
 }
 
-#participants-stat-label {
+#statistika-ucastniku-popisek {
   font-size: 13px;
   color: #666666;
   margin-top: 4px;
@@ -46,7 +46,7 @@ export const statsParticipantsComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "stats-participants": `SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`
+    "statistika-ucastniku": `SELECT COUNT(*) as pocet_ucastniku FROM ucastnici`
   },
   sql_click: {}
 });

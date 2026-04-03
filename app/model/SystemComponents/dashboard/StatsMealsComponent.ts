@@ -1,21 +1,21 @@
 ﻿import { Component } from "~/model/Component";
 
-export const statsMealsComponent = new Component({
-  id: "stats-meals",
-  name: "Stats Meals",
-  tags: ["dashboard"],
-  description: `Component for meals stats. SQL: SELECT COUNT(*) as count FROM jidla`,
+export const statistikaJidelKomponenta = new Component({
+  id: "statistika-jidel",
+  name: "Statistika jídel",
+  tags: ["statistika", "jídel"],
+  description: `Komponenta pro statistiku jídel. SQL: SELECT COUNT(*) as pocet_jidel FROM jidla`,
   html: `
-  <div id="meals-stat-card">
-  <div id="meals-stat-icon">🍽️</div>
-  <div id="meals-stat-content">
-    <div id="meals-stat-number">pocet_jidel</div>
-    <div id="meals-stat-label">jídel</div>
+  <div id="statistika-jidel-karta">
+    <div id="statistika-jidel-ikona">🍽️</div>
+    <div id="statistika-jidel-obsah">
+      <div id="statistika-jidel-pocet">pocet_jidel</div>
+      <div id="statistika-jidel-popisek">jídel</div>
+    </div>
   </div>
-</div>
-`,
+  `,
   css: `
-#meals-stat-card {
+#statistika-jidel-karta {
   background-color: #ffffff;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -27,17 +27,17 @@ export const statsMealsComponent = new Component({
   max-width:400px;
 }
 
-#meals-stat-icon {
+#statistika-jidel-ikona {
   font-size: 32px;
 }
 
-#meals-stat-number {
+#statistika-jidel-pocet {
   font-size: 28px;
   font-weight: bold;
   color: #111111;
 }
 
-#meals-stat-label {
+#statistika-jidel-popisek {
   font-size: 13px;
   color: #666666;
   margin-top: 4px;
@@ -46,7 +46,7 @@ export const statsMealsComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "stats-meals": `SELECT COUNT(*) as pocet_jidel FROM jidla`
+    "statistika-jidel": `SELECT COUNT(*) as pocet_jidel FROM jidla`
   },
   sql_click: {}
 });

@@ -9,7 +9,7 @@ export enum FinishType {
     /**
      * Task is completed immediately after the activity is finished.
      */
-    AFTER_ACTIVITY = 'after-activity',
+    IMMEDIATE = 'immediate',
 
     /**
      * Task is completed after the database has been updated with the activity results.

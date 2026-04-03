@@ -3,7 +3,9 @@ import { Component } from "./Component";
 import { DatabaseWrapper } from "~/utils/DatabaseWrapper";
 import { SqljsDatabaseFactory } from "~/utils/SqljsDatabaseFactory";
 import type { GUID } from "./GUID";
+import type { Page } from "./Page";
 import { Score } from "./Score";
+import { useComponentStore } from "~/stores/componentStore";
 
 /**
  * Represents an information system, encapsulating its configuration, data tables, tasks, and component mappings.
@@ -33,6 +35,16 @@ export class InformationSystem {
    * The tasks defined for the information system.
    */
   public tasks: Task[];
+
+  /**
+   * The default (original) tasks for this system. Used to reset student progress.
+   */
+  public defaultTasks: Task[];
+
+  /**
+   * The pages defined for the information system (routing, metadata).
+   */
+  public pages: Page[];
 
   /**
    * The user-customised component overrides for this system.
@@ -65,6 +77,8 @@ export class InformationSystem {
     language,
     description,
     tasks = [],
+    defaultTasks,
+    pages = [],
     actualComponents = [],
     defaultComponents = [],
     database = null,
@@ -76,6 +90,8 @@ export class InformationSystem {
     language: string;
     description: string;
     tasks?: Task[];
+    defaultTasks?: Task[];
+    pages?: Page[];
     actualComponents?: Component[];
     defaultComponents?: Component[];
     database?: DatabaseWrapper | null;
@@ -87,6 +103,8 @@ export class InformationSystem {
     this.language = language;
     this.description = description;
     this.tasks = tasks;
+    this.defaultTasks = defaultTasks ?? JSON.parse(JSON.stringify(tasks)).map((t: any) => Task.fromJSON(t));
+    this.pages = pages;
     this.actualComponents = actualComponents;
     this.defaultComponents = defaultComponents;
     this.database = database;
@@ -105,6 +123,7 @@ export class InformationSystem {
       name: configData.name,
       language: configData.language,
       description: configData.description,
+      pages: configData.pages ?? [],
       configData,
     });
   }
@@ -119,21 +138,27 @@ export class InformationSystem {
 
     try {
       const configData = JSON.parse(configContent);
+      const pages: Page[] = (configData.pages || []).map((page: Page) => ({
+        ...page,
+        vueSource: filesContents[page.vueFile] ?? null,
+      }));
       const system = new InformationSystem({
         id: configData.id as GUID,
         name: configData.name,
         language: configData.language,
         description: configData.description,
         tasks: (configData.tasks || []).map((task: any) => Task.fromJSON(task)),
+        pages,
         configData,
       });
 
       // Initialize the database with the config data and CSV contents
-      const csvEntries = Object.fromEntries(
-        Object.entries(filesContents).filter(([path]) => !path.endsWith('config.json') && !path.endsWith('system_components.json'))
-      );
-      if (Object.keys(csvEntries).length > 0) {
-        const dbResult = await SqljsDatabaseFactory.createDatabase(csvEntries);
+      // initialize using create_schema.sql
+      const sqlEntry = Object.entries(filesContents).find(([path]) => path.endsWith('create_schema.sql'));
+      console.log("Found SQL entry for database initialization:", sqlEntry);
+      if (sqlEntry) {
+        const dbResult = await SqljsDatabaseFactory.createDatabaseFromSql(sqlEntry[1]);
+        console.log("Database creation from SQL result:", dbResult);
         if (dbResult.result === OperationResultType.SUCCESS && dbResult.data) {
           system.database = DatabaseWrapper.fromInstance(dbResult.data);
         } else {
@@ -141,7 +166,21 @@ export class InformationSystem {
         }
       }
 
+
+      // const csvEntries = Object.fromEntries(
+      //   Object.entries(filesContents).filter(([path]) => !path.endsWith('config.json') && !path.endsWith('system_components.json') && !path.endsWith('.vue'))
+      // );
+      // if (Object.keys(csvEntries).length > 0) {
+      //   const dbResult = await SqljsDatabaseFactory.createDatabase(csvEntries);
+      //   if (dbResult.result === OperationResultType.SUCCESS && dbResult.data) {
+      //     system.database = DatabaseWrapper.fromInstance(dbResult.data);
+      //   } else {
+      //     return new Operation(OperationResultType.ERROR, "Failed to build database: " + dbResult.message, null);
+      //   }
+      // }
+
       // Load default components from system_components.json if present
+      /*
       const componentsEntry = Object.entries(filesContents).find(([path]) => path.endsWith('system_components.json'));
       if (componentsEntry) {
         try {
@@ -154,6 +193,14 @@ export class InformationSystem {
         } catch (e) {
           console.warn("Failed to parse system_components.json", e);
         }
+      }
+      */
+
+      // Temporarily use componentStore as the source of default components
+      const componentStore = useComponentStore();
+      system.defaultComponents = [...componentStore.defaultComponents];
+      if (system.actualComponents.length === 0) {
+        system.actualComponents = componentStore.defaultComponents.map(c => Component.fromJSON(JSON.parse(JSON.stringify(c))));
       }
 
       return new Operation(OperationResultType.SUCCESS, "System loaded successfully.", system);

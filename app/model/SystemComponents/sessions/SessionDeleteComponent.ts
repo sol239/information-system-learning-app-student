@@ -1,0 +1,34 @@
+import { Component } from "~/model/Component";
+
+export const sessionDeleteComponent = new Component({
+  id: "smazat-turnus",
+  name: "Smazat turnus",
+  tags: ["turnusy"],
+  description: `Zobrazuje tlačítko pro smazání turnusu. Vyžaduje generalVariable: idTurnusu.`,
+  html: `
+<div id="smazat-turnus-tlacitko">
+  Smazat turnus
+</div>
+`,
+  css: `
+#smazat-turnus-tlacitko {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid #ef4444;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+`,
+  js: ``,
+  js_click: ``,
+  sql: {},
+  sql_click: {
+    "smazat-turnus": `DELETE FROM turnusy WHERE id_turnusu = idTurnusu`
+  }
+});

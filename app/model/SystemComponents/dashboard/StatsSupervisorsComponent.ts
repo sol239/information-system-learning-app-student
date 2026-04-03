@@ -1,21 +1,21 @@
 ﻿import { Component } from "~/model/Component";
 
-export const statsSupervisorsComponent = new Component({
-  id: "stats-supervisors",
-  name: "Stats Supervisors",
-  tags: ["dashboard"],
-  description: `Component for supervisors stats. SQL: SELECT COUNT(*) as pocet_vedoucich FROM vedouci`,
+export const statistikaVedoucichKomponenta = new Component({
+  id: "statistika-vedoucich",
+  name: "Statistika vedoucích",
+  tags: ["statistika", "vedoucích"],
+  description: `Komponenta pro statistiku vedoucích. SQL: SELECT COUNT(*) as pocet_vedoucich FROM vedouci`,
   html: `
-  <div id="supervisors-stat-card">
-    <div id="supervisors-stat-icon">👨‍🏫</div>
-    <div id="supervisors-stat-content">
-      <div id="supervisors-stat-number">pocet_vedoucich</div>
-      <div id="supervisors-stat-label">vedoucích</div>
+  <div id="statistika-vedoucich-karta">
+    <div id="statistika-vedoucich-ikona">👨‍🏫</div>
+    <div id="statistika-vedoucich-obsah">
+      <div id="statistika-vedoucich-pocet">pocet_vedoucich</div>
+      <div id="statistika-vedoucich-popisek">vedoucích</div>
     </div>
   </div>
-`,
+  `,
   css: `
-#supervisors-stat-card {
+#statistika-vedoucich-karta {
   background-color: #ffffff;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -27,17 +27,17 @@ export const statsSupervisorsComponent = new Component({
   max-width:400px;
 }
 
-#supervisors-stat-icon {
+#statistika-vedoucich-ikona {
   font-size: 32px;
 }
 
-#supervisors-stat-number {
+#statistika-vedoucich-pocet {
   font-size: 28px;
   font-weight: bold;
   color: #111111;
 }
 
-#supervisors-stat-label {
+#statistika-vedoucich-popisek {
   font-size: 13px;
   color: #666666;
   margin-top: 4px;
@@ -46,7 +46,7 @@ export const statsSupervisorsComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "stats-supervisors": `SELECT COUNT(*) as pocet_vedoucich FROM vedouci`
+    "statistika-vedoucich": `SELECT COUNT(*) as pocet_vedoucich FROM vedouci`
   },
   sql_click: {}
 });

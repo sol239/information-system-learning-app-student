@@ -1,21 +1,21 @@
 ﻿import { Component } from "~/model/Component";
 
-export const statsSessionsComponent = new Component({
-  id: "stats-sessions",
-  name: "Stats Sessions",
-  tags: ["dashboard"],
-  description: `Component for sessions stats. SQL: SELECT COUNT(*) as pocet_turnusu FROM turnusy`,
+export const statistikaTurnusuKomponenta = new Component({
+  id: "statistika-turnusu",
+  name: "Statistika turnusů",
+  tags: ["statistika", "turnusů"],
+  description: `Komponenta pro statistiku turnusů. SQL: SELECT COUNT(*) as pocet_turnusu FROM turnusy`,
   html: `
-  <div id="sessions-stat-card">
-    <div id="sessions-stat-icon">📅</div>
-    <div id="sessions-stat-content">
-      <div id="sessions-stat-number">pocet_turnusu</div>
-      <div id="sessions-stat-label">turnusů</div>
+  <div id="statistika-turnusu-karta">
+    <div id="statistika-turnusu-ikona">📅</div>
+    <div id="statistika-turnusu-obsah">
+      <div id="statistika-turnusu-pocet">pocet_turnusu</div>
+      <div id="statistika-turnusu-popisek">turnusů</div>
     </div>
   </div>
-`,
+  `,
   css: `
-#sessions-stat-card {
+#statistika-turnusu-karta {
   background-color: #ffffff;
   border: 1px solid #cccccc;
   border-radius: 8px;
@@ -27,17 +27,17 @@ export const statsSessionsComponent = new Component({
   max-width:400px;
 }
 
-#sessions-stat-icon {
+#statistika-turnusu-ikona {
   font-size: 32px;
 }
 
-#sessions-stat-number {
+#statistika-turnusu-pocet {
   font-size: 28px;
   font-weight: bold;
   color: #111111;
 }
 
-#sessions-stat-label {
+#statistika-turnusu-popisek {
   font-size: 13px;
   color: #666666;
   margin-top: 4px;
@@ -46,7 +46,7 @@ export const statsSessionsComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "stats-sessions": `SELECT COUNT(*) as pocet_turnusu FROM turnusy`
+    "statistika-turnusu": `SELECT COUNT(*) as pocet_turnusu FROM turnusy`
   },
   sql_click: {}
 });
