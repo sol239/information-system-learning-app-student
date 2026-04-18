@@ -19,6 +19,8 @@ export const editTlacitkoUlozitJidloKomponenta = new Component({
 const stav_tlacitka = je_nazev_validni ? "" : "disabled";`,
   sql: {},
   sql_click: {
-    upravitJidlo: `UPDATE jidla SET jmeno = 'edit_vstup_nazev_jidla', doba_podavani = 'edit_vstup_doba_podavani' WHERE id_jidla = idJidla`
+    upravitJidlo: `UPDATE jidla SET jmeno = 'edit_vstup_nazev_jidla', doba_podavani = 'edit_vstup_doba_podavani' WHERE id_jidla = idJidla`,
+    smazatAlergenyJidla: `DELETE FROM jidla_alergeny WHERE id_jidla = idJidla`,
+    vlozitAlergenyJidla: `INSERT OR IGNORE INTO jidla_alergeny (id_jidla, id_alergenu) SELECT idJidla, id_alergenu FROM alergeny WHERE id_alergenu IN (edit_vstup_alergeny_jidla)`
   },
 });

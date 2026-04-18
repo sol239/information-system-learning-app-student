@@ -29,6 +29,7 @@
                     <div class="modal-container">
                         <ComponentWrapper :component="vstupNazevComponent" />
                         <ComponentWrapper :component="vstupDobaComponent" />
+                        <ComponentWrapper :component="vstupAlergenyComponent" />
                         <div class="flex gap-2">
                             <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                 @click="createModalOpen = false" />
@@ -69,6 +70,8 @@
                                     :component="withVars(editVstupNazevComponent, [new Variable('idJidla', mealId)])" />
                                 <ComponentWrapper
                                     :component="withVars(editVstupDobaComponent, [new Variable('idJidla', mealId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupAlergenyComponent, [new Variable('idJidla', mealId)])" />
                                 <div class="flex gap-2">
                                     <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                         @click="editModalOpen[mealId] = false" />
@@ -133,11 +136,13 @@ const countBarComponent = computed(() => systemsStore.getComponentById('celkovy-
 // Create components
 const vstupNazevComponent = computed(() => systemsStore.getComponentById('vstup-nazev-jidla'));
 const vstupDobaComponent = computed(() => systemsStore.getComponentById('vstup-doba-podavani'));
+const vstupAlergenyComponent = computed(() => systemsStore.getComponentById('vstup-alergeny-jidla'));
 const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-jidlo'));
 
 // Edit components
 const editVstupNazevComponent = computed(() => systemsStore.getComponentById('edit-vstup-nazev-jidla'));
 const editVstupDobaComponent = computed(() => systemsStore.getComponentById('edit-vstup-doba-podavani'));
+const editVstupAlergenyComponent = computed(() => systemsStore.getComponentById('edit-vstup-alergeny-jidla'));
 const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-jidlo'));
 
 // Delete component
@@ -216,4 +221,3 @@ onMounted(() => {
     box-sizing: border-box;
 }
 </style>
-

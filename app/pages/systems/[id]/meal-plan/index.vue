@@ -3,6 +3,44 @@
 
         <h1 class="text-4xl font-bold">{{ t('meal_plan') }}</h1>
 
+        <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <div class="flex items-center gap-2 mb-4">
+                <UIcon name="i-heroicons-user-plus" class="w-5 h-5 text-sky-600" />
+                <h2 class="text-lg font-semibold text-gray-900">Přidat jídlo osobě</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-end">
+                <ComponentWrapper class="w-full" :component="addMealSessionComponent" />
+                <ComponentWrapper class="w-full" :component="addMealPersonComponent" />
+                <ComponentWrapper class="w-full" :component="addMealDateComponent" />
+                <ComponentWrapper class="w-full" :component="addMealMealComponent" />
+                <ComponentWrapper
+                    class="w-full"
+                    :component="addMealSubmitComponent"
+                    @action-completed="reloadMealPlan"
+                />
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <div class="flex items-center gap-2 mb-4">
+                <UIcon name="i-heroicons-trash" class="w-5 h-5 text-red-600" />
+                <h2 class="text-lg font-semibold text-gray-900">Odebrat jídlo osobě</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-end">
+                <ComponentWrapper class="w-full" :component="removeMealSessionComponent" />
+                <ComponentWrapper class="w-full" :component="removeMealPersonComponent" />
+                <ComponentWrapper class="w-full" :component="removeMealDateComponent" />
+                <ComponentWrapper class="w-full" :component="removeMealMealComponent" />
+                <ComponentWrapper
+                    class="w-full"
+                    :component="removeMealSubmitComponent"
+                    @action-completed="reloadMealPlan"
+                />
+            </div>
+        </section>
+
         <!-- Sessions accordion -->
         <div v-for="sessionId in sessionIds" :key="sessionId"
             class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -150,6 +188,16 @@ const mealAllergensComponent = computed(() => systemsStore.getComponentById('jid
 const mealServingTimeComponent = computed(() => systemsStore.getComponentById('jidelnicek-doba-podavani-jidla'));
 const mealPeopleComponent = computed(() => systemsStore.getComponentById('jidelnicek-lide-jidla'));
 const mealSupervisorsComponent = computed(() => systemsStore.getComponentById('jidelnicek-vedouci-jidla'));
+const addMealSessionComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-turnus-jidlo-osobe'));
+const addMealPersonComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-osoba-jidlo-osobe'));
+const addMealDateComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-datum-jidlo-osobe'));
+const addMealMealComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-jidlo-jidlo-osobe'));
+const addMealSubmitComponent = computed(() => systemsStore.getComponentById('jidelnicek-tlacitko-pridat-jidlo-osobe'));
+const removeMealSessionComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-turnus-odebrat-jidlo-osobe'));
+const removeMealPersonComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-osoba-odebrat-jidlo-osobe'));
+const removeMealDateComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-datum-odebrat-jidlo-osobe'));
+const removeMealMealComponent = computed(() => systemsStore.getComponentById('jidelnicek-vstup-jidlo-odebrat-jidlo-osobe'));
+const removeMealSubmitComponent = computed(() => systemsStore.getComponentById('jidelnicek-tlacitko-odebrat-jidlo-osobe'));
 
 // State
 const sessionIds = ref<number[]>([]);
@@ -232,6 +280,21 @@ const loadMeals = async (sId: number, date: string) => {
             dayMeals.value = { ...dayMeals.value, [key]: result.data[0].values.map(row => Number(row[0])) };
         }
     } catch (e) { console.error('Failed to load meals for day', date, e); }
+};
+
+const reloadMealPlan = async () => {
+    await loadSessions();
+
+    for (const sessionId of expandedSessions.value) {
+        await loadDays(sessionId);
+    }
+
+    for (const key of expandedDayKeys.value) {
+        const [sessionId, date] = key.split('|');
+        if (sessionId && date) {
+            await loadMeals(Number(sessionId), date);
+        }
+    }
 };
 
 watch(() => systemsStore.selectedSystem?.database?.sqlJsDatabase, (db) => {

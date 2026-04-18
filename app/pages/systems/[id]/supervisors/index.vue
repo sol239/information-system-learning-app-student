@@ -50,6 +50,8 @@
                         <ComponentWrapper :component="vstupTelefonComponent" />
                         <ComponentWrapper :component="vstupAdresaComponent" />
                         <ComponentWrapper :component="vstupVekComponent" />
+                        <ComponentWrapper :component="vstupAlergenyComponent" />
+                        <ComponentWrapper :component="vstupTurnusyComponent" />
                         <div class="flex gap-2">
                             <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                 @click="createModalOpen = false" />
@@ -99,6 +101,10 @@
                                     :component="withVars(editVstupAdresaComponent, [new Variable('idVedouciho', supervisorId)])" />
                                 <ComponentWrapper
                                     :component="withVars(editVstupVekComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupAlergenyComponent, [new Variable('idVedouciho', supervisorId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupTurnusyComponent, [new Variable('idVedouciho', supervisorId)])" />
                                 <div class="flex gap-2">
                                     <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                         @click="editModalOpen[supervisorId] = false" />
@@ -167,6 +173,8 @@ const vstupEmailComponent = computed(() => systemsStore.getComponentById('vstup-
 const vstupTelefonComponent = computed(() => systemsStore.getComponentById('vstup-telefon-vedouciho'));
 const vstupAdresaComponent = computed(() => systemsStore.getComponentById('vstup-adresa-vedouciho'));
 const vstupVekComponent = computed(() => systemsStore.getComponentById('vstup-vek-vedouciho'));
+const vstupAlergenyComponent = computed(() => systemsStore.getComponentById('vstup-alergeny-vedouciho'));
+const vstupTurnusyComponent = computed(() => systemsStore.getComponentById('vstup-turnusy-vedouciho'));
 const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-vedouciho'));
 
 // Edit components
@@ -175,6 +183,8 @@ const editVstupEmailComponent = computed(() => systemsStore.getComponentById('ed
 const editVstupTelefonComponent = computed(() => systemsStore.getComponentById('edit-vstup-telefon-vedouciho'));
 const editVstupAdresaComponent = computed(() => systemsStore.getComponentById('edit-vstup-adresa-vedouciho'));
 const editVstupVekComponent = computed(() => systemsStore.getComponentById('edit-vstup-vek-vedouciho'));
+const editVstupAlergenyComponent = computed(() => systemsStore.getComponentById('edit-vstup-alergeny-vedouciho'));
+const editVstupTurnusyComponent = computed(() => systemsStore.getComponentById('edit-vstup-turnusy-vedouciho'));
 const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-vedouciho'));
 
 // Delete component
@@ -201,7 +211,7 @@ const filteredSupervisorIds = computed(() => {
     if (selectedSessionId.value !== null) {
         ids = ids.filter(s => s.sessionId === selectedSessionId.value);
     }
-    return ids.map(s => s.id);
+    return [...new Set(ids.map(s => s.id))];
 });
 
 function resetFilter() {

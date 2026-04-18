@@ -90,16 +90,9 @@ export const jidelnicekPocetPorciDneKomponenta = new Component({
   js_click: ``,
   sql: {
     "jidelnicek-pocet-porci-dne": `SELECT (
-  (
-    SELECT COUNT(*)
-    FROM turnusy_ucastnici tu
-    JOIN turnusy t ON t.id_turnusu = tu.id_turnusu
-    WHERE DATE('datumDne') BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)
-  ) * (
-    SELECT COUNT(*)
-    FROM kniha_jidel kj
-    WHERE DATE(kj.datum) = DATE('datumDne')
-  )
+  SELECT COUNT(*)
+  FROM ucastnici_jidla uj
+  WHERE DATE(uj.datum_podavani) = DATE('datumDne')
 ) + (
   SELECT COUNT(*)
   FROM jidla_vedouci jv

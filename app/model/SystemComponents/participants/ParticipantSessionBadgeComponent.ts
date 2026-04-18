@@ -7,23 +7,22 @@ export const stitekTurnusuUcastnikaKomponenta = new Component({
   description: `Zobrazuje název turnusu a datum pro účastníka. Vyžaduje generalVariable: idUcastnika.`,
   html: `
 <div id="stitek-turnusu-ucastnika">
-  Turnus id_turnusu_ucastnika (datum_od_ucastnika – datum_do_ucastnika)
+  turnusy_ucastnika
 </div>
 `,
   css: `
 #stitek-turnusu-ucastnika {
-  display: inline-flex;
-  align-items: center;
+  display: block;
   font-size: 13px;
   color: #6b7280;
   padding: 0;
+  white-space: pre-line;
 }
 `,
   js: ``,
   js_click: ``,
   sql: {
-    "stitek-turnusu-ucastnika": `SELECT t.id_turnusu AS id_turnusu_ucastnika, strftime('%d. %m.', t.datum_od) AS datum_od_ucastnika, strftime('%d. %m. %Y', t.datum_do) AS datum_do_ucastnika FROM turnusy t JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu WHERE tu.id_ucastnika = idUcastnika LIMIT 1`
+    "stitek-turnusu-ucastnika": `SELECT COALESCE(GROUP_CONCAT('Turnus ' || t.id_turnusu || ' (' || strftime('%d. %m.', t.datum_od) || ' - ' || strftime('%d. %m. %Y', t.datum_do) || ')', CHAR(10)), 'Bez turnusu') AS turnusy_ucastnika FROM turnusy t JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu WHERE tu.id_ucastnika = idUcastnika`
   },
   sql_click: {}
 });
-

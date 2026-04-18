@@ -23,6 +23,8 @@ const je_vek_validni = Number(vstup_vek_ucastnika) >= 6 && Number(vstup_vek_ucas
 const stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? "" : "disabled";`,
   sql: {},
   sql_click: {
-    vlozitUcastnika: `INSERT INTO ucastnici (jmeno, email, telefon, adresa, vek) VALUES ('vstup_jmeno_ucastnika', 'vstup_email_ucastnika', 'vstup_telefon_ucastnika', 'vstup_adresa_ucastnika', vstup_vek_ucastnika)`
+    vlozitUcastnika: `INSERT INTO ucastnici (jmeno, email, telefon, adresa, vek) VALUES ('vstup_jmeno_ucastnika', 'vstup_email_ucastnika', 'vstup_telefon_ucastnika', 'vstup_adresa_ucastnika', vstup_vek_ucastnika)`,
+    vlozitAlergenyUcastnika: `INSERT OR IGNORE INTO ucastnici_alergeny (id_ucastnika, id_alergenu) SELECT (SELECT MAX(id_ucastnika) FROM ucastnici), id_alergenu FROM alergeny WHERE id_alergenu IN (vstup_alergeny_ucastnika)`,
+    vlozitTurnusyUcastnika: `INSERT OR IGNORE INTO turnusy_ucastnici (id_ucastnika, id_turnusu) SELECT (SELECT MAX(id_ucastnika) FROM ucastnici), id_turnusu FROM turnusy WHERE id_turnusu IN (vstup_turnusy_ucastnika)`
   },
 });

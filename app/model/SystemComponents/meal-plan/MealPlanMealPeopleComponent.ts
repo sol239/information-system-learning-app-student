@@ -120,15 +120,9 @@ export const jidelnicekLideJidlaKomponenta = new Component({
   sql: {
     "jidelnicek-lide-jidla": `SELECT u.jmeno AS jmena_ucastniku_jidla
 FROM ucastnici u
-JOIN turnusy_ucastnici tu ON u.id_ucastnika = tu.id_ucastnika
-JOIN turnusy t ON t.id_turnusu = tu.id_turnusu
-WHERE DATE('datumDne') BETWEEN DATE(t.datum_od) AND DATE(t.datum_do)
-  AND EXISTS (
-    SELECT 1
-    FROM kniha_jidel kj
-    WHERE kj.id_jidla = idJidla
-      AND DATE(kj.datum) = DATE('datumDne')
-  )
+JOIN ucastnici_jidla uj ON u.id_ucastnika = uj.id_ucastnika
+WHERE uj.id_jidla = idJidla
+  AND DATE(uj.datum_podavani) = DATE('datumDne')
 ORDER BY u.jmeno`
   },
   sql_click: {}
@@ -255,10 +249,8 @@ export const jidelnicekVedouciJidlaKomponenta = new Component({
     "jidelnicek-vedouci-jidla": `SELECT DISTINCT v.jmeno AS jmena_vedoucich_jidla
 FROM vedouci v
 JOIN jidla_vedouci jv ON v.id_vedouciho = jv.id_vedouciho
-JOIN jidla prirazene_jidlo ON prirazene_jidlo.id_jidla = jv.id_jidla
-JOIN jidla zobrazene_jidlo ON zobrazene_jidlo.id_jidla = idJidla
-WHERE DATE(jv.datum_podavani) = DATE('datumDne')
-  AND prirazene_jidlo.doba_podavani = zobrazene_jidlo.doba_podavani
+WHERE jv.id_jidla = idJidla
+  AND DATE(jv.datum_podavani) = DATE('datumDne')
 ORDER BY v.jmeno`
   },
   sql_click: {}

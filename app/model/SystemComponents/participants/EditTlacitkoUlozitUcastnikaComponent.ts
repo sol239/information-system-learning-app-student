@@ -23,6 +23,10 @@ const je_vek_validni = Number(edit_vstup_vek_ucastnika) >= 6 && Number(edit_vstu
 const stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? "" : "disabled";`,
   sql: {},
   sql_click: {
-    upravitUcastnika: `UPDATE ucastnici SET jmeno = 'edit_vstup_jmeno_ucastnika', email = 'edit_vstup_email_ucastnika', telefon = 'edit_vstup_telefon_ucastnika', adresa = 'edit_vstup_adresa_ucastnika', vek = edit_vstup_vek_ucastnika WHERE id_ucastnika = idUcastnika`
+    upravitUcastnika: `UPDATE ucastnici SET jmeno = 'edit_vstup_jmeno_ucastnika', email = 'edit_vstup_email_ucastnika', telefon = 'edit_vstup_telefon_ucastnika', adresa = 'edit_vstup_adresa_ucastnika', vek = edit_vstup_vek_ucastnika WHERE id_ucastnika = idUcastnika`,
+    smazatAlergenyUcastnika: `DELETE FROM ucastnici_alergeny WHERE id_ucastnika = idUcastnika`,
+    vlozitAlergenyUcastnika: `INSERT OR IGNORE INTO ucastnici_alergeny (id_ucastnika, id_alergenu) SELECT idUcastnika, id_alergenu FROM alergeny WHERE id_alergenu IN (edit_vstup_alergeny_ucastnika)`,
+    smazatTurnusyUcastnika: `DELETE FROM turnusy_ucastnici WHERE id_ucastnika = idUcastnika`,
+    vlozitTurnusyUcastnika: `INSERT OR IGNORE INTO turnusy_ucastnici (id_ucastnika, id_turnusu) SELECT idUcastnika, id_turnusu FROM turnusy WHERE id_turnusu IN (edit_vstup_turnusy_ucastnika)`
   },
 });

@@ -50,6 +50,8 @@
                         <ComponentWrapper :component="vstupTelefonComponent" />
                         <ComponentWrapper :component="vstupAdresaComponent" />
                         <ComponentWrapper :component="vstupVekComponent" />
+                        <ComponentWrapper :component="vstupAlergenyComponent" />
+                        <ComponentWrapper :component="vstupTurnusyComponent" />
                         <div class="flex gap-2">
                             <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                 @click="createModalOpen = false" />
@@ -99,6 +101,10 @@
                                     :component="withVars(editVstupAdresaComponent, [new Variable('idUcastnika', participantId)])" />
                                 <ComponentWrapper
                                     :component="withVars(editVstupVekComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupAlergenyComponent, [new Variable('idUcastnika', participantId)])" />
+                                <ComponentWrapper
+                                    :component="withVars(editVstupTurnusyComponent, [new Variable('idUcastnika', participantId)])" />
                                 <div class="flex gap-2">
                                     <UButton label="Zrušit" color="neutral" variant="solid" size="md"
                                         @click="editModalOpen[participantId] = false" />
@@ -168,6 +174,8 @@ const vstupEmailComponent = computed(() => systemsStore.getComponentById('vstup-
 const vstupTelefonComponent = computed(() => systemsStore.getComponentById('vstup-telefon-ucastnika'));
 const vstupAdresaComponent = computed(() => systemsStore.getComponentById('vstup-adresa-ucastnika'));
 const vstupVekComponent = computed(() => systemsStore.getComponentById('vstup-vek-ucastnika'));
+const vstupAlergenyComponent = computed(() => systemsStore.getComponentById('vstup-alergeny-ucastnika'));
+const vstupTurnusyComponent = computed(() => systemsStore.getComponentById('vstup-turnusy-ucastnika'));
 const btnUlozitComponent = computed(() => systemsStore.getComponentById('btn-ulozit-ucastnika'));
 
 // Edit components
@@ -176,6 +184,8 @@ const editVstupEmailComponent = computed(() => systemsStore.getComponentById('ed
 const editVstupTelefonComponent = computed(() => systemsStore.getComponentById('edit-vstup-telefon-ucastnika'));
 const editVstupAdresaComponent = computed(() => systemsStore.getComponentById('edit-vstup-adresa-ucastnika'));
 const editVstupVekComponent = computed(() => systemsStore.getComponentById('edit-vstup-vek-ucastnika'));
+const editVstupAlergenyComponent = computed(() => systemsStore.getComponentById('edit-vstup-alergeny-ucastnika'));
+const editVstupTurnusyComponent = computed(() => systemsStore.getComponentById('edit-vstup-turnusy-ucastnika'));
 const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edit-btn-ulozit-ucastnika'));
 
 // Delete component
@@ -203,7 +213,7 @@ const filteredParticipantIds = computed(() => {
         ids = ids.filter(p => p.sessionId === selectedSessionId.value);
     }
 
-    return ids.map(p => p.id);
+    return [...new Set(ids.map(p => p.id))];
 });
 
 function resetFilter() {
