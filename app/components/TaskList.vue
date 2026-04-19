@@ -30,14 +30,17 @@
       >
         <div class="flex items-start justify-between gap-2">
           <span class="font-medium text-sm text-gray-900 dark:text-white leading-snug">{{ task.title }}</span>
-          <UBadge :color="statusColor(task.status)" variant="subtle" size="xs" class="shrink-0 mt-0.5">
-            {{ statusLabel(task.status) }}
-          </UBadge>
-        </div>
-        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <span>{{ t('task_round') }} {{ task.round }}</span>
-          <span>·</span>
-          <span>{{ task.pointsReward }} {{ t('task_pts') }}</span>
+          <span
+            role="checkbox"
+            :aria-checked="isTaskDone(task)"
+            :aria-label="t('task_completed')"
+            class="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors"
+            :class="isTaskDone(task)
+              ? 'border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400'
+              : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900'"
+          >
+            <UIcon v-if="isTaskDone(task)" name="i-lucide-check" class="h-3 w-3 text-white" />
+          </span>
         </div>
       </button>
     </div>
@@ -47,7 +50,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useSystemsStore } from '~/stores/systemsStore'
-import { TaskStatus } from '~/model/Task/TaskStatus'
 import type { Task } from '~/model/Task/Task'
 
 const { t } = useI18n()
@@ -58,20 +60,8 @@ const selectedTask = ref<Task | null>(null)
 
 const tasks = computed(() => systemsStore.selectedSystem?.tasks ?? [])
 
-function statusColor(status: TaskStatus): 'green' | 'sky' | 'neutral' {
-  switch (status) {
-    case TaskStatus.COMPLETED: return 'green'
-    case TaskStatus.IN_PROGRESS: return 'sky'
-    default: return 'neutral'
-  }
-}
-
-function statusLabel(status: TaskStatus): string {
-  switch (status) {
-    case TaskStatus.COMPLETED: return t('task_completed')
-    case TaskStatus.IN_PROGRESS: return t('task_in_progress')
-    default: return t('task_not_started')
-  }
+function isTaskDone(task: Task): boolean {
+  return task.activity?.isCompleted === true && task.finish?.isComplete === true
 }
 
 function openTask(task: Task) {

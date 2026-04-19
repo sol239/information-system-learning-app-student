@@ -1,6 +1,6 @@
 import type { IFinish } from "./IFinish";
 
-export class ImmediateFinish implements IFinish {
+export class TypeCorrectFinish implements IFinish {
 
     public isComplete: boolean = false;
 
@@ -10,7 +10,8 @@ export class ImmediateFinish implements IFinish {
         public label?: string,
     ) { }
 
-    public evaluate(): boolean {
-        return false;
+    public evaluate(input: unknown = ""): boolean {
+        this.isComplete = String(input).trim() === this.correctAnswer.trim();
+        return this.isComplete;
     }
 }

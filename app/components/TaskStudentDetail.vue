@@ -1,12 +1,15 @@
 <template>
   <UCard v-if="props.task" class="shadow-lg dark:bg-gray-900/50">
     <div class="space-y-6">
-      <!-- Title & round/points -->
+      <!-- Title & points -->
       <div class="flex flex-col gap-2">
         <div class="flex flex-wrap items-center gap-2">
+          <!-- Round is always 1 in the designer, so keep it hidden in the student task detail. -->
+          <!--
           <UBadge color="sky" variant="subtle" size="lg">
             {{ t('task_round') }} {{ props.task.round }}
           </UBadge>
+          -->
           <UBadge color="green" variant="subtle" size="lg">
             {{ props.task.pointsReward }} {{ t('task_pts') }}
           </UBadge>
@@ -138,15 +141,33 @@
 
       <!-- Finish section -->
       <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-800 space-y-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('task_finish') }}</p>
-          <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-            {{ finishLabel }}
-          </h3>
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('task_finish') }}</p>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ finishLabel }}
+            </h3>
+          </div>
+          <UBadge
+            :color="props.task.finish?.isComplete ? 'green' : 'neutral'"
+            variant="subtle"
+            size="md"
+            class="flex items-center gap-1.5"
+          >
+            <div
+              class="w-4 h-4 rounded border-2 flex items-center justify-center shrink-0"
+              :class="props.task.finish?.isComplete
+                ? 'border-green-500 bg-green-500 dark:border-green-400 dark:bg-green-400'
+                : 'border-gray-400 dark:border-gray-500'"
+            >
+              <UIcon v-if="props.task.finish?.isComplete" name="i-lucide-check" class="text-white w-3 h-3" />
+            </div>
+            {{ t('completed') }}
+          </UBadge>
         </div>
 
-        <p v-if="props.task.finishDescription" class="text-sm text-gray-700 dark:text-gray-300">
-          {{ props.task.finishDescription }}
+        <p v-if="props.task.finish?.description" class="text-sm text-gray-700 dark:text-gray-300">
+          {{ props.task.finish.description }}
         </p>
 
         <!-- SELECT_OPTIONS finish options - checkable -->
@@ -154,11 +175,16 @@
           <div
             v-for="(option, index) in finishOptions"
             :key="`fin-opt-${index}`"
-            class="flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer select-none transition-colors"
-            :class="selectedFinishOptionIndices.includes(index)
-              ? 'border-sky-400 bg-sky-50 dark:border-sky-600 dark:bg-sky-900/20'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-            @click="toggleFinishOption(index)"
+            class="flex items-center gap-3 rounded-lg border px-3 py-2 select-none transition-colors"
+            :class="[
+              props.task.finish?.isComplete
+                ? 'cursor-not-allowed opacity-60'
+                : 'cursor-pointer',
+              selectedFinishOptionIndices.includes(index)
+                ? 'border-sky-400 bg-sky-50 dark:border-sky-600 dark:bg-sky-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            ]"
+            @click="!props.task.finish?.isComplete && toggleFinishOption(index)"
           >
             <div
               class="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors"
@@ -176,22 +202,45 @@
           v-if="props.task.finishType === FinishType.TYPE_CORRECT"
           v-model="typeCorrectAnswer"
           :placeholder="t('task_your_answer')"
+          :disabled="props.task.finish?.isComplete"
           class="w-full"
         />
 
-        <UButton
-          v-if="props.task.finishType === FinishType.SELECT_OPTIONS || props.task.finishType === FinishType.TYPE_CORRECT"
-          color="primary"
-          variant="solid"
-          icon="i-lucide-check-circle"
-          class="mt-2"
-        >
-          {{ t('evaluate') }}
-        </UButton>
+        <div v-if="canEvaluateFinish" class="flex items-center gap-3 mt-2">
+          <UButton
+            color="primary"
+            variant="solid"
+            icon="i-lucide-check-circle"
+            :disabled="props.task.finish?.isComplete === true"
+            @click="evaluateFinish"
+          >
+            {{ t('evaluate') }}
+          </UButton>
+          <UBadge
+            v-if="finishEvaluationResult === true"
+            color="green"
+            variant="subtle"
+            size="lg"
+            class="flex items-center gap-1"
+          >
+            <UIcon name="i-lucide-circle-check" class="w-4 h-4" />
+            {{ t('correct_answer') }}
+          </UBadge>
+          <UBadge
+            v-else-if="finishEvaluationResult === false"
+            color="red"
+            variant="subtle"
+            size="lg"
+            class="flex items-center gap-1"
+          >
+            <UIcon name="i-lucide-circle-x" class="w-4 h-4" />
+            {{ t('incorrect_answer') }}
+          </UBadge>
+        </div>
       </div>
 
       <!-- Feedback -->
-      <div v-if="props.task.feedback" class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+      <div v-if="props.task.completed && props.task.feedback" class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
         <p class="text-sm text-amber-800 dark:text-amber-300">{{ props.task.feedback }}</p>
       </div>
     </div>
@@ -199,14 +248,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ActivityType } from '~/model/Task/Activity/ActivityType'
 import { FinishType } from '~/model/Task/Finish/FinishType'
 import type { Task } from '~/model/Task/Task'
 import type { SelectActivity } from '~/model/Task/Activity/SelectActivity'
 import type { SelectOptionsActivity } from '~/model/Task/Activity/SelectOptionsActivity'
 import type { Option } from '~/model/Task/Option'
-import type { GUID } from '~/model/GUID'
+import { TaskStatus } from '~/model/Task/TaskStatus'
 
 const { t } = useI18n()
 const highlightStore = useHighlightStore()
@@ -221,6 +270,18 @@ const selectedActivityOptionIndices = ref<number[]>([])
 const selectedFinishOptionIndices = ref<number[]>([])
 const typeCorrectAnswer = ref('')
 const activityEvaluationResult = ref<boolean | null>(null)
+const finishEvaluationResult = ref<boolean | null>(null)
+
+watch(
+  () => props.task?.id,
+  () => {
+    selectedActivityOptionIndices.value = []
+    selectedFinishOptionIndices.value = []
+    typeCorrectAnswer.value = ''
+    activityEvaluationResult.value = null
+    finishEvaluationResult.value = null
+  }
+)
 
 function toggleActivityOption(index: number) {
   const idx = selectedActivityOptionIndices.value.indexOf(index)
@@ -261,6 +322,7 @@ function evaluateActivity() {
   }
 
   activityEvaluationResult.value = isCorrect
+  task.status = isCorrect ? TaskStatus.IN_PROGRESS : task.status
 
   if (isCorrect) {
     const activity = task.activity as any
@@ -280,19 +342,144 @@ function evaluateActivity() {
     }
   }
 
+  if (!isCorrect) {
+    applyIncorrectScore(task)
+  }
+
   // Persist updated progress to IndexedDB
   const system = systemsStore.selectedSystem
   if (system) {
     systemsStore.updateSystem(system)
   }
+}
 
+async function evaluateFinish() {
+  const task = props.task
+  if (!task?.finish) return
+
+  let isCorrect = false
+
+  if (task.finishType === FinishType.IMMEDIATE) {
+    isCorrect = await task.finish.evaluate(undefined, {
+      activityCompleted: isTaskActivityCompleted(task)
+    })
+  } else if (task.finishType === FinishType.SELECT_OPTIONS) {
+    const selectedIds = selectedFinishOptionIndices.value
+      .map(index => finishOptions.value[index]?.id ?? index)
+    isCorrect = await task.finish.evaluate(selectedIds)
+  } else if (task.finishType === FinishType.TYPE_CORRECT) {
+    isCorrect = await task.finish.evaluate(typeCorrectAnswer.value)
+  } else if (task.finishType === FinishType.AFTER_DATABASE_UPDATE) {
+    isCorrect = await task.finish.evaluate(systemsStore.selectedSystem?.database)
+  }
+
+  finishEvaluationResult.value = isCorrect
+
+  if (isCorrect) {
+    completeTask(task)
+  } else {
+    task.status = TaskStatus.IN_PROGRESS
+    applyIncorrectScore(task)
+  }
+
+  const system = systemsStore.selectedSystem
+  if (system) {
+    systemsStore.updateSystem(system)
+  }
+}
+
+function completeTask(task: Task) {
+  const wasCompleted = task.completed || task.status === TaskStatus.COMPLETED
+  task.completed = true
+  task.status = TaskStatus.COMPLETED
+
+  if (task.finish) {
+    task.finish.isComplete = true
+  }
+
+  if (task.activityType === ActivityType.REPAIR) {
+    addSolvedComponentIds(getActivityComponentIds(task))
+  }
+
+  if (!wasCompleted) {
+    systemsStore.selectedSystem?.score?.increaseScore(task.pointsReward)
+  }
+}
+
+function applyIncorrectScore(task: Task) {
   const score = systemsStore.selectedSystem?.score
-  if (score) {
-    if (isCorrect) {
-      score.increaseScore(task.pointsReward)
-    } else {
-      score.decreaseScore(task.failPenalty)
-      score.incrementMistakes()
+  if (!score || task.completed) return
+
+  score.decreaseScore(task.failPenalty)
+  score.incrementMistakes()
+}
+
+function isTaskActivityCompleted(task: Task): boolean {
+  if (task.activity?.isCompleted === true) {
+    return true
+  }
+
+  if (task.activityType !== ActivityType.REPAIR) {
+    return false
+  }
+
+  const repaired = areRepairComponentsCorrect(task)
+  task.componentsRepaired = repaired
+  if (task.activity) {
+    task.activity.isCompleted = repaired
+  }
+
+  return repaired
+}
+
+function areRepairComponentsCorrect(task: Task): boolean {
+  const components = task.activity?.activityComponents?.length
+    ? task.activity.activityComponents
+    : task.errorComponents
+
+  if (!components.length) {
+    return task.componentsRepaired
+  }
+
+  const defaultComponents = systemsStore.selectedSystem?.defaultComponents ?? []
+
+  return components.every(component => {
+    const defaultComponent = defaultComponents.find(item => String(item.id) === String(component.id))
+    return defaultComponent ? componentMatchesDefault(component, defaultComponent) : false
+  })
+}
+
+function componentMatchesDefault(component: any, defaultComponent: any): boolean {
+  return ['html', 'css', 'js', 'js_click'].every(field => {
+    const current = String(component[field] ?? '')
+    const expected = String(defaultComponent[field] ?? '')
+    return current === '' && expected !== '' ? true : current === expected
+  }) && recordMatchesDefault(component.sql, defaultComponent.sql)
+    && recordMatchesDefault(component.sql_click, defaultComponent.sql_click)
+}
+
+function recordMatchesDefault(currentRecord: Record<string, string> | undefined, expectedRecord: Record<string, string> | undefined): boolean {
+  const current = currentRecord ?? {}
+  const expected = expectedRecord ?? {}
+  const currentKeys = Object.keys(current)
+
+  if (currentKeys.length === 0) {
+    return true
+  }
+
+  return currentKeys.every(key => String(current[key] ?? '') === String(expected[key] ?? ''))
+}
+
+function getActivityComponentIds(task: Task): string[] {
+  return (task.activity?.activityComponents?.length ? task.activity.activityComponents : task.errorComponents)
+    .map(component => component.id)
+    .filter(Boolean)
+}
+
+function addSolvedComponentIds(componentIds: string[]) {
+  for (const id of componentIds) {
+    if (!globalSettings.solvedComponentIds.includes(id)) {
+      globalSettings.solvedComponentIds.push(id)
     }
   }
 }
@@ -317,14 +504,20 @@ const activityLabel = computed(() => {
 
 const activityDescription = computed(() => props.task?.activity?.description ?? '')
 
-const activityOptions = computed<{ text: string }[]>(() => {
-  const activity = props.task?.activity as ({ options?: { text: string }[] } | undefined)
+const activityOptions = computed<Option[]>(() => {
+  const activity = props.task?.activity as ({ options?: Option[] } | undefined)
   return activity?.options ?? []
 })
 
+const canEvaluateFinish = computed(() =>
+  props.task?.finishType === FinishType.IMMEDIATE
+  || props.task?.finishType === FinishType.AFTER_DATABASE_UPDATE
+  || props.task?.finishType === FinishType.SELECT_OPTIONS
+  || props.task?.finishType === FinishType.TYPE_CORRECT
+)
+
 const finishLabel = computed(() => {
-  const task = props.task as (Task & { finish?: { label?: string } }) | null
-  if (task?.finish?.label) return task.finish.label
+  if (props.task?.finish?.label) return props.task.finish.label
   switch (props.task?.finishType) {
     case FinishType.IMMEDIATE: return t('task_finish_immediate')
     case FinishType.AFTER_DATABASE_UPDATE: return t('task_finish_after_db')
@@ -334,8 +527,8 @@ const finishLabel = computed(() => {
   }
 })
 
-const finishOptions = computed<{ text: string }[]>(() => {
-  const task = props.task as (Task & { finish?: { options?: { text: string }[] } }) | null
+const finishOptions = computed<Option[]>(() => {
+  const task = props.task as (Task & { finish?: { options?: Option[] } }) | null
   return task?.finish?.options ?? []
 })
 </script>

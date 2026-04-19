@@ -1,4 +1,4 @@
-import type { IFinish } from "./IFinish";
+import type { FinishEvaluationContext, IFinish } from "./IFinish";
 
 export class ImmediateFinish implements IFinish {
 
@@ -9,7 +9,8 @@ export class ImmediateFinish implements IFinish {
             public label?: string,
         ) { }
     
-    public evaluate(): boolean {
-        return false;
+    public evaluate(_input?: unknown, context?: FinishEvaluationContext): boolean {
+        this.isComplete = Boolean(context?.activityCompleted);
+        return this.isComplete;
     }
 }

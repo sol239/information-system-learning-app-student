@@ -1,4 +1,6 @@
 import type { IFinish } from "./IFinish";
+import { OperationResultType } from "../../../utils/OperationResultType";
+import type { DatabaseWrapper } from "../../../utils/DatabaseWrapper";
 
 export class AfterDatabaseUpdateFinish implements IFinish {
 
@@ -7,9 +9,25 @@ export class AfterDatabaseUpdateFinish implements IFinish {
     constructor(
             public description: string,
             public label?: string,
+            public checkQuery: string = "",
         ) { }
     
-    public evaluate(): boolean {
-        return false;
+    public async evaluate(input?: unknown): Promise<boolean> {
+        const db = input as DatabaseWrapper | null | undefined;
+        const query = this.checkQuery.trim();
+
+        if (!db || !query || !/^select\b/i.test(query)) {
+            this.isComplete = false;
+            return this.isComplete;
+        }
+
+        await db.initializeDatabase();
+        const result = await db.query(query);
+        const rows = Array.isArray(result.data)
+            ? result.data.flatMap(resultSet => resultSet.values ?? [])
+            : [];
+
+        this.isComplete = result.result === OperationResultType.SUCCESS && rows.length > 0;
+        return this.isComplete;
     }
 }

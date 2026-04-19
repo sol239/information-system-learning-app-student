@@ -43,17 +43,7 @@
           {{ t('task_scoring_label') }}
         </span>
 
-        <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-          <UFormField>
-            <template #label>
-              <span>{{ t('task_round') }}</span>
-              <span class="ml-1 font-normal text-gray-500 dark:text-gray-400">
-                ({{ t('task_round_info') }})
-              </span>
-            </template>
-            <UInput v-model.number="taskForm.round" type="number" min="1" class="w-full" />
-          </UFormField>
-
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
           <UFormField>
             <template #label>
               <span>{{ t('task_points_reward') }}</span>
@@ -175,7 +165,21 @@
                 :placeholder="t('task_select_activity_type')" class="w-full" />
             </UFormField>
 
-            <UFormField v-if="taskForm.activityType === ActivityType.SELECT_OPTIONS" :label="t('task_activity_options')">
+            <UFormField v-if="taskForm.activityType === ActivityType.SELECT_OPTIONS">
+              <template #label>
+                <span class="inline-flex items-center gap-1.5">
+                  {{ t('task_activity_options') }}
+                  <HoverHint :text="t('task_options_info')">
+                    <button
+                      type="button"
+                      class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
+                      :aria-label="t('task_options_info')"
+                    >
+                      <UIcon name="i-lucide-info" class="h-4 w-4" />
+                    </button>
+                  </HoverHint>
+                </span>
+              </template>
               <div class="space-y-3">
                 <div v-for="(option, index) in taskForm.activityOptions" :key="`activity-option-${index}`"
                   class="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-800">
@@ -210,12 +214,13 @@
               <UCheckbox
                 v-model="taskForm.substituteAfterActivity"
                 :label="t('task_substitute_checkbox')"
+                :disabled="isRepairActivity"
               />
-              <HoverHint :text="t('task_substitute_after_activity_hint')">
+              <HoverHint :text="substituteAfterActivityHint">
                 <button
                   type="button"
                   class="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
-                  :aria-label="t('task_substitute_after_activity_hint')"
+                  :aria-label="substituteAfterActivityHint"
                 >
                   <UIcon name="i-lucide-info" class="h-4 w-4" />
                 </button>
@@ -249,7 +254,21 @@
                 :placeholder="t('task_select_finish_type')" class="w-full" />
             </UFormField>
 
-            <UFormField v-if="taskForm.finishType === FinishType.SELECT_OPTIONS" :label="t('task_finish_options')">
+            <UFormField v-if="taskForm.finishType === FinishType.SELECT_OPTIONS">
+              <template #label>
+                <span class="inline-flex items-center gap-1.5">
+                  {{ t('task_finish_options') }}
+                  <HoverHint :text="t('task_options_info')">
+                    <button
+                      type="button"
+                      class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
+                      :aria-label="t('task_options_info')"
+                    >
+                      <UIcon name="i-lucide-info" class="h-4 w-4" />
+                    </button>
+                  </HoverHint>
+                </span>
+              </template>
               <div class="space-y-3">
                 <div v-for="(option, index) in taskForm.finishOptions" :key="`finish-option-${index}`"
                   class="flex items-center gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-800">
@@ -273,12 +292,36 @@
             <UFormField v-if="taskForm.finishType === FinishType.TYPE_CORRECT" :label="t('task_finish_correct_answer')">
               <UInput v-model="taskForm.finishCorrectAnswer" :placeholder="t('task_correct_answer_placeholder')" class="w-full" />
             </UFormField>
+
+            <UFormField v-if="taskForm.finishType === FinishType.AFTER_DATABASE_UPDATE" :label="t('task_finish_check_query')">
+              <UTextarea
+                v-model="taskForm.finishCheckQuery"
+                :placeholder="t('task_finish_check_query_placeholder')"
+                :rows="4"
+                autoresize
+                class="font-mono w-full"
+              />
+            </UFormField>
           </div>
         </div>
       </div>
 
       <div class="grid gap-4">
-        <UFormField :label="t('task_feedback_label')" class="md:col-span-2">
+        <UFormField class="md:col-span-2">
+          <template #label>
+            <span class="inline-flex items-center gap-1.5">
+              {{ t('task_feedback_label') }}
+              <HoverHint :text="t('task_feedback_info')">
+                <button
+                  type="button"
+                  class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
+                  :aria-label="t('task_feedback_info')"
+                >
+                  <UIcon name="i-lucide-info" class="h-4 w-4" />
+                </button>
+              </HoverHint>
+            </span>
+          </template>
           <UTextarea
             v-model="taskForm.feedback"
             :placeholder="t('task_feedback_placeholder')"
@@ -292,7 +335,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import EditComponentBody from '~/components/EditComponentBody.vue'
 import HoverHint from '~/components/HoverHint.vue'
 import { Component as SystemComponent } from '~/model/Component'
@@ -300,7 +343,7 @@ import type { ComponentVariables } from '~/model/ComponentVariables'
 import type { GUID } from '~/model/GUID'
 import { ActivityType } from '~/model/Task/Activity/ActivityType'
 import { FinishType } from '~/model/Task/Finish/FinishType'
-import type { Task } from '~/model/Task/Task'
+import { Task } from '~/model/Task/Task'
 import { useSystemsStore } from '~/stores/systemsStore'
 
 type TaskDetailForm = {
@@ -320,10 +363,12 @@ type TaskDetailForm = {
   activityOptions: ActivityOption[]
   finishOptions: ActivityOption[]
   finishCorrectAnswer: string
+  finishCheckQuery: string
   substituteAfterActivity: boolean
 }
 
 type ActivityOption = {
+  id?: GUID
   text: string
   isCorrect: boolean
 }
@@ -372,10 +417,15 @@ const createDefaultForm = (): TaskDetailForm => ({
   activityOptions: [],
   finishOptions: [],
   finishCorrectAnswer: '',
+  finishCheckQuery: '',
   substituteAfterActivity: false
 })
 
 const taskForm = reactive<TaskDetailForm>(createDefaultForm())
+const TASK_UPDATE_DEBOUNCE_MS = 1000
+let taskUpdateTimeout: ReturnType<typeof setTimeout> | null = null
+let queuedTaskUpdate: Task | null = null
+let isSyncingTaskForm = false
 
 const { t } = useI18n()
 
@@ -391,13 +441,24 @@ const activityTypeOptions = computed(() => [
   { label: t('task_activity_select'), value: ActivityType.SELECT },
   { label: t('task_activity_select_options'), value: ActivityType.SELECT_OPTIONS }
 ])
+const isRepairActivity = computed(() => taskForm.activityType === ActivityType.REPAIR)
+const substituteAfterActivityHint = computed(() =>
+  isRepairActivity.value
+    ? `${t('task_substitute_after_activity_hint')} ${t('task_substitute_after_activity_repair_disabled_hint')}`
+    : t('task_substitute_after_activity_hint')
+)
 
 watch(
   () => props.selectedTask,
   (task) => {
+    flushQueuedTaskUpdate()
+    isSyncingTaskForm = true
     Object.assign(taskForm, createDefaultForm())
 
     if (!task) {
+      nextTick(() => {
+        isSyncingTaskForm = false
+      })
       return
     }
 
@@ -405,10 +466,10 @@ watch(
       id: task.id,
       title: task.title,
       description: task.description,
-      finishDescription: task.finishDescription,
+      finishDescription: task.finish?.description ?? '',
       finishType: task.finishType,
-      finishLabel: (task as Task & { finish?: { label?: string } }).finish?.label ?? '',
-      round: task.round,
+      finishLabel: task.finish?.label ?? '',
+      round: 1,
       feedback: task.feedback,
       pointsReward: task.pointsReward,
       failPenalty: task.failPenalty,
@@ -417,18 +478,25 @@ watch(
       activityDescription: task.activity?.description ?? '',
       activityOptions: Array.isArray((task.activity as { options?: ActivityOption[] } | undefined)?.options)
         ? (task.activity as { options?: ActivityOption[] }).options.map(option => ({
+          id: option.id,
           text: option.text ?? '',
           isCorrect: Boolean(option.isCorrect)
         }))
         : [],
-      finishOptions: Array.isArray(((task as Task & { finish?: { options?: ActivityOption[] } }).finish?.options))
-        ? ((task as Task & { finish?: { options?: ActivityOption[] } }).finish?.options ?? []).map(option => ({
+      finishOptions: Array.isArray((task.finish as { options?: ActivityOption[] } | undefined)?.options)
+        ? ((task.finish as { options?: ActivityOption[] }).options ?? []).map(option => ({
+          id: option.id,
           text: option.text ?? '',
           isCorrect: Boolean(option.isCorrect)
         }))
         : [],
-      finishCorrectAnswer: (task as Task & { finish?: { correctAnswer?: string } }).finish?.correctAnswer ?? '',
+      finishCorrectAnswer: (task.finish as { correctAnswer?: string } | undefined)?.correctAnswer ?? '',
+      finishCheckQuery: (task.finish as { checkQuery?: string } | undefined)?.checkQuery ?? '',
       substituteAfterActivity: (task.activity as any)?.substituteAfterActivity ?? false
+    })
+
+    nextTick(() => {
+      isSyncingTaskForm = false
     })
   },
   { immediate: true }
@@ -437,40 +505,86 @@ watch(
 watch(
   taskForm,
   () => {
-    if (!props.selectedTask) {
+    if (isSyncingTaskForm || !props.selectedTask) {
       return
     }
 
-    emit('update:selectedTask', {
-      ...props.selectedTask,
-      ...taskForm,
-      finishType: taskForm.finishType,
-      finish: {
-        ...((props.selectedTask as Task & { finish?: { label?: string } }).finish ?? {}),
-        label: taskForm.finishLabel || undefined,
-        description: taskForm.finishDescription || undefined,
-        options: taskForm.finishType === FinishType.SELECT_OPTIONS
-          ? taskForm.finishOptions.map(option => ({ ...option }))
-          : undefined,
-        correctAnswer: taskForm.finishType === FinishType.TYPE_CORRECT
-          ? taskForm.finishCorrectAnswer
-          : undefined
-      },
-      activityType: taskForm.activityType,
-      activity: {
-        ...(props.selectedTask.activity ?? {}),
-        label: taskForm.activityLabel || undefined,
-        description: taskForm.activityDescription || taskForm.description,
-        activityComponents: props.selectedTask.activity?.activityComponents ?? props.selectedTask.errorComponents ?? [],
-        substituteAfterActivity: taskForm.substituteAfterActivity,
-        options: taskForm.activityType === ActivityType.SELECT_OPTIONS
-          ? taskForm.activityOptions.map(option => ({ ...option }))
-          : undefined
-      }
-    })
+    queueTaskUpdate(buildTaskUpdate(props.selectedTask))
   },
   { deep: true }
 )
+
+function buildTaskUpdate(selectedTask: Task): Task {
+  const finish = Task.createFinish(
+    taskForm.finishType,
+    {
+      ...selectedTask.finish,
+      label: taskForm.finishLabel || undefined,
+      description: taskForm.finishDescription || undefined,
+      isComplete: selectedTask.finish?.isComplete ?? false,
+      options: taskForm.finishOptions.map(option => ({
+        id: option.id ?? createOptionId(),
+        text: option.text,
+        isCorrect: option.isCorrect
+      })),
+      correctAnswer: taskForm.finishCorrectAnswer,
+      checkQuery: taskForm.finishCheckQuery
+    },
+    taskForm.finishDescription
+  )
+
+  return {
+    ...selectedTask,
+    ...taskForm,
+    finishType: taskForm.finishType,
+    finish,
+    activityType: taskForm.activityType,
+    activity: {
+      ...(selectedTask.activity ?? {}),
+      label: taskForm.activityLabel || undefined,
+      description: taskForm.activityDescription || taskForm.description,
+      activityComponents: selectedTask.activity?.activityComponents ?? selectedTask.errorComponents ?? [],
+      substituteAfterActivity: taskForm.activityType === ActivityType.REPAIR ? false : taskForm.substituteAfterActivity,
+      options: taskForm.activityType === ActivityType.SELECT_OPTIONS
+        ? taskForm.activityOptions.map(option => ({
+          id: option.id ?? createOptionId(),
+          text: option.text,
+          isCorrect: option.isCorrect
+        }))
+        : undefined
+    }
+  }
+}
+
+function queueTaskUpdate(updatedTask: Task) {
+  queuedTaskUpdate = updatedTask
+
+  if (taskUpdateTimeout) {
+    clearTimeout(taskUpdateTimeout)
+  }
+
+  taskUpdateTimeout = setTimeout(() => {
+    flushQueuedTaskUpdate()
+  }, TASK_UPDATE_DEBOUNCE_MS)
+}
+
+function flushQueuedTaskUpdate() {
+  if (taskUpdateTimeout) {
+    clearTimeout(taskUpdateTimeout)
+    taskUpdateTimeout = null
+  }
+
+  if (!queuedTaskUpdate) {
+    return
+  }
+
+  emit('update:selectedTask', queuedTaskUpdate)
+  queuedTaskUpdate = null
+}
+
+onBeforeUnmount(() => {
+  flushQueuedTaskUpdate()
+})
 
 watch(selectedComponentIds, (componentIds) => {
   if (editingComponentId.value && !componentIds.includes(editingComponentId.value)) {
@@ -483,6 +597,16 @@ watch(
   (newType) => {
     if (newType === FinishType.IMMEDIATE && !taskForm.finishDescription) {
       taskForm.finishDescription = t('task_finish_immediate_default_description')
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => taskForm.activityType,
+  (activityType) => {
+    if (activityType === ActivityType.REPAIR) {
+      taskForm.substituteAfterActivity = false
     }
   },
   { immediate: true }
@@ -564,6 +688,7 @@ function downloadTaskJson() {
 
 function addActivityOption() {
   taskForm.activityOptions.push({
+    id: createOptionId(),
     text: '',
     isCorrect: false
   })
@@ -585,6 +710,7 @@ function toggleActivityOptionCorrect(index: number) {
 
 function addFinishOption() {
   taskForm.finishOptions.push({
+    id: createOptionId(),
     text: '',
     isCorrect: false
   })
@@ -602,5 +728,9 @@ function toggleFinishOptionCorrect(index: number) {
   }
 
   option.isCorrect = !option.isCorrect
+}
+
+function createOptionId(): GUID {
+  return crypto.randomUUID() as GUID
 }
 </script>

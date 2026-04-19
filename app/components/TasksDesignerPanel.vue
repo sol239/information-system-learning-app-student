@@ -337,7 +337,7 @@ function queueSystemPersist(system: InformationSystem) {
     persistSystemTimeout = null
     refreshDefaultTasks(system)
     void systemsStore.updateSystem(system)
-  }, 250)
+  }, 1000)
 }
 
 async function persistSystemNow(system: InformationSystem) {

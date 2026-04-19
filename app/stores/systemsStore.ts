@@ -83,6 +83,8 @@ export const useSystemsStore = defineStore('systems', () => {
 
 },
     {
-        persist: true,
+        persist: {
+            pick: ['selectedSystemId'],
+        },
     }
 )

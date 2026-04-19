@@ -12,7 +12,17 @@ export class SelectOptionsFinish implements IFinish {
 
     ) { }
 
-    public evaluate(): boolean {
-        return false;
+    public evaluate(input: unknown = []): boolean {
+        const selectedInput = Array.isArray(input) ? input : [];
+        const selectedOptionIds = new Set(selectedInput.map(id => String(id)));
+        const correctOptionIds = this.options
+            .map((option, index) => option.isCorrect ? String(option.id ?? index) : null)
+            .filter((id): id is string => id !== null);
+
+        this.isComplete = selectedInput.length === correctOptionIds.length
+            && selectedOptionIds.size === correctOptionIds.length
+            && correctOptionIds.every(id => selectedOptionIds.has(id));
+
+        return this.isComplete;
     }
 }

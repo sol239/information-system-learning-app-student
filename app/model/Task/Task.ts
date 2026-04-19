@@ -3,10 +3,16 @@ import { ActivityType } from "./Activity/ActivityType";
 import { RepairActivity } from "./Activity/RepairActivity";
 import { SelectActivity } from "./Activity/SelectActivity";
 import { SelectOptionsActivity } from "./Activity/SelectOptionsActivity";
+import { AfterDatabaseUpdateFinish } from "./Finish/AfterDatabaseUpdateFinish";
 import { FinishType } from "./Finish/FinishType";
+import { ImmediateFinish } from "./Finish/ImmediateFinish";
 import type { GUID } from "../GUID";
 import { TaskStatus } from "./TaskStatus";
 import { Component } from "../Component";
+import type { IFinish } from "./Finish/IFinish";
+import { SelectOptionsFinish } from "./Finish/SelectOptionsFinish";
+import { TypeCorrectFinish } from "./Finish/TypeCorrectFinish";
+import type { Option } from "./Option";
 
 export class Task {
   constructor(
@@ -18,8 +24,9 @@ export class Task {
     public completed: boolean = false,
 
     public activity?: IActivity,
-
-    public finishDescription: string = '',
+    public activityType: ActivityType = ActivityType.REPAIR,
+    
+    public finish?: IFinish,
     public finishType: FinishType = FinishType.IMMEDIATE,
 
     public round: number = 1,
@@ -31,7 +38,6 @@ export class Task {
     public pointsReward: number = 0,
     public failPenalty: number = 1,
 
-    public activityType: ActivityType = ActivityType.REPAIR,
     public answer: string = "",
     public errorComponents: Component[] = [],
     public isEditable: boolean = false,
@@ -43,6 +49,7 @@ export class Task {
     const finishType = Task.parseFinishType(data?.finishType);
     const status = Task.parseStatus(data?.status);
     const errorComponents = Task.parseComponents(data?.errorComponents ?? data?.["error-components"]);
+    const finish = Task.createFinish(finishType, data?.finish, data?.finishDescription ?? "");
 
     const task = new Task(
       String(data?.id ?? "") as GUID,
@@ -51,28 +58,19 @@ export class Task {
       data?.componentsRepaired ?? false,
       data?.completed ?? status === TaskStatus.COMPLETED,
       Task.createActivity(activityType, data?.activity, data?.description ?? "", errorComponents, data?.substituteAfterActivity ?? data?.activity?.substituteAfterActivity ?? false),
-      data?.finishDescription ?? "",
+      activityType,
+      finish,
       finishType,
       Number(data?.round ?? 1),
       status,
       data?.feedback ?? "",
       Number(data?.pointsReward ?? 0),
       Number(data?.failPenalty ?? 1),
-      activityType,
       data?.answer ?? "",
       errorComponents,
       data?.isEditable ?? data?.is_editable ?? false,
       data?.isSubstituted ?? false
     );
-
-    if (data?.finish) {
-      (task as any).finish = {
-        label: data.finish.label,
-        description: data.finish.description,
-        options: Array.isArray(data.finish.options) ? data.finish.options : undefined,
-        correctAnswer: data.finish.correctAnswer ?? undefined,
-      };
-    }
 
     return task;
   }
@@ -127,7 +125,7 @@ export class Task {
     const components = parsedComponents.length > 0 ? parsedComponents : activityComponents;
     const label = activity?.label;
 
-    const activityOptions = Array.isArray(activity?.options) ? activity.options : [];
+    const activityOptions = Task.normalizeOptions(activity?.options);
 
     let instance: IActivity;
     switch (activityType) {
@@ -143,6 +141,63 @@ export class Task {
     }
     instance.substituteAfterActivity = substituteAfterActivity;
     return instance;
+  }
+
+  public static createFinish(
+    finishType: FinishType,
+    finish: any,
+    fallbackDescription: string
+  ): IFinish {
+    const description = finish?.description ?? fallbackDescription;
+    const label = finish?.label;
+    let taskFinish: IFinish;
+
+    switch (finishType) {
+      case FinishType.AFTER_DATABASE_UPDATE:
+        taskFinish = new AfterDatabaseUpdateFinish(
+          description,
+          label,
+          finish?.checkQuery ?? finish?.query ?? ""
+        );
+        break;
+      case FinishType.SELECT_OPTIONS:
+        taskFinish = new SelectOptionsFinish(
+          description,
+          label,
+          Task.normalizeOptions(finish?.options)
+        );
+        break;
+      case FinishType.TYPE_CORRECT:
+        taskFinish = new TypeCorrectFinish(description, finish?.correctAnswer ?? "", label);
+        break;
+      case FinishType.IMMEDIATE:
+      default:
+        taskFinish = new ImmediateFinish(description, label);
+    }
+
+    taskFinish.isComplete = Boolean(finish?.isComplete);
+    return taskFinish;
+  }
+
+  private static normalizeOptions(data: any): Option[] {
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map((option: any) => ({
+      id: String(option?.id ?? Task.createOptionId()) as GUID,
+      text: option?.text ?? "",
+      isCorrect: Boolean(option?.isCorrect)
+    }));
+  }
+
+  private static createOptionId(): GUID {
+    const cryptoApi = globalThis.crypto as Crypto | undefined;
+    if (cryptoApi?.randomUUID) {
+      return cryptoApi.randomUUID() as GUID;
+    }
+
+    return `option-${Date.now()}-${Math.random().toString(36).slice(2)}` as GUID;
   }
 
   private static parseActivityType(value: unknown): ActivityType {

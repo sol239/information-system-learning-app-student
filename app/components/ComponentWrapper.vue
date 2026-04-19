@@ -18,7 +18,7 @@
         </span>
       </div>
       <div v-else-if="globalSettings.teacherHighlightEnabled" class="teacher-mode-overlay" @click.stop="handleTeacherModeClick">
-        <UBadge :color="globalSettings.selectedComponents?.has(props.component.id) ? 'sky' : 'blue'"
+        <UBadge :color="globalSettings.selectedComponents?.has(props.component.id) ? 'red' : 'blue'"
           variant="solid" size="md"
           class="teacher-icon" style="cursor: pointer;">
           {{ globalSettings.selectedComponents?.has(props.component.id) ? '✓ ' + props.component.name : props.component.name }}
@@ -715,9 +715,9 @@ onBeforeUnmount(() => {
 }
 
 .teacher-outline--selected {
-  outline: 4px solid #38bdf8;
+  outline: 4px solid #ef4444;
   outline-offset: 2px;
-  background-color: rgba(56, 189, 248, 0.08);
+  background-color: rgba(239, 68, 68, 0.08);
 }
 </style>
 .teacher-mode-overlay {
@@ -744,11 +744,11 @@ onBeforeUnmount(() => {
 }
 @keyframes glow-blue {
   0%, 100% {
-    background-color: rgba(56, 189, 248, 0.4);
-    box-shadow: 0 0 0 2px #38bdf8, 0 0 2px rgba(56, 189, 248, 0.4);
+    background-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 0 2px #ef4444, 0 0 2px rgba(239, 68, 68, 0.4);
   }
   50% {
-    background-color: rgba(56, 189, 248, 0.6);
-    box-shadow: 0 0 0 2px #38bdf8, 0 0 18px rgba(56, 189, 248, 0.9);
+    background-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 0 2px #ef4444, 0 0 18px rgba(239, 68, 68, 0.9);
   }
 }
