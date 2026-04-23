@@ -4,12 +4,6 @@
       <!-- Title & points -->
       <div class="flex flex-col gap-2">
         <div class="flex flex-wrap items-center gap-2">
-          <!-- Round is always 1 in the designer, so keep it hidden in the student task detail. -->
-          <!--
-          <UBadge color="sky" variant="subtle" size="lg">
-            {{ t('task_round') }} {{ props.task.round }}
-          </UBadge>
-          -->
           <UBadge color="green" variant="subtle" size="lg">
             {{ props.task.pointsReward }} {{ t('task_pts') }}
           </UBadge>
@@ -256,6 +250,7 @@ import type { SelectActivity } from '~/model/Task/Activity/SelectActivity'
 import type { SelectOptionsActivity } from '~/model/Task/Activity/SelectOptionsActivity'
 import type { Option } from '~/model/Task/Option'
 import { TaskStatus } from '~/model/Task/TaskStatus'
+import { advanceCurrentRound } from '~/utils/taskLevels'
 
 const { t } = useI18n()
 const highlightStore = useHighlightStore()
@@ -403,6 +398,11 @@ function completeTask(task: Task) {
 
   if (!wasCompleted) {
     systemsStore.selectedSystem?.score?.increaseScore(task.pointsReward)
+  }
+
+  const system = systemsStore.selectedSystem
+  if (system) {
+    advanceCurrentRound(system)
   }
 }
 

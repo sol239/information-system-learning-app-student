@@ -71,6 +71,16 @@ export class InformationSystem {
    */
   public score: Score;
 
+  /**
+   * The currently unlocked task level.
+   */
+  public currentRound: number;
+
+  /**
+   * The number of task levels available in the system.
+   */
+  public levelCount: number;
+
   constructor({
     id,
     name,
@@ -84,6 +94,8 @@ export class InformationSystem {
     database = null,
     configData,
     score,
+    currentRound = 1,
+    levelCount = 1,
   }: {
     id: GUID;
     name: string;
@@ -97,6 +109,8 @@ export class InformationSystem {
     database?: DatabaseWrapper | null;
     configData?: any;
     score?: Score;
+    currentRound?: number;
+    levelCount?: number;
   }) {
     this.id = id;
     this.name = name;
@@ -110,6 +124,8 @@ export class InformationSystem {
     this.database = database;
     this.configData = configData;
     this.score = score ?? new Score();
+    this.currentRound = currentRound;
+    this.levelCount = levelCount;
   }
 
   /**
@@ -124,6 +140,8 @@ export class InformationSystem {
       language: configData.language,
       description: configData.description,
       pages: configData.pages ?? [],
+      currentRound: Number(configData.currentRound ?? 1),
+      levelCount: Number(configData.levelCount ?? 1),
       configData,
     });
   }
@@ -149,6 +167,8 @@ export class InformationSystem {
         description: configData.description,
         tasks: (configData.tasks || []).map((task: any) => Task.fromJSON(task)),
         pages,
+        currentRound: Number(configData.currentRound ?? 1),
+        levelCount: Number(configData.levelCount ?? 1),
         configData,
       });
 

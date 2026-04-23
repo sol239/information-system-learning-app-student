@@ -9,7 +9,7 @@ export const statsMaxParticipantsPerSessionComponent = new Component({
   <div id="statistika-max-ucastniku-turnusu-card">
     <div id="statistika-max-ucastniku-turnusu-icon">#</div>
     <div id="statistika-max-ucastniku-turnusu-content">
-      <div id="statistika-max-ucastniku-turnusu-number">max_pocet_ucastniku_turnusu</div>
+      <div id="statistika-max-ucastniku-turnusu-number">maximalni_pocet_zapsanych</div>
       <div id="statistika-max-ucastniku-turnusu-label">max. účastníků v turnusu</div>
     </div>
   </div>
@@ -48,7 +48,7 @@ export const statsMaxParticipantsPerSessionComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "statistika-max-ucastniku-turnusu": `SELECT COALESCE(MAX(participant_count), 0) AS max_pocet_ucastniku_turnusu FROM (SELECT COUNT(tu.id_ucastnika) AS participant_count FROM turnusy t LEFT JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu GROUP BY t.id_turnusu)`
+    "statistika-max-ucastniku-turnusu": `SELECT MAX(pocet_zapsanych) as maximalni_pocet_zapsanych FROM (SELECT COUNT(*) AS pocet_zapsanych FROM turnusy_ucastnici GROUP BY id_turnusu);`
   },
   sql_click: {}
 });

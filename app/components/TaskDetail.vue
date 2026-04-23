@@ -36,6 +36,90 @@
             class="w-full"
           />
         </UFormField>
+
+        <UFormField :label="t('task_visible_pages')">
+          <div v-if="systemPages.length" class="flex flex-wrap gap-2">
+            <UBadge
+              v-for="page in systemPages"
+              :key="page.route"
+              role="checkbox"
+              :aria-checked="isPageVisible(page)"
+              color="neutral"
+              :variant="isPageVisible(page) ? 'solid' : 'subtle'"
+              class="flex cursor-pointer items-center gap-1.5 px-3 py-1 transition"
+              @click="toggleVisiblePage(page)"
+            >
+              <UIcon
+                :name="isPageVisible(page) ? 'i-lucide-eye' : 'i-lucide-eye-off'"
+                class="h-3.5 w-3.5"
+              />
+              {{ page.name }}: {{ page.route }}
+            </UBadge>
+          </div>
+          <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+            {{ t('task_no_pages') }}
+          </p>
+        </UFormField>
+
+        <UFormField>
+          <template #label>
+            <span>{{ t('task_level_count') }}</span>
+            <span class="ml-1 font-normal text-gray-500 dark:text-gray-400">
+              ({{ t('task_level_count_info') }})
+            </span>
+          </template>
+          <UInput
+            v-model.number="systemLevelCount"
+            type="number"
+            min="1"
+            class="w-full"
+          />
+        </UFormField>
+      </div>
+
+      <div class="space-y-4 rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+        <span class="text-sm font-semibold text-gray-900 dark:text-white md:col-span-2">
+          {{ t('task_level') }}
+        </span>
+
+        <div class="grid gap-3">
+          <UFormField>
+            <template #label>
+              <span>{{ t('task_level') }}</span>
+              <span class="ml-1 font-normal text-gray-500 dark:text-gray-400">
+                ({{ t('task_level_info') }})
+              </span>
+            </template>
+            <USelect
+              v-model="taskForm.round"
+              :items="levelOptions"
+              value-key="value"
+              label-key="label"
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="space-y-2">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ t('task_level_tasks') }}
+            </span>
+            <div class="max-h-56 space-y-2 overflow-y-auto rounded-lg border border-gray-200 p-2 dark:border-gray-800">
+              <div
+                v-for="task in tasksInSelectedLevel"
+                :key="task.id"
+                class="rounded-md border border-gray-200 px-3 py-2 text-sm dark:border-gray-800"
+                :class="task.id === taskForm.id
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
+                  : 'bg-white text-gray-700 dark:bg-gray-950 dark:text-gray-300'"
+              >
+                <span class="font-medium">{{ task.title || t('task_untitled') }}</span>
+              </div>
+              <p v-if="!tasksInSelectedLevel.length" class="px-2 py-3 text-sm text-gray-500 dark:text-gray-400">
+                {{ t('task_level_no_tasks') }}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="space-y-4 rounded-xl border border-gray-200 p-4 dark:border-gray-800">
@@ -341,10 +425,12 @@ import HoverHint from '~/components/HoverHint.vue'
 import { Component as SystemComponent } from '~/model/Component'
 import type { ComponentVariables } from '~/model/ComponentVariables'
 import type { GUID } from '~/model/GUID'
+import type { Page } from '~/model/Page'
 import { ActivityType } from '~/model/Task/Activity/ActivityType'
 import { FinishType } from '~/model/Task/Finish/FinishType'
 import { Task } from '~/model/Task/Task'
 import { useSystemsStore } from '~/stores/systemsStore'
+import { systemVisiblePages } from '~/utils/taskPageVisibility'
 
 type TaskDetailForm = {
   id: GUID | ''
@@ -365,6 +451,7 @@ type TaskDetailForm = {
   finishCorrectAnswer: string
   finishCheckQuery: string
   substituteAfterActivity: boolean
+  visiblePages: Page[]
 }
 
 type ActivityOption = {
@@ -388,6 +475,24 @@ const selectedTaskFromSettings = computed<Task | null>(() => {
 const selectedComponentIds = computed(() =>
   selectedTaskFromSettings.value?.errorComponents?.map(component => component.id) ?? []
 )
+const systemPages = computed(() => {
+  const system = systemsStore.selectedSystem
+  return system ? systemVisiblePages(system, t('database')) : []
+})
+const systemTasks = computed(() => systemsStore.selectedSystem?.tasks ?? [])
+const systemLevelCount = ref(1)
+const levelOptions = computed(() =>
+  Array.from({ length: normalizeLevelCount(systemLevelCount.value) }, (_, index) => {
+    const level = index + 1
+    return {
+      label: String(level),
+      value: level
+    }
+  })
+)
+const tasksInSelectedLevel = computed(() =>
+  systemTasks.value.filter(task => task.round === taskForm.round)
+)
 const editingComponentId = ref<string | null>(null)
 const isEditingComponentValid = ref(true)
 const editComponentBodyRef = ref<InstanceType<typeof EditComponentBody> | null>(null)
@@ -398,6 +503,7 @@ defineModel<string>({ default: '' })
 const emit = defineEmits<{
   (e: 'submit' | 'evaluate'): void
   (e: 'update:selectedTask', value: Task): void
+  (e: 'update:levelCount', value: number): void
 }>()
 
 const createDefaultForm = (): TaskDetailForm => ({
@@ -418,7 +524,8 @@ const createDefaultForm = (): TaskDetailForm => ({
   finishOptions: [],
   finishCorrectAnswer: '',
   finishCheckQuery: '',
-  substituteAfterActivity: false
+  substituteAfterActivity: false,
+  visiblePages: []
 })
 
 const taskForm = reactive<TaskDetailForm>(createDefaultForm())
@@ -428,6 +535,14 @@ let queuedTaskUpdate: Task | null = null
 let isSyncingTaskForm = false
 
 const { t } = useI18n()
+
+watch(
+  () => systemsStore.selectedSystem?.levelCount,
+  (levelCount) => {
+    systemLevelCount.value = normalizeLevelCount(levelCount)
+  },
+  { immediate: true }
+)
 
 const finishTypeOptions = computed(() => [
   { label: t('task_finish_type_after_activity'), value: FinishType.IMMEDIATE },
@@ -469,7 +584,7 @@ watch(
       finishDescription: task.finish?.description ?? '',
       finishType: task.finishType,
       finishLabel: task.finish?.label ?? '',
-      round: 1,
+      round: task.round,
       feedback: task.feedback,
       pointsReward: task.pointsReward,
       failPenalty: task.failPenalty,
@@ -492,7 +607,10 @@ watch(
         : [],
       finishCorrectAnswer: (task.finish as { correctAnswer?: string } | undefined)?.correctAnswer ?? '',
       finishCheckQuery: (task.finish as { checkQuery?: string } | undefined)?.checkQuery ?? '',
-      substituteAfterActivity: (task.activity as any)?.substituteAfterActivity ?? false
+      substituteAfterActivity: (task.activity as any)?.substituteAfterActivity ?? false,
+      visiblePages: (Array.isArray(task.visiblePages)
+        ? task.visiblePages
+        : systemPages.value).map(toTaskPage)
     })
 
     nextTick(() => {
@@ -513,6 +631,12 @@ watch(
   },
   { deep: true }
 )
+
+watch(systemLevelCount, (levelCount) => {
+  const normalizedLevelCount = normalizeLevelCount(levelCount)
+  taskForm.round = Math.min(normalizeTaskLevel(taskForm.round), normalizedLevelCount)
+  emit('update:levelCount', normalizedLevelCount)
+})
 
 function buildTaskUpdate(selectedTask: Task): Task {
   const finish = Task.createFinish(
@@ -552,8 +676,23 @@ function buildTaskUpdate(selectedTask: Task): Task {
           isCorrect: option.isCorrect
         }))
         : undefined
-    }
+    },
+    visiblePages: taskForm.visiblePages.map(toTaskPage)
   }
+}
+
+function normalizeLevelCount(value: unknown): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? Math.max(1, Math.floor(parsed)) : 1
+}
+
+function normalizeTaskLevel(value: unknown): number {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) {
+    return 1
+  }
+
+  return Math.max(1, Math.min(Math.floor(parsed), normalizeLevelCount(systemLevelCount.value)))
 }
 
 function queueTaskUpdate(updatedTask: Task) {
@@ -728,6 +867,30 @@ function toggleFinishOptionCorrect(index: number) {
   }
 
   option.isCorrect = !option.isCorrect
+}
+
+function isPageVisible(page: Page): boolean {
+  return taskForm.visiblePages.some(visiblePage => visiblePage.route === page.route)
+}
+
+function toggleVisiblePage(page: Page) {
+  const pageIndex = taskForm.visiblePages.findIndex(visiblePage => visiblePage.route === page.route)
+
+  if (pageIndex === -1) {
+    taskForm.visiblePages.push(toTaskPage(page))
+    return
+  }
+
+  taskForm.visiblePages.splice(pageIndex, 1)
+}
+
+function toTaskPage(page: Page): Page {
+  return {
+    name: page.name,
+    route: page.route,
+    description: page.description,
+    vueFile: page.vueFile
+  }
 }
 
 function createOptionId(): GUID {

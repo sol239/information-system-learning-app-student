@@ -7,6 +7,7 @@ import { AfterDatabaseUpdateFinish } from "./Finish/AfterDatabaseUpdateFinish";
 import { FinishType } from "./Finish/FinishType";
 import { ImmediateFinish } from "./Finish/ImmediateFinish";
 import type { GUID } from "../GUID";
+import type { Page } from "../Page";
 import { TaskStatus } from "./TaskStatus";
 import { Component } from "../Component";
 import type { IFinish } from "./Finish/IFinish";
@@ -41,7 +42,8 @@ export class Task {
     public answer: string = "",
     public errorComponents: Component[] = [],
     public isEditable: boolean = false,
-    public isSubstituted: boolean = false
+    public isSubstituted: boolean = false,
+    public visiblePages?: Page[]
   ) { }
 
   public static fromJSON(data: any): Task {
@@ -69,7 +71,10 @@ export class Task {
       data?.answer ?? "",
       errorComponents,
       data?.isEditable ?? data?.is_editable ?? false,
-      data?.isSubstituted ?? false
+      data?.isSubstituted ?? false,
+      Array.isArray(data?.visiblePages ?? data?.visible_pages)
+        ? (data.visiblePages ?? data.visible_pages)
+        : undefined
     );
 
     return task;

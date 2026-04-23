@@ -9,7 +9,7 @@ export const statsMinParticipantsPerSessionComponent = new Component({
   <div id="statistika-min-ucastniku-turnusu-card">
     <div id="statistika-min-ucastniku-turnusu-icon">MIN</div>
     <div id="statistika-min-ucastniku-turnusu-content">
-      <div id="statistika-min-ucastniku-turnusu-number">min_pocet_ucastniku_turnusu</div>
+      <div id="statistika-min-ucastniku-turnusu-number">minimalni_pocet_zapsanych</div>
       <div id="statistika-min-ucastniku-turnusu-label">min. účastníků v turnusu</div>
     </div>
   </div>
@@ -48,7 +48,7 @@ export const statsMinParticipantsPerSessionComponent = new Component({
   js: ``,
   js_click: ``,
   sql: {
-    "statistika-min-ucastniku-turnusu": `SELECT COALESCE(MIN(participant_count), 0) AS min_pocet_ucastniku_turnusu FROM (SELECT COUNT(tu.id_ucastnika) AS participant_count FROM turnusy t LEFT JOIN turnusy_ucastnici tu ON t.id_turnusu = tu.id_turnusu GROUP BY t.id_turnusu)`
+    "statistika-min-ucastniku-turnusu": `SELECT MIN(pocet_zapsanych) as minimalni_pocet_zapsanych FROM (SELECT COUNT(*) AS pocet_zapsanych FROM turnusy_ucastnici GROUP BY id_turnusu);`
   },
   sql_click: {}
 });

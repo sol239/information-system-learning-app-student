@@ -17,16 +17,21 @@ export const celkovyPocetJidelKomponenta = new Component({
   align-items: center;
   gap: 10px;
   padding: 6px 16px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: #18181b;
+  border: 1px solid #3f3f46;
   border-radius: 10px;
-  color: #15803d;
+  color: #e4e4e7;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 #ikona-poctu-jidel {
   font-size: 15px;
+}
+
+#popisek-poctu-jidel {
+  color: #34d399;
+  font-weight: 700;
 }
 `,
   js: ``,

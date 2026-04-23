@@ -21,6 +21,17 @@
             <!-- Spacer -->
             <div class="flex-1" />
 
+            <!-- Meal name filter -->
+            <UInput
+                v-model="filterText"
+                icon="i-heroicons-magnifying-glass"
+                placeholder="Název jídla"
+                class="w-56"
+            />
+
+            <!-- Order select -->
+            <ComponentWrapper :component="razeniComponent" />
+
             <!-- Add meal modal -->
             <ModalContainer v-model:open="createModalOpen" class="w-fit">
                 <UButton label="Přidat jídlo" color="primary" icon="i-heroicons-plus" size="md" />
@@ -108,6 +119,7 @@ import ComponentWrapper from '~/components/ComponentWrapper.vue';
 import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
+import { useSystemInputVariables } from '~/composables/useSystemInputVariables';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -119,6 +131,7 @@ function withVars(comp: any, vars: Variable[]) {
 
 const route = useRoute();
 const systemsStore = useSystemsStore();
+const { systemInputVariables } = useSystemInputVariables();
 const { t } = useI18n();
 const systemId = route.params.id as string;
 
@@ -132,6 +145,7 @@ const editModalOpen = reactive<Record<number, boolean>>({});
 const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-jidla'));
 const allergenListComponent = computed(() => systemsStore.getComponentById('seznam-alergenu-jidla'));
 const countBarComponent = computed(() => systemsStore.getComponentById('celkovy-pocet-jidel'));
+const razeniComponent = computed(() => systemsStore.getComponentById('razeni-jidel'));
 
 // Create components
 const vstupNazevComponent = computed(() => systemsStore.getComponentById('vstup-nazev-jidla'));
@@ -149,10 +163,16 @@ const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edi
 const smazatComponent = computed(() => systemsStore.getComponentById('smazat-jidlo'));
 
 // Meal data
-interface MealRow { id: number; time: string }
+interface MealRow {
+    id: number;
+    time: string;
+    name: string;
+    allergenCount: number;
+}
 const meals = ref<MealRow[]>([]);
 
 // Filter
+const filterText = ref('');
 const selectedTime = ref<string | null>(null);
 
 const timeFilterItems = computed(() => [
@@ -162,12 +182,48 @@ const timeFilterItems = computed(() => [
     { label: 'večeře', value: 'večeře' },
 ]);
 
+const normalizedFilterText = computed(() => filterText.value.trim().toLocaleLowerCase('cs-CZ'));
+
+const orderBy = computed(() => {
+    const value = systemInputVariables.value.find(variable => variable.name === 'razeni_jidel')?.variable;
+    const normalizedValue = String(value ?? 'nazev');
+    return ['nazev', 'doba', 'alergeny'].includes(normalizedValue) ? normalizedValue : 'nazev';
+});
+
 const filteredMealIds = computed(() => {
-    let list = meals.value;
+    let filteredMeals = meals.value;
     if (selectedTime.value) {
-        list = list.filter(m => m.time === selectedTime.value);
+        filteredMeals = filteredMeals.filter(m => m.time === selectedTime.value);
     }
-    return list.map(m => m.id);
+
+    if (normalizedFilterText.value) {
+        filteredMeals = filteredMeals.filter(m =>
+            m.name.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value)
+        );
+    }
+
+    const uniqueMeals: MealRow[] = [];
+    const seenIds = new Set<number>();
+    for (const m of filteredMeals) {
+        if (seenIds.has(m.id)) continue;
+        seenIds.add(m.id);
+        uniqueMeals.push(m);
+    }
+
+    const collator = new Intl.Collator('cs-CZ', { sensitivity: 'base', numeric: true });
+    uniqueMeals.sort((a, b) => {
+        if (orderBy.value === 'doba') {
+            return collator.compare(a.time, b.time) || a.id - b.id;
+        }
+
+        if (orderBy.value === 'alergeny') {
+            return a.allergenCount - b.allergenCount || collator.compare(a.name, b.name) || a.id - b.id;
+        }
+
+        return collator.compare(a.name, b.name) || a.id - b.id;
+    });
+
+    return uniqueMeals.map(m => m.id);
 });
 
 const loadData = async () => {
@@ -176,12 +232,25 @@ const loadData = async () => {
 
     try {
         const result = await db.query(
-            `SELECT id_jidla, doba_podavani FROM jidla ORDER BY id_jidla`
+            `SELECT
+                j.id_jidla,
+                j.doba_podavani,
+                j.jmeno,
+                COALESCE(alergeny.pocet_alergenu, 0) AS pocet_alergenu
+             FROM jidla j
+             LEFT JOIN (
+                SELECT id_jidla, COUNT(id_alergenu) AS pocet_alergenu
+                FROM jidla_alergeny
+                GROUP BY id_jidla
+             ) alergeny ON j.id_jidla = alergeny.id_jidla
+             ORDER BY j.id_jidla`
         );
         if (result.data?.[0]?.values) {
             meals.value = result.data[0].values.map(row => ({
                 id: Number(row[0]),
-                time: String(row[1])
+                time: String(row[1] || ''),
+                name: String(row[2] || ''),
+                allergenCount: Number(row[3] || 0)
             }));
         }
     } catch (e) {

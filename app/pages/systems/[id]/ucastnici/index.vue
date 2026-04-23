@@ -21,23 +21,16 @@
             <!-- Spacer -->
             <div class="flex-1" />
 
-            <!-- Reset filter
-            <UButton
-                icon="i-heroicons-arrow-path"
-                color="neutral"
-                variant="outline"
-                @click="resetFilter"
-            />
-            -->
-
-            <!-- Search
+            <!-- Name/email filter -->
             <UInput
                 v-model="filterText"
                 icon="i-heroicons-magnifying-glass"
-                :placeholder="t('filter_participants')"
+                placeholder="Jméno, email, telefon nebo adresa"
                 class="w-56"
             />
-            -->
+
+            <!-- Order select -->
+            <ComponentWrapper :component="razeniComponent" />
 
             <!-- Add participant modal -->
             <ModalContainer v-model:open="createModalOpen" class="w-fit">
@@ -141,6 +134,7 @@ import ComponentWrapper from '~/components/ComponentWrapper.vue';
 import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
+import { useSystemInputVariables } from '~/composables/useSystemInputVariables';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -152,6 +146,7 @@ function withVars(comp: any, vars: Variable[]) {
 
 const route = useRoute();
 const systemsStore = useSystemsStore();
+const { systemInputVariables } = useSystemInputVariables();
 const { t } = useI18n();
 const systemId = route.params.id as string;
 
@@ -167,6 +162,7 @@ const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-uc
 const sessionBadgeComponent = computed(() => systemsStore.getComponentById('stitek-turnusu-ucastnika'));
 const allergenBadgeComponent = computed(() => systemsStore.getComponentById('stitek-alergenu-ucastnika'));
 const capacityBarComponent = computed(() => systemsStore.getComponentById('celkova-kapacita-ucastniku'));
+const razeniComponent = computed(() => systemsStore.getComponentById('razeni-ucastniku'));
 
 // Create components
 const vstupJmenoComponent = computed(() => systemsStore.getComponentById('vstup-jmeno-ucastnika'));
@@ -192,7 +188,16 @@ const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edi
 const smazatComponent = computed(() => systemsStore.getComponentById('smazat-ucastnika'));
 
 // Participant data
-interface ParticipantRow { id: number; sessionId: number }
+interface ParticipantRow {
+    id: number;
+    sessionId: number | null;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    age: number;
+    allergenCount: number;
+}
 const participants = ref<ParticipantRow[]>([]);
 
 // Filters
@@ -207,13 +212,55 @@ const sessionFilterItems = computed<SessionItem[]>(() => [
     ...sessions.value.map(s => ({ label: s.label, value: s.id }))
 ]);
 
+const normalizedFilterText = computed(() => filterText.value.trim().toLocaleLowerCase('cs-CZ'));
+
+const orderBy = computed(() => {
+    const value = systemInputVariables.value.find(variable => variable.name === 'razeni_ucastniku')?.variable;
+    const normalizedValue = String(value ?? 'jmeno');
+    return ['jmeno', 'vek', 'email', 'alergeny'].includes(normalizedValue) ? normalizedValue : 'jmeno';
+});
+
 const filteredParticipantIds = computed(() => {
-    let ids = participants.value;
+    let filteredParticipants = participants.value;
     if (selectedSessionId.value !== null) {
-        ids = ids.filter(p => p.sessionId === selectedSessionId.value);
+        filteredParticipants = filteredParticipants.filter(p => p.sessionId === selectedSessionId.value);
     }
 
-    return [...new Set(ids.map(p => p.id))];
+    if (normalizedFilterText.value) {
+        filteredParticipants = filteredParticipants.filter(p =>
+            p.name.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            p.email.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            p.phone.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            p.address.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value)
+        );
+    }
+
+    const uniqueParticipants: ParticipantRow[] = [];
+    const seenIds = new Set<number>();
+    for (const p of filteredParticipants) {
+        if (seenIds.has(p.id)) continue;
+        seenIds.add(p.id);
+        uniqueParticipants.push(p);
+    }
+
+    const collator = new Intl.Collator('cs-CZ', { sensitivity: 'base', numeric: true });
+    uniqueParticipants.sort((a, b) => {
+        if (orderBy.value === 'vek') {
+            return a.age - b.age || a.id - b.id;
+        }
+
+        if (orderBy.value === 'email') {
+            return collator.compare(a.email, b.email) || a.id - b.id;
+        }
+
+        if (orderBy.value === 'alergeny') {
+            return a.allergenCount - b.allergenCount || collator.compare(a.name, b.name) || a.id - b.id;
+        }
+
+        return collator.compare(a.name, b.name) || a.id - b.id;
+    });
+
+    return uniqueParticipants.map(participant => participant.id);
 });
 
 function resetFilter() {
@@ -228,14 +275,34 @@ const loadData = async () => {
     try {
         // Load participants with their session
         const pResult = await db.query(
-            `SELECT u.id_ucastnika, tu.id_turnusu FROM ucastnici u
+            `SELECT
+                u.id_ucastnika,
+                tu.id_turnusu,
+                u.jmeno,
+                u.email,
+                u.telefon,
+                u.adresa,
+                u.vek,
+                COALESCE(alergeny.pocet_alergenu, 0) AS pocet_alergenu
+             FROM ucastnici u
              LEFT JOIN turnusy_ucastnici tu ON u.id_ucastnika = tu.id_ucastnika
+             LEFT JOIN (
+                SELECT id_ucastnika, COUNT(id_alergenu) AS pocet_alergenu
+                FROM ucastnici_alergeny
+                GROUP BY id_ucastnika
+             ) alergeny ON u.id_ucastnika = alergeny.id_ucastnika
              ORDER BY tu.id_turnusu, u.id_ucastnika`
         );
         if (pResult.data?.[0]?.values) {
             participants.value = pResult.data[0].values.map(row => ({
                 id: Number(row[0]),
-                sessionId: Number(row[1])
+                sessionId: row[1] !== null ? Number(row[1]) : null,
+                name: String(row[2] || ''),
+                email: String(row[3] || ''),
+                phone: String(row[4] || ''),
+                address: String(row[5] || ''),
+                age: Number(row[6] || 0),
+                allergenCount: Number(row[7] || 0)
             }));
         }
 

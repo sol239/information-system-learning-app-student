@@ -70,10 +70,28 @@
             </template>
         </UPopover>
 
-        <UButton icon="i-heroicons-table-cells" variant="outline" color="neutral"
+        <UButton v-if="isDatabaseAvailable" icon="i-heroicons-table-cells" variant="outline" color="neutral"
             @click="navigateTo(`/systems/${systemsStore.selectedSystemId}/database`)" size="md">
             <span class="mobile-hidden">{{ t('database') }}</span>
         </UButton>
+        <ModernHoverPopover
+            v-else
+            :title="t('task_page_unavailable_title')"
+            :description="t('task_page_unavailable_description')"
+            icon="i-lucide-lock"
+        >
+            <UButton
+                icon="i-lucide-lock"
+                variant="outline"
+                color="neutral"
+                size="md"
+                class="cursor-not-allowed opacity-70"
+                :aria-label="`${t('database')}: ${t('task_page_unavailable_description')}`"
+                @click.prevent
+            >
+                <span class="mobile-hidden">{{ t('database') }}</span>
+            </UButton>
+        </ModernHoverPopover>
 
         <div v-if="!globalSettings.teacherMode" class="flex items-center gap-2">
             <!-- Score badge moved to task sidebar header -->
@@ -126,6 +144,8 @@
             </UButton>
             <template #content>
                 <div class="p-2 flex flex-col gap-1">
+                    <UButton block :label="$t('refresh_system')" color="green" variant="ghost"
+                        icon="i-lucide-refresh-cw" @click="refreshSystem" class="justify-start" />
                     <UButton block :label="$t('refresh_components')" color="primary" variant="ghost"
                         icon="i-heroicons-squares-2x2" @click="refreshComponents" class="justify-start" />
                     <UButton block :label="$t('refresh_tasks')" color="sky" variant="ghost"
@@ -143,10 +163,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import SettingsDrawer from '~/components/SettingsDrawer.vue'
 import StudentComponent from '~/components/StudentComponent.vue'
 import { IndexedDbHandler } from '~/utils/IndexedDbHandler'
+import { OperationResultType } from '~/utils/OperationResultType'
+import { DATABASE_PAGE_ROUTE, taskAllowsPage } from '~/utils/taskPageVisibility'
 import { Task } from '~/model/Task/Task'
 
 const highlightStore = useHighlightStore()
@@ -156,11 +178,23 @@ const globalSettings = useGlobalSettingsStore()
 const { t } = useI18n()
 const toast = useToast()
 const route = useRoute()
+const preloadedSystems = usePreloadedSystems()
 
 const resetPopoverOpen = ref(false)
 const exitPopoverOpen = ref(false)
 const studentDrawerOpen = ref(false)
 const taskPopoverOpen = ref(false)
+
+const selectedTask = computed(() => {
+    const selectedTaskId = globalSettings.selectedTaskId
+    if (!selectedTaskId) {
+        return null
+    }
+
+    return systemsStore.selectedSystem?.tasks?.find(task => task.id === selectedTaskId) ?? null
+})
+
+const isDatabaseAvailable = computed(() => taskAllowsPage(selectedTask.value, DATABASE_PAGE_ROUTE))
 
 
 async function printTableData() {
@@ -212,6 +246,58 @@ async function refreshComponents() {
     toast.add({ title: t('component_refresh_success') || 'Components refreshed', color: 'primary', icon: 'i-lucide-check-circle' });
 }
 
+async function refreshSystem() {
+    const currentSystemId = systemsStore.selectedSystemId
+    if (!currentSystemId) {
+        return
+    }
+
+    try {
+        await preloadedSystems.load()
+        const freshSystem = preloadedSystems.systems.value.find(system => String(system.id) === String(currentSystemId))
+
+        if (!freshSystem) {
+            toast.add({
+                title: t('refresh_system_error'),
+                color: 'red',
+                icon: 'i-lucide-alert-triangle'
+            })
+            resetPopoverOpen.value = false
+            return
+        }
+
+        globalSettings.selectedTaskId = null
+        globalSettings.solvedComponentIds = []
+
+        const result = await systemsStore.updateSystem(freshSystem)
+        if (result.result !== OperationResultType.SUCCESS) {
+            toast.add({
+                title: t('refresh_system_error'),
+                color: 'red',
+                icon: 'i-lucide-alert-triangle'
+            })
+            resetPopoverOpen.value = false
+            return
+        }
+
+        systemsStore.selectedSystemId = String(freshSystem.id)
+        toast.add({
+            title: t('refresh_system_success'),
+            color: 'primary',
+            icon: 'i-lucide-check-circle'
+        })
+    } catch (error) {
+        console.error('System refresh failed:', error)
+        toast.add({
+            title: t('refresh_system_error'),
+            color: 'red',
+            icon: 'i-lucide-alert-triangle'
+        })
+    } finally {
+        resetPopoverOpen.value = false
+    }
+}
+
 async function refreshTasks() {
     const system = systemsStore.selectedSystem;
     if (!system) return;
@@ -219,6 +305,7 @@ async function refreshTasks() {
     system.tasks = system.defaultTasks.map((t: any) => Task.fromJSON(JSON.parse(JSON.stringify(t))));
     // Reset score
     system.score.reset();
+    system.currentRound = 1;
     // Clear solved component IDs
     globalSettings.solvedComponentIds = [];
     await systemsStore.updateSystem(system);
@@ -232,7 +319,7 @@ async function refreshDatabase() {
     if (system.database) {
         await system.database.resetDatabase();
         await systemsStore.updateSystem(system);
-        toast.add({ title: t('database_refresh_success') || 'Database refreshed', color: 'primary', icon: 'i-lucide-check-circle' });
+        toast.add({ title: t('refresh_database_success') || 'Database refreshed', color: 'primary', icon: 'i-lucide-check-circle' });
     }
 
 

@@ -22,6 +22,8 @@ interface StoredSystem {
     databaseBinary: Uint8Array | null;
     defaultDatabaseBinary: Uint8Array | null;
     score: { mistakesCount: number; score: number } | null;
+    currentRound?: number;
+    levelCount?: number;
 }
 
 class AppDatabase extends Dexie {
@@ -85,6 +87,8 @@ export class IndexedDbStorage {
                 databaseBinary,
                 defaultDatabaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
+                currentRound: system.currentRound,
+                levelCount: system.levelCount,
             };
             await db.systems.put(record);
             return new Operation(OperationResultType.SUCCESS, 'System saved successfully', null);
@@ -133,6 +137,8 @@ export class IndexedDbStorage {
                 databaseBinary,
                 defaultDatabaseBinary,
                 score: { mistakesCount: system.score.mistakesCount, score: system.score.score },
+                currentRound: system.currentRound,
+                levelCount: system.levelCount,
             };
             await db.systems.put(updatedRecord);
             return new Operation(OperationResultType.SUCCESS, 'System updated successfully', null);
@@ -171,6 +177,8 @@ export class IndexedDbStorage {
             actualComponents: Component.arrayFromJSON(record.actualComponents ?? []),
             defaultComponents: Component.arrayFromJSON(record.defaultComponents ?? []),
             score,
+            currentRound: Number(record.currentRound ?? 1),
+            levelCount: Number(record.levelCount ?? 1),
         });
         if (record.databaseBinary) {
             system.database = record.defaultDatabaseBinary

@@ -16,7 +16,7 @@
       <div class="flex flex-col gap-2">
         <div class="flex flex-row gap-2 w-full items-center">
           <USelect id="query-select" v-model="selectedSqlQuery" :items="sqlQueryNames" :placeholder="t('select_sql_query')"
-            class="flex-1" :disabled="Object.keys(sqlRecord).length === 1" />
+            class="flex-1" :disabled="Object.keys(sqlRecord).length === 1" :ui="selectOverlayUi" />
           <UBadge color="neutral" variant="subtle" size="md">{{ sqlQueryNames.length }}</UBadge>
           <UButton icon="i-lucide-plus" @click="addQuery" size="md" class="aspect-square shrink-0" />
           <UButton icon="i-lucide-minus" @click="removeQuery" size="md" color="red" variant="subtle"
@@ -52,7 +52,7 @@
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">{{ t('sql_click_actions') }}</span>
           <USelect v-if="sqlClickQueryNames.length > 0" v-model="selectedSqlClickQuery" :items="sqlClickQueryNames"
             placeholder="Select SQL click query" size="xs" class="flex-1"
-            :disabled="sqlClickQueryNames.length <= 1" />
+            :disabled="sqlClickQueryNames.length <= 1" :ui="selectOverlayUi" />
           <div class="flex gap-1">
             <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addClickQuery" />
             <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeClickQuery"
@@ -147,6 +147,9 @@ const sizeMultiplier = ref(0.7);
 const selectedSqlQuery = ref<string>('');
 const selectedSqlClickQuery = ref<string>('');
 const isEditedSqlValid = ref(true);
+const selectOverlayUi = {
+  content: 'z-[10020]'
+};
 
 const localVariables = ref<ComponentVariables>(new ComponentVariables());
 const sqlRecord = ref<Record<string, string>>({ ...(props.component.sql ?? {}) });
@@ -161,7 +164,14 @@ const generalVariableNames = computed(() => localVariables.value.generalVariable
 
 const jsVarsHeader = computed<string>(() => {
   const vars = [...(localVariables.value.generalVariables ?? []), ...(localVariables.value.sqlVariables ?? [])];
-  return vars.length === 0 ? '' : JsHandler.getVariablesIntoJs(vars);
+  if (vars.length === 0) return '';
+
+  return [
+    `// ${t('js_available_constants_comment')}`,
+    JsHandler.getVariablesIntoJs(vars).trimEnd(),
+    '',
+    `// ${t('js_user_code_comment')}`
+  ].join('\n');
 });
 
 // Watch validity and let parent wrapper know

@@ -3,8 +3,9 @@
     <div class="mx-auto w-[90vw] max-w-none p-6">
       <div class="mb-6 mt-5 flex items-center justify-between gap-4">
         <div class="min-w-0">
-          <h1 class="text-4xl font-extrabold tracking-tight text-teacher-600 dark:text-teacher-400 sm:text-5xl">
-            {{ t('task_designer') }}
+          <h1 class="flex items-center gap-3 text-4xl font-extrabold tracking-tight text-teacher-600 dark:text-teacher-400 sm:text-5xl">
+            <span>{{ t('task_designer') }}</span>
+            <UIcon name="i-lucide-pencil-ruler" class="h-8 w-8 shrink-0 sm:h-10 sm:w-10" />
           </h1>
         </div>
 

@@ -21,23 +21,16 @@
             <!-- Spacer -->
             <div class="flex-1" />
 
-            <!-- Reset filter
-            <UButton
-                icon="i-heroicons-arrow-path"
-                color="neutral"
-                variant="outline"
-                @click="resetFilter"
-            />
-            -->
-
-            <!-- Search
+            <!-- Name/email filter -->
             <UInput
                 v-model="filterText"
                 icon="i-heroicons-magnifying-glass"
-                :placeholder="t('filter_supervisors')"
+                placeholder="Jméno, email, telefon nebo adresa"
                 class="w-56"
             />
-            -->
+
+            <!-- Order select -->
+            <ComponentWrapper :component="orderComponent" />
 
             <!-- Add supervisor modal -->
             <ModalContainer v-model:open="createModalOpen" class="w-fit">
@@ -141,6 +134,7 @@ import ComponentWrapper from '~/components/ComponentWrapper.vue';
 import ModalContainer from '~/components/ModalContainer.vue';
 import { ComponentVariables, Variable } from '~/model/ComponentVariables';
 import { useSystemsStore } from '~/stores/systemsStore';
+import { useSystemInputVariables } from '~/composables/useSystemInputVariables';
 
 function withVars(comp: any, vars: Variable[]) {
   if (!comp) return undefined;
@@ -152,6 +146,7 @@ function withVars(comp: any, vars: Variable[]) {
 
 const route = useRoute();
 const systemsStore = useSystemsStore();
+const { systemInputVariables } = useSystemInputVariables();
 const { t } = useI18n();
 const systemId = route.params.id as string;
 
@@ -166,6 +161,7 @@ const cardInfoComponent = computed(() => systemsStore.getComponentById('karta-ve
 const sessionBadgeComponent = computed(() => systemsStore.getComponentById('stitek-turnusu-vedouciho'));
 const allergenBadgeComponent = computed(() => systemsStore.getComponentById('stitek-alergenu-vedouciho'));
 const countBarComponent = computed(() => systemsStore.getComponentById('celkovy-pocet-vedoucich'));
+const orderComponent = computed(() => systemsStore.getComponentById('razeni-vedoucich'));
 
 // Create components
 const vstupJmenoComponent = computed(() => systemsStore.getComponentById('vstup-jmeno-vedouciho'));
@@ -191,7 +187,16 @@ const editBtnUlozitComponent = computed(() => systemsStore.getComponentById('edi
 const smazatComponent = computed(() => systemsStore.getComponentById('smazat-vedouciho'));
 
 // Supervisor data
-interface SupervisorRow { id: number; sessionId: number | null }
+interface SupervisorRow {
+    id: number;
+    sessionId: number | null;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    age: number;
+    allergenCount: number;
+}
 const supervisors = ref<SupervisorRow[]>([]);
 
 // Filters
@@ -206,18 +211,56 @@ const sessionFilterItems = computed<SessionItem[]>(() => [
     ...sessions.value.map(s => ({ label: s.label, value: s.id }))
 ]);
 
-const filteredSupervisorIds = computed(() => {
-    let ids = supervisors.value;
-    if (selectedSessionId.value !== null) {
-        ids = ids.filter(s => s.sessionId === selectedSessionId.value);
-    }
-    return [...new Set(ids.map(s => s.id))];
+const normalizedFilterText = computed(() => filterText.value.trim().toLocaleLowerCase('cs-CZ'));
+
+const orderBy = computed(() => {
+    const value = systemInputVariables.value.find(variable => variable.name === 'razeni_vedoucich')?.variable;
+    const normalizedValue = String(value ?? 'jmeno');
+    return ['jmeno', 'vek', 'email', 'alergeny'].includes(normalizedValue) ? normalizedValue : 'jmeno';
 });
 
-function resetFilter() {
-    selectedSessionId.value = null;
-    filterText.value = '';
-}
+const filteredSupervisorIds = computed(() => {
+    let filteredSupervisors = supervisors.value;
+    if (selectedSessionId.value !== null) {
+        filteredSupervisors = filteredSupervisors.filter(s => s.sessionId === selectedSessionId.value);
+    }
+
+    if (normalizedFilterText.value) {
+        filteredSupervisors = filteredSupervisors.filter(s =>
+            s.name.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            s.email.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            s.phone.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value) ||
+            s.address.toLocaleLowerCase('cs-CZ').includes(normalizedFilterText.value)
+        );
+    }
+
+    const uniqueSupervisors: SupervisorRow[] = [];
+    const seenIds = new Set<number>();
+    for (const supervisor of filteredSupervisors) {
+        if (seenIds.has(supervisor.id)) continue;
+        seenIds.add(supervisor.id);
+        uniqueSupervisors.push(supervisor);
+    }
+
+    const collator = new Intl.Collator('cs-CZ', { sensitivity: 'base', numeric: true });
+    uniqueSupervisors.sort((a, b) => {
+        if (orderBy.value === 'vek') {
+            return a.age - b.age || a.id - b.id;
+        }
+
+        if (orderBy.value === 'email') {
+            return collator.compare(a.email, b.email) || a.id - b.id;
+        }
+
+        if (orderBy.value === 'alergeny') {
+            return a.allergenCount - b.allergenCount || collator.compare(a.name, b.name) || a.id - b.id;
+        }
+
+        return collator.compare(a.name, b.name) || a.id - b.id;
+    });
+
+    return uniqueSupervisors.map(supervisor => supervisor.id);
+});
 
 const loadData = async () => {
     const db = systemsStore.selectedSystem?.database;
@@ -226,14 +269,34 @@ const loadData = async () => {
     try {
         // Load supervisors with their session
         const vResult = await db.query(
-            `SELECT v.id_vedouciho, vt.id_turnusu FROM vedouci v
+            `SELECT
+                v.id_vedouciho,
+                vt.id_turnusu,
+                v.jmeno,
+                v.email,
+                v.telefon,
+                v.adresa,
+                v.vek,
+                COALESCE(alergeny.pocet_alergenu, 0) AS pocet_alergenu
+             FROM vedouci v
              LEFT JOIN vedouci_turnusy vt ON v.id_vedouciho = vt.id_vedouciho
+             LEFT JOIN (
+                SELECT id_vedouciho, COUNT(id_alergenu) AS pocet_alergenu
+                FROM vedouci_alergeny
+                GROUP BY id_vedouciho
+             ) alergeny ON alergeny.id_vedouciho = v.id_vedouciho
              ORDER BY vt.id_turnusu, v.id_vedouciho`
         );
         if (vResult.data?.[0]?.values) {
             supervisors.value = vResult.data[0].values.map(row => ({
                 id: Number(row[0]),
-                sessionId: row[1] !== null ? Number(row[1]) : null
+                sessionId: row[1] !== null ? Number(row[1]) : null,
+                name: String(row[2] ?? ''),
+                email: String(row[3] ?? ''),
+                phone: String(row[4] ?? ''),
+                address: String(row[5] ?? ''),
+                age: Number(row[6] ?? 0),
+                allergenCount: Number(row[7] ?? 0)
             }));
         }
 

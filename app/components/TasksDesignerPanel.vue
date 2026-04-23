@@ -49,6 +49,14 @@
         </UButton>
     </div>
 
+    <UAlert
+      v-if="inconsistentLevelVisiblePages.length"
+      color="red"
+      icon="i-lucide-alert-triangle"
+      :title="t('task_level_visible_pages_mismatch_title')"
+      :description="visiblePagesMismatchDescription"
+    />
+
     <div v-if="tasks.length" class="flex flex-wrap gap-2">
       <UBadge
         v-for="task in tasks"
@@ -82,6 +90,7 @@
       v-else
       :selected-task="selectedTask"
       @update:selected-task="handleTaskUpdate"
+      @update:level-count="handleLevelCountUpdate"
     />
 
     <UModal v-model:open="showImportModal" :title="t('task_import_title')" :ui="{ content: 'w-[560px]' }">
@@ -155,6 +164,8 @@ import type { GUID } from '~/model/GUID'
 import type { InformationSystem } from '~/model/InformationSystem'
 import { Task } from '~/model/Task/Task'
 import { useSystemsStore } from '~/stores/systemsStore'
+import { inconsistentVisiblePageLevels } from '~/utils/taskLevels'
+import { systemVisiblePages } from '~/utils/taskPageVisibility'
 
 const showImportModal = ref(false)
 const importJsonText = ref('')
@@ -190,6 +201,16 @@ const systemsStore = useSystemsStore()
 const globalSettings = useGlobalSettingsStore()
 const selectedTask = ref<Task | null>(null)
 const tasks = computed(() => systemsStore.selectedSystem?.tasks ?? [])
+const inconsistentLevelVisiblePages = computed(() => {
+  const system = systemsStore.selectedSystem
+  return system ? inconsistentVisiblePageLevels(system.tasks, systemVisiblePages(system)) : []
+})
+const visiblePagesMismatchDescription = computed(() => {
+  const levels = inconsistentLevelVisiblePages.value.join(', ')
+  return levels
+    ? `${t('task_level_visible_pages_mismatch_description')} ${t('task_levels')}: ${levels}`
+    : t('task_level_visible_pages_mismatch_description')
+})
 let persistSystemTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(selectedTask, (task) => {
@@ -305,6 +326,23 @@ const handleTaskUpdate = (updatedTask: Task) => {
 
   Object.assign(taskToUpdate, updatedTask)
   selectedTask.value = taskToUpdate
+
+  queueSystemPersist(system)
+}
+
+const handleLevelCountUpdate = (levelCount: number) => {
+  const system = systemsStore.selectedSystem
+  if (!system) {
+    return
+  }
+
+  const normalizedLevelCount = Math.max(1, Math.floor(Number(levelCount) || 1))
+  if (system.levelCount === normalizedLevelCount) {
+    return
+  }
+
+  system.levelCount = normalizedLevelCount
+  system.currentRound = Math.min(system.currentRound, system.levelCount)
 
   queueSystemPersist(system)
 }

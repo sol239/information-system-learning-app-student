@@ -198,7 +198,7 @@ INSERT INTO vedouci_alergeny (id_vedouciho, id_alergenu) VALUES
 (1,1),(3,1),(3,3),(5,1),(5,14),(6,2),(6,6);
 
 INSERT INTO vedouci_turnusy (id_turnusu, id_vedouciho) VALUES
-(1,1),(1,2),(2,3),(2,4),(3,5),(3,6);
+(1,1),(1,2),(1,3),(2,3),(2,4),(3,5),(3,6);
 
 INSERT INTO ucastnici (id_ucastnika, jmeno, email, rodne_cislo, telefon, adresa, vek) VALUES
 (1,'Tereza Nováková','tereza.novakova@example.com','045217/1234','+420 601 123 456','Náměstí Míru 12, Praha, 120 00',12),
@@ -233,9 +233,9 @@ INSERT INTO ucastnici (id_ucastnika, jmeno, email, rodne_cislo, telefon, adresa,
 (30,'Jakub Mareš','jakub.mares@example.com','110506/7788','+420 602 333 444','Koliště 16, Opava, 746 01',13);
 
 INSERT INTO turnusy_ucastnici (id_ucastnika, id_turnusu) VALUES
-(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),
+(1,1),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(30,1),
 (11,2),(12,2),(13,2),(14,2),(15,2),(16,2),(17,2),(18,2),(19,2),(20,2),(21,2),(22,2),
-(23,3),(24,3),(25,3),(26,3),(27,3),(28,3),(29,3),(30,3);
+(1,3),(23,3),(24,3),(25,3),(26,3),(27,3),(28,3),(29,3),(30,3);
 
 INSERT INTO ucastnici_alergeny (id_ucastnika, id_alergenu) VALUES
 (2,1),(4,7),(6,3),(8,8),(10,6),(11,1),(12,7),(13,3),(14,8),
