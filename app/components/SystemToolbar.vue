@@ -168,7 +168,7 @@ import SettingsDrawer from '~/components/SettingsDrawer.vue'
 import StudentComponent from '~/components/StudentComponent.vue'
 import { IndexedDbHandler } from '~/utils/IndexedDbHandler'
 import { OperationResultType } from '~/utils/OperationResultType'
-import { DATABASE_PAGE_ROUTE, taskAllowsPage } from '~/utils/taskPageVisibility'
+import { DATABASE_PAGE_ROUTE, systemAllowsPageForTaskContext } from '~/utils/taskPageVisibility'
 import { Task } from '~/model/Task/Task'
 
 const highlightStore = useHighlightStore()
@@ -194,7 +194,10 @@ const selectedTask = computed(() => {
     return systemsStore.selectedSystem?.tasks?.find(task => task.id === selectedTaskId) ?? null
 })
 
-const isDatabaseAvailable = computed(() => taskAllowsPage(selectedTask.value, DATABASE_PAGE_ROUTE))
+const isDatabaseAvailable = computed(() => {
+    const system = systemsStore.selectedSystem
+    return system ? systemAllowsPageForTaskContext(system, selectedTask.value, DATABASE_PAGE_ROUTE) : true
+})
 
 
 async function printTableData() {

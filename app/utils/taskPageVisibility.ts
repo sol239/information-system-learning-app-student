@@ -1,6 +1,7 @@
 import type { InformationSystem } from '~/model/InformationSystem'
 import type { Page } from '~/model/Page'
 import type { Task } from '~/model/Task/Task'
+import { isTaskDone } from '~/utils/taskLevels'
 
 export const DATABASE_PAGE_ROUTE = '/database'
 
@@ -40,6 +41,40 @@ export function taskAllowsPage(task: Task | null | undefined, pageRoute: string)
   return task.visiblePages.some(page => page.route === pageRoute)
 }
 
+export function systemAllowsPageForTaskContext(
+  system: InformationSystem,
+  task: Task | null | undefined,
+  pageRoute: string
+): boolean {
+  if (task) {
+    return taskAllowsPage(task, pageRoute)
+  }
+
+  return currentLevelAllowsPage(system, pageRoute)
+}
+
 export function firstTaskAllowedPage(system: InformationSystem, task: Task | null | undefined): Page | null {
-  return systemVisiblePages(system).find(page => taskAllowsPage(task, page.route)) ?? null
+  return systemVisiblePages(system).find(page => systemAllowsPageForTaskContext(system, task, page.route)) ?? null
+}
+
+function currentLevelAllowsPage(system: InformationSystem, pageRoute: string): boolean {
+  const tasks = system.tasks ?? []
+
+  if (!tasks.length || tasks.every(isTaskDone)) {
+    return true
+  }
+
+  const currentLevelTasks = tasks.filter(task => task.round === system.currentRound)
+
+  if (!currentLevelTasks.length) {
+    return true
+  }
+
+  const allPages = systemVisiblePages(system)
+  return currentLevelTasks.some(task => taskAllowsPageForCurrentLevel(task, pageRoute, allPages))
+}
+
+function taskAllowsPageForCurrentLevel(task: Task, pageRoute: string, allPages: Page[]): boolean {
+  const visiblePages = Array.isArray(task.visiblePages) ? task.visiblePages : allPages
+  return visiblePages.some(page => page.route === pageRoute)
 }

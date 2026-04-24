@@ -49,7 +49,7 @@
 <script setup lang="ts">
 /* 1. Imports */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { DATABASE_PAGE_ROUTE, systemVisiblePages, taskAllowsPage } from '~/utils/taskPageVisibility'
+import { DATABASE_PAGE_ROUTE, systemAllowsPageForTaskContext, systemVisiblePages } from '~/utils/taskPageVisibility'
 
 /* 2. Stores */
 const highlightStore = useHighlightStore()
@@ -89,7 +89,8 @@ const localItems = computed(() => {
 })
 
 function isPageAvailable(pageRoute: string): boolean {
-    return taskAllowsPage(selectedTask.value, pageRoute)
+    const system = systemsStore.selectedSystem
+    return system ? systemAllowsPageForTaskContext(system, selectedTask.value, pageRoute) : true
 }
 
 /* 10. Watchers */

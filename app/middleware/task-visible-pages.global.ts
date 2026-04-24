@@ -2,7 +2,7 @@ import {
   firstTaskAllowedPage,
   systemVisiblePages,
   systemPageRouteFromPath,
-  taskAllowsPage,
+  systemAllowsPageForTaskContext,
 } from '~/utils/taskPageVisibility'
 
 export default defineNuxtRouteMiddleware((to) => {
@@ -31,7 +31,7 @@ export default defineNuxtRouteMiddleware((to) => {
     ? system.tasks.find(task => task.id === globalSettings.selectedTaskId)
     : null
 
-  if (taskAllowsPage(selectedTask, systemPage.route)) {
+  if (systemAllowsPageForTaskContext(system, selectedTask, systemPage.route)) {
     return
   }
 

@@ -157,7 +157,11 @@
       <template #label>
         <span class="inline-flex items-center gap-1.5">
           {{ t('task_selected_components') }}
-          <HoverHint :text="t('task_selected_components_info')">
+          <ModernHoverPopover
+            :title="t('task_selected_components')"
+            :description="t('task_selected_components_info')"
+            icon="i-lucide-info"
+          >
             <button
               type="button"
               class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -165,25 +169,37 @@
             >
               <UIcon name="i-lucide-info" class="h-4 w-4" />
             </button>
-          </HoverHint>
+          </ModernHoverPopover>
         </span>
       </template>
       <div class="flex flex-wrap gap-2 items-center">
         <UBadge v-for="component in selectedComponents" :key="component.id" color="neutral" variant="subtle"
           class="flex items-center gap-1 font-mono pr-1">
           <span>{{ component.name }}</span>
-          <HoverHint :text="t('task_export_component_action')">
+          <ModernHoverPopover
+            :title="t('task_export_component_title')"
+            :description="t('task_export_component_desc')"
+            icon="i-lucide-copy"
+          >
             <UButton icon="i-lucide-copy" color="neutral" variant="ghost" size="xs" class="shrink-0"
               @click.stop="exportSelectedComponent(component.id)" />
-          </HoverHint>
-          <HoverHint :text="t('task_edit_component_action')">
+          </ModernHoverPopover>
+          <ModernHoverPopover
+            :title="t('task_edit_component_title')"
+            :description="t('task_edit_component_desc')"
+            icon="i-lucide-pencil"
+          >
             <UButton icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs" class="shrink-0"
               @click.stop="startEditingComponent(component.id)" />
-          </HoverHint>
-          <HoverHint :text="t('task_remove_component_action')">
+          </ModernHoverPopover>
+          <ModernHoverPopover
+            :title="t('task_remove_component_title')"
+            :description="t('task_remove_component_desc')"
+            icon="i-lucide-trash-2"
+          >
             <UButton icon="i-lucide-trash-2" color="red" variant="ghost" size="xs" class="shrink-0"
               @click.stop="removeSelectedComponent(component.id)" />
-          </HoverHint>
+          </ModernHoverPopover>
         </UBadge>
         <p v-if="!selectedComponents.length" class="text-sm text-gray-500 dark:text-gray-400 mr-2">
           {{ t('task_no_components') }}
@@ -241,7 +257,10 @@
               <template #label>
                 <span class="inline-flex items-center gap-1.5">
                   {{ t('task_activity_type') }}
-                  <HoverHint>
+                  <ModernHoverPopover
+                    :title="t('task_activity_type')"
+                    icon="i-lucide-info"
+                  >
                     <button
                       type="button"
                       class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -256,7 +275,7 @@
                         <p><span class="font-semibold">{{ t('task_activity_select_options') }}</span>: {{ t('task_activity_select_options_info') }}</p>
                       </div>
                     </template>
-                  </HoverHint>
+                  </ModernHoverPopover>
                 </span>
               </template>
               <USelect v-model="taskForm.activityType" :items="activityTypeOptions" value-key="value" label-key="label"
@@ -267,7 +286,11 @@
               <template #label>
                 <span class="inline-flex items-center gap-1.5">
                   {{ t('task_activity_options') }}
-                  <HoverHint :text="t('task_options_info')">
+                  <ModernHoverPopover
+                    :title="t('task_activity_options')"
+                    :description="t('task_options_info')"
+                    icon="i-lucide-info"
+                  >
                     <button
                       type="button"
                       class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -275,7 +298,7 @@
                     >
                       <UIcon name="i-lucide-info" class="h-4 w-4" />
                     </button>
-                  </HoverHint>
+                  </ModernHoverPopover>
                 </span>
               </template>
               <div class="space-y-3">
@@ -314,7 +337,11 @@
                 :label="t('task_substitute_checkbox')"
                 :disabled="isRepairActivity"
               />
-              <HoverHint :text="substituteAfterActivityHint">
+              <ModernHoverPopover
+                :title="t('task_substitute_checkbox')"
+                :description="substituteAfterActivityHint"
+                icon="i-lucide-info"
+              >
                 <button
                   type="button"
                   class="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -322,7 +349,7 @@
                 >
                   <UIcon name="i-lucide-info" class="h-4 w-4" />
                 </button>
-              </HoverHint>
+              </ModernHoverPopover>
             </div>
 
             <UCheckbox
@@ -420,7 +447,11 @@
               <template #label>
                 <span class="inline-flex items-center gap-1.5">
                   {{ t('task_finish_options') }}
-                  <HoverHint :text="t('task_options_info')">
+                  <ModernHoverPopover
+                    :title="t('task_finish_options')"
+                    :description="t('task_options_info')"
+                    icon="i-lucide-info"
+                  >
                     <button
                       type="button"
                       class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -428,7 +459,7 @@
                     >
                       <UIcon name="i-lucide-info" class="h-4 w-4" />
                     </button>
-                  </HoverHint>
+                  </ModernHoverPopover>
                 </span>
               </template>
               <div class="space-y-3">
@@ -532,7 +563,11 @@
           <template #label>
             <span class="inline-flex items-center gap-1.5">
               {{ t('task_feedback_label') }}
-              <HoverHint :text="t('task_feedback_info')">
+              <ModernHoverPopover
+                :title="t('task_feedback_label')"
+                :description="t('task_feedback_info')"
+                icon="i-lucide-info"
+              >
                 <button
                   type="button"
                   class="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-teacher-600 focus:outline-none dark:text-gray-500 dark:hover:text-teacher-400"
@@ -540,7 +575,7 @@
                 >
                   <UIcon name="i-lucide-info" class="h-4 w-4" />
                 </button>
-              </HoverHint>
+              </ModernHoverPopover>
             </span>
           </template>
           <UTextarea
@@ -595,7 +630,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import EditComponentBody from '~/components/EditComponentBody.vue'
-import HoverHint from '~/components/HoverHint.vue'
+import ModernHoverPopover from '~/components/ModernHoverPopover.vue'
 import { Component as SystemComponent } from '~/model/Component'
 import type { ComponentVariables } from '~/model/ComponentVariables'
 import type { GUID } from '~/model/GUID'

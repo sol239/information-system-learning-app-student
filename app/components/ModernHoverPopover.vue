@@ -7,8 +7,12 @@
         <UIcon :name="icon" class="modern-hover-popover__icon-symbol" />
       </div>
       <div class="modern-hover-popover__content">
-        <div class="modern-hover-popover__title">{{ title }}</div>
-        <div class="modern-hover-popover__description">{{ description }}</div>
+        <div v-if="title" class="modern-hover-popover__title">{{ title }}</div>
+        <div v-if="$slots.content || description" class="modern-hover-popover__description">
+          <slot name="content">
+            {{ description }}
+          </slot>
+        </div>
       </div>
     </div>
   </div>
@@ -16,8 +20,8 @@
 
 <script setup lang="ts">
 withDefaults(defineProps<{
-  title: string
-  description: string
+  title?: string
+  description?: string
   icon?: string
 }>(), {
   icon: 'i-heroicons-information-circle'

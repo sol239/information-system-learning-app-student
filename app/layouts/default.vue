@@ -156,6 +156,8 @@ function openDesignerFromSidebar() {
         <slot />
       </CustomScrollbar>
     </main>
+
+    <StudentProgressModals v-if="showSystemChrome" />
   </div>
 </template>
 

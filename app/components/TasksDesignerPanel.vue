@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-wrap items-center gap-2">
+      <!--
         <UButton
           icon="i-lucide-download"
           color="neutral"
@@ -19,6 +20,7 @@
         >
           {{ t('task_import_all') }}
         </UButton>
+      -->
 
         <UButton
           icon="i-lucide-file-json"
@@ -29,15 +31,20 @@
           {{ t('task_add_from_json') }}
         </UButton>
 
-        <UButton
-          :icon="previewStudentView ? 'i-lucide-pencil' : 'i-lucide-eye'"
-          color="neutral"
-          :variant="previewStudentView ? 'solid' : 'soft'"
-          :title="previewStudentView ? t('task_switch_to_editor') : t('task_preview_student')"
-          @click="previewStudentView = !previewStudentView"
+        <ModernHoverPopover
+          :title="previewStudentView ? t('task_preview_student_title') : t('task_preview_editor_title')"
+          :description="previewStudentView ? t('task_preview_student_desc') : t('task_preview_editor_desc')"
+          :icon="previewStudentView ? 'i-lucide-eye' : 'i-lucide-pencil'"
         >
-          {{ previewStudentView ? t('task_editor_view') : t('task_student_preview') }}
-        </UButton>
+          <UButton
+            :icon="previewStudentView ? 'i-lucide-pencil' : 'i-lucide-eye'"
+            color="neutral"
+            :variant="previewStudentView ? 'solid' : 'soft'"
+            @click="previewStudentView = !previewStudentView"
+          >
+            {{ previewStudentView ? t('task_editor_view') : t('task_student_preview') }}
+          </UButton>
+        </ModernHoverPopover>
 
         <UButton
           icon="i-lucide-plus"
@@ -160,6 +167,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import HoverHint from '~/components/HoverHint.vue'
+import ModernHoverPopover from '~/components/ModernHoverPopover.vue'
 import type { GUID } from '~/model/GUID'
 import type { InformationSystem } from '~/model/InformationSystem'
 import { Task } from '~/model/Task/Task'
