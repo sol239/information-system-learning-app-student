@@ -1,1 +1,1 @@
-export type VariableType = string | number | Date;
+export type VariableType = string | number | boolean | Date;

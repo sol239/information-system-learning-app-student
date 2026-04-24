@@ -21,6 +21,7 @@ export class JsHandler {
             let tsType = "string";
 
             if (typeof firstValue === "number") tsType = "number";
+            else if (typeof firstValue === "boolean") tsType = "boolean";
             else if (firstValue instanceof Date) tsType = "Date";
 
             const formatValue = (v: any) => {
@@ -54,23 +55,7 @@ export class JsHandler {
         const result: Variable[] = [];
         if (!jsCode) return result;
 
-        // Step 1: collect declared variable names via AST — only from user-written code
-        const sourceForNames = ts.createSourceFile(
-            'virtual-file.js',
-            userCodeOnly ?? jsCode,
-            ts.ScriptTarget.Latest,
-            true
-        );
-
-        const declaredNames: string[] = [];
-
-        function visitNode(node: ts.Node) {
-            if (ts.isVariableDeclaration(node) && node.name && ts.isIdentifier(node.name)) {
-                declaredNames.push(node.name.text);
-            }
-            ts.forEachChild(node, visitNode);
-        }
-        visitNode(sourceForNames);
+        const declaredNames = this.getDeclaredVariableNames(userCodeOnly ?? jsCode);
 
         if (declaredNames.length === 0) return result;
 
@@ -92,11 +77,11 @@ export class JsHandler {
 
             let finalValue: VariableType | VariableType[];
 
-            if (typeof value === 'number' || typeof value === 'string' || value instanceof Date) {
+            if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' || value instanceof Date) {
                 finalValue = value;
             } else if (Array.isArray(value)) {
                 finalValue = (value as any[]).filter(v =>
-                    typeof v === 'string' || typeof v === 'number' || v instanceof Date
+                    typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' || v instanceof Date
                 ) as VariableType[];
             } else {
                 finalValue = String(value);
@@ -106,5 +91,26 @@ export class JsHandler {
         }
 
         return result;
+    }
+
+    public static getDeclaredVariableNames(jsCode: string): string[] {
+        const sourceForNames = ts.createSourceFile(
+            'virtual-file.js',
+            jsCode,
+            ts.ScriptTarget.Latest,
+            true
+        );
+
+        const declaredNames: string[] = [];
+
+        function visitNode(node: ts.Node) {
+            if (ts.isVariableDeclaration(node) && node.name && ts.isIdentifier(node.name)) {
+                declaredNames.push(node.name.text);
+            }
+            ts.forEachChild(node, visitNode);
+        }
+        visitNode(sourceForNames);
+
+        return declaredNames;
     }
 }

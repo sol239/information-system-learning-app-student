@@ -34,6 +34,8 @@ export const smazatUcastnikaKomponenta = new Component({
   sql: {},
   sql_click: {
     "smazat-ucastnika-turnusy": `DELETE FROM turnusy_ucastnici WHERE id_ucastnika = idUcastnika`,
+    "smazat-ucastnika-alergeny": `DELETE FROM ucastnici_alergeny WHERE id_ucastnika = idUcastnika`,
+    "smazat-ucastnika-jidla": `DELETE FROM ucastnici_jidla WHERE id_ucastnika = idUcastnika`,
     "smazat-ucastnika": `DELETE FROM ucastnici WHERE id_ucastnika = idUcastnika`
   }
 });

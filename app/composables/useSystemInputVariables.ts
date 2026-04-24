@@ -9,11 +9,16 @@ export function useSystemInputVariables() {
     const existing = systemInputVariables.value.find(variable => variable.name === name);
 
     if (existing) {
+      if (existing.variable === value) return;
       existing.variable = value;
       return;
     }
 
     systemInputVariables.value.push(new Variable(name, value));
+  }
+
+  function upsertSystemComputedVariable(name: string, value: VariableType) {
+    upsertSystemInputVariable(name, value);
   }
 
   function removeSystemInputVariable(name: string) {
@@ -27,6 +32,7 @@ export function useSystemInputVariables() {
   return {
     systemInputVariables,
     upsertSystemInputVariable,
+    upsertSystemComputedVariable,
     removeSystemInputVariable,
     clearSystemInputVariables
   };

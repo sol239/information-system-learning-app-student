@@ -76,8 +76,9 @@ const modalFormState = reactive<Record<string, string | number>>({});
 const wrapperRef = ref<HTMLElement | null>(null);
 
 const componentVariables = ref<ComponentVariables>(new ComponentVariables());
-const { systemInputVariables, upsertSystemInputVariable, removeSystemInputVariable } = useSystemInputVariables();
+const { systemInputVariables, upsertSystemInputVariable, upsertSystemComputedVariable, removeSystemInputVariable } = useSystemInputVariables();
 const ownedSystemVariableNames = new Set<string>();
+const ownedComputedVariableNames = new Set<string>();
 let db: DatabaseWrapper | undefined = undefined;
 let isRefreshingSqlVars = false;
 const componentCodeUpdatedEventName = 'component-code-updated';
@@ -103,13 +104,19 @@ function mergeVariablesByName(...groups: Array<Variable[] | undefined>): Variabl
   return Array.from(merged.values());
 }
 
+const declaredJsVariableNames = computed(() => new Set(JsHandler.getDeclaredVariableNames(props.component.js ?? '')));
+
+const externalSystemVariables = computed(() =>
+  systemInputVariables.value.filter(variable => !declaredJsVariableNames.value.has(variable.name))
+);
+
 const resolvedVariables = computed<ComponentVariables>(() => {
   const merged = new ComponentVariables();
   merged.generalVariables = [...(componentVariables.value.generalVariables ?? [])];
   merged.sqlVariables = [...(componentVariables.value.sqlVariables ?? [])];
   merged.jsVariables = mergeVariablesByName(
     componentVariables.value.jsVariables ?? [],
-    systemInputVariables.value
+    externalSystemVariables.value
   );
   return merged;
 });
@@ -123,7 +130,7 @@ const jsVarsHeader = computed<string>(() => {
   const vars = mergeVariablesByName(
     componentVariables.value.generalVariables ?? [],
     componentVariables.value.sqlVariables ?? [],
-    systemInputVariables.value
+    externalSystemVariables.value
   );
   if (vars.length === 0) return '';
   return JsHandler.getVariablesIntoJs(vars);
@@ -553,6 +560,7 @@ async function refreshJsVariables(options: { preserveActiveInput?: boolean } = {
     try {
       const fullCode = jsVarsHeader.value ? `${jsVarsHeader.value}\n${props.component.js}` : props.component.js;
       componentVariables.value.jsVariables = JsHandler.getJsVariables(fullCode, props.component.js);
+      syncComputedSystemVariables();
 
       if (props.component.js.includes('document.')) {
         await nextTick();
@@ -564,6 +572,25 @@ async function refreshJsVariables(options: { preserveActiveInput?: boolean } = {
   }
 
   await restoreActiveSystemInput(activeInputSnapshot);
+}
+
+function syncComputedSystemVariables() {
+  const nextComputedNames = new Set<string>();
+
+  for (const variable of componentVariables.value.jsVariables) {
+    if (typeof variable.variable !== 'boolean') continue;
+
+    nextComputedNames.add(variable.name);
+    ownedComputedVariableNames.add(variable.name);
+    upsertSystemComputedVariable(variable.name, variable.variable);
+  }
+
+  for (const variableName of Array.from(ownedComputedVariableNames)) {
+    if (nextComputedNames.has(variableName)) continue;
+
+    ownedComputedVariableNames.delete(variableName);
+    removeSystemInputVariable(variableName);
+  }
 }
 
 function handleComponentCodeUpdated(event: Event) {
@@ -592,6 +619,10 @@ onBeforeUnmount(() => {
   }
 
   for (const variableName of ownedSystemVariableNames) {
+    removeSystemInputVariable(variableName);
+  }
+
+  for (const variableName of ownedComputedVariableNames) {
     removeSystemInputVariable(variableName);
   }
 });

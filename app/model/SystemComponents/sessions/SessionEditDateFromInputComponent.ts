@@ -19,12 +19,12 @@ export const editVstupDatumOdKomponenta = new Component({
 .form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }
 `,
 
-  js: `const je_datum_validni =
+  js: `const je_datum_od_validni =
     !isNaN(new Date(edit_vstup_datum_od).getTime());
 
 let barva_ramecku = "#FFFFFF";
 
-if (je_datum_validni) {
+if (je_datum_od_validni) {
     barva_ramecku = "#4aff5c";
 } else {
     barva_ramecku = "#ff4f92";

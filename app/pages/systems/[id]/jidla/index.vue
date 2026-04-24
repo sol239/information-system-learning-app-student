@@ -105,7 +105,7 @@
         <!-- Empty state -->
         <div v-if="filteredMealIds.length === 0 && isDbReady" class="text-center py-12">
             <UIcon name="i-heroicons-cake" class="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ t('no_meals') }}</h3>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ t('no_meals_found') }}</h3>
             <p class="text-gray-500">{{ t('no_meals_description') }}</p>
         </div>
     </div>

@@ -191,7 +191,7 @@ INSERT INTO vedouci (id_vedouciho, jmeno, email, rodne_cislo, telefon, adresa, v
 (2,'Jana Svobodová','jana.svobodova@example.com','820202/2345','+420 602 222 222','Masarykova 2, Brno, 602 00',32),
 (3,'Martin Dvořák','martin.dvorak@example.com','790303/3456','+420 603 333 333','Komenského 3, Ostrava, 702 00',40),
 (4,'Eva Procházková','eva.prochazkova@example.com','850404/4567','+420 604 444 444','Smetanova 4, Plzeň, 301 00',29),
-(5,'Tomáš Král','tomas.kral.supervisor@example.com','780505/5678','+420 605 555 555','Jiráskova 5, Liberec, 460 01',38),
+(5,'Tomáš Masaryk','tomas.masaryk@example.com','780505/5678','+420 605 555 555','Jiráskova 5, Liberec, 460 01',38),
 (6,'Lucie Bláhová','lucie.blahova@example.com','830606/6789','+420 606 666 666','Palackého 6, Zlín, 760 01',31);
 
 INSERT INTO vedouci_alergeny (id_vedouciho, id_alergenu) VALUES

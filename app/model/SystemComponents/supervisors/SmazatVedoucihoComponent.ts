@@ -34,6 +34,8 @@ export const smazatVedoucihoKomponenta = new Component({
   sql: {},
   sql_click: {
     "smazat-vedouciho-turnusy": `DELETE FROM vedouci_turnusy WHERE id_vedouciho = idVedouciho`,
+    "smazat-vedouciho-alergeny": `DELETE FROM vedouci_alergeny WHERE id_vedouciho = idVedouciho`,
+    "smazat-vedouciho-jidla": `DELETE FROM jidla_vedouci WHERE id_vedouciho = idVedouciho`,
     "smazat-vedouciho": `DELETE FROM vedouci WHERE id_vedouciho = idVedouciho`
   }
 });

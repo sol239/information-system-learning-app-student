@@ -29,8 +29,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-end">
-                <ComponentWrapper class="w-full" :component="removeMealSessionComponent" />
                 <ComponentWrapper class="w-full" :component="removeMealPersonComponent" />
+                <ComponentWrapper class="w-full" :component="removeMealSessionComponent" />
                 <ComponentWrapper class="w-full" :component="removeMealDateComponent" />
                 <ComponentWrapper class="w-full" :component="removeMealMealComponent" />
                 <ComponentWrapper

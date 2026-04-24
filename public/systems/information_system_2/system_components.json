@@ -826,7 +826,7 @@
     "description": "Tlačítko pro uložení změn existujícího jídla. Vyžaduje generalVariable: idJidla.",
     "html": "\n<button id=\"system-edit_btn_ulozit_jidlo\" class=\"btn-uspech\" stav_tlacitka>Upravit jídlo</button>\n",
     "css": "\n.btn-uspech { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_nazev_validni = edit_vstup_nazev_jidla.trim().length > 0;\nconst stav_tlacitka = je_nazev_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_nazev_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -1066,6 +1066,10 @@
     "js_click": "",
     "sql": {},
     "sql_click": {
+      "smazat-jidlo-alergeny": "DELETE FROM jidla_alergeny WHERE id_jidla = idJidla",
+      "smazat-jidlo-kniha-jidel": "DELETE FROM kniha_jidel WHERE id_jidla = idJidla",
+      "smazat-jidlo-ucastnici": "DELETE FROM ucastnici_jidla WHERE id_jidla = idJidla",
+      "smazat-jidlo-vedouci": "DELETE FROM jidla_vedouci WHERE id_jidla = idJidla",
       "smazat-jidlo": "DELETE FROM jidla WHERE id_jidla = idJidla"
     },
     "tags": [
@@ -1087,7 +1091,7 @@
     "description": "Tlačítko pro uložení nového jídla.",
     "html": "\n<button id=\"system-btn_ulozit_jidlo\" class=\"btn-uspech\" stav_tlacitka>Uložit jídlo</button>\n",
     "css": "\n.btn-uspech { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_nazev_validni = vstup_nazev_jidla.trim().length > 0;\nconst stav_tlacitka = je_nazev_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_nazev_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -1185,7 +1189,7 @@
     "description": "Tlačítko pro uložení změn existujícího účastníka. Vyžaduje generalVariable: idUcastnika.",
     "html": "\n<button id=\"system-edit_btn_ulozit_ucastnika\" class=\"btn-uspech\" stav_tlacitka>Upravit účastníka</button>\n",
     "css": "\n.btn-uspech { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_jmeno_validni = edit_vstup_jmeno_ucastnika.trim().split(\" \").filter(Boolean).length === 2;\nconst je_validni_email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(edit_vstup_email_ucastnika);\nconst je_cislo_validni = /^\\+?[0-9\\s]{9,20}$/.test(edit_vstup_telefon_ucastnika);\nconst je_adresa_validni = /^\\S.+\\s+\\d+[a-zA-Z]?\\s*,\\s*\\S.+\\s*,\\s*\\d{3}\\s?\\d{2}$/.test(edit_vstup_adresa_ucastnika.trim());\nconst je_vek_validni = Number(edit_vstup_vek_ucastnika) >= 6 && Number(edit_vstup_vek_ucastnika) <= 15;\nconst stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -1239,13 +1243,12 @@
     "id": "edit-vstup-alergeny-ucastnika",
     "name": "Vstup – Edit alergeny účastníka",
     "description": "Vícenásobný výběr alergenů účastníka. Vyžaduje generalVariable: idUcastnika.",
-    "html": "\n<div class=\"form-radek\">\n  <label for=\"edit-vstup_alergeny_ucastnika-idUcastnika\">Alergeny:</label>\n  <div id=\"edit-vstup_alergeny_ucastnika-idUcastnika\" class=\"vyber-checkboxu\"></div>\n  <input type=\"hidden\" id=\"system-edit_vstup_alergeny_ucastnika-idUcastnika\" name=\"system-edit_vstup_alergeny_ucastnika\" />\n</div>\n",
+    "html": "\n<div class=\"form-radek\">\n  <label for=\"edit-vstup_alergeny_ucastnika-idUcastnika\">Alergeny:</label>\n  <div id=\"edit-vstup_alergeny_ucastnika-idUcastnika\" class=\"vyber-checkboxu\">\n    moznosti_alergenu_edit_ucastnika\n  </div>\n  <input type=\"hidden\" id=\"system-edit_vstup_alergeny_ucastnika-idUcastnika\" name=\"system-edit_vstup_alergeny_ucastnika\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.vyber-checkboxu { border: 1px solid #d1d5db; border-radius: 6px; padding: 8px; min-width: 280px; max-height: 150px; overflow-y: auto; background: #ffffff; }\n.volba-radek { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 4px; font-size: 14px; font-weight: 400; cursor: pointer; }\n.volba-radek:hover { background: #f3f4f6; }\n.volba-radek input { width: 16px; height: 16px; }\n",
-    "js": "\nconst vyberAlergenuEditUcastnika = document.querySelector('#edit-vstup_alergeny_ucastnika-' + idUcastnika);\nconst hiddenAlergenyEditUcastnika = document.querySelector('#system-edit_vstup_alergeny_ucastnika-' + idUcastnika);\nconst vybraneIdAlergenuEditUcastnika = typeof vybrane_id_alergenu_ucastnika === 'undefined'\n  ? []\n  : (Array.isArray(vybrane_id_alergenu_ucastnika) ? vybrane_id_alergenu_ucastnika : [vybrane_id_alergenu_ucastnika]);\nconst vsechnaIdAlergenuEditUcastnika = typeof id_alergenu === 'undefined'\n  ? []\n  : (Array.isArray(id_alergenu) ? id_alergenu : [id_alergenu]);\nconst vsechnaJmenaAlergenuEditUcastnika = typeof jmeno_alergenu === 'undefined'\n  ? []\n  : (Array.isArray(jmeno_alergenu) ? jmeno_alergenu : [jmeno_alergenu]);\n\nif (vyberAlergenuEditUcastnika) {\n  const vybrenaIdSet = new Set(vybraneIdAlergenuEditUcastnika.map(function(id) { return String(id); }));\n  const moznostiAlergenuEditUcastnika = vsechnaIdAlergenuEditUcastnika.map(function(id, index) {\n    const checked = vybrenaIdSet.has(String(id)) ? ' checked' : '';\n    const jmeno = vsechnaJmenaAlergenuEditUcastnika[index] ?? '';\n    return '<label class=\"volba-radek\"><input type=\"checkbox\" value=\"' + id + '\"' + checked + '> ' + jmeno + '</label>';\n  }).join('');\n\n  vyberAlergenuEditUcastnika.innerHTML = moznostiAlergenuEditUcastnika;\n}\n\nfunction syncAlergenyEditUcastnika() {\n  if (!hiddenAlergenyEditUcastnika) return;\n  if (!vyberAlergenuEditUcastnika) return;\n\n  const checkboxesAlergenuEditUcastnika = vyberAlergenuEditUcastnika.querySelectorAll('input[type=\"checkbox\"]');\n  const hodnoty = Array.from(checkboxesAlergenuEditUcastnika)\n    .filter(function(checkbox) { return checkbox.checked; })\n    .map(function(checkbox) { return checkbox.value; });\n\n  hiddenAlergenyEditUcastnika.value = hodnoty.length > 0 ? hodnoty.join(',') : 'NULL';\n  hiddenAlergenyEditUcastnika.dispatchEvent(new Event('input', { bubbles: true }));\n}\n\nif (vyberAlergenuEditUcastnika) {\n  const checkboxesAlergenuEditUcastnika = vyberAlergenuEditUcastnika.querySelectorAll('input[type=\"checkbox\"]');\n  syncAlergenyEditUcastnika();\n\n  checkboxesAlergenuEditUcastnika.forEach(function(checkbox) {\n    if (checkbox.dataset.editAlergenyUcastnikaChange === '1') return;\n    checkbox.dataset.editAlergenyUcastnikaChange = '1';\n    checkbox.addEventListener('change', syncAlergenyEditUcastnika);\n  });\n}\n",
+    "js": "\nconst checkboxesAlergenuEditUcastnika = document.querySelectorAll('#edit-vstup_alergeny_ucastnika-' + idUcastnika + ' input[type=\"checkbox\"]');\nconst hiddenAlergenyEditUcastnika = document.querySelector('#system-edit_vstup_alergeny_ucastnika-' + idUcastnika);\n\nfunction syncAlergenyEditUcastnika() {\n  if (!hiddenAlergenyEditUcastnika) return;\n\n  const hodnoty = Array.from(checkboxesAlergenuEditUcastnika)\n    .filter(function(checkbox) { return checkbox.checked; })\n    .map(function(checkbox) { return checkbox.value; });\n\n  hiddenAlergenyEditUcastnika.value = hodnoty.length > 0 ? hodnoty.join(',') : 'NULL';\n  hiddenAlergenyEditUcastnika.dispatchEvent(new Event('input', { bubbles: true }));\n}\n\nif (checkboxesAlergenuEditUcastnika.length > 0) {\n  syncAlergenyEditUcastnika();\n\n  checkboxesAlergenuEditUcastnika.forEach(function(checkbox) {\n    checkbox.addEventListener('change', syncAlergenyEditUcastnika);\n  });\n}\n",
     "js_click": "",
     "sql": {
-      "nacistVybraneAlergenyUcastnika": "SELECT ua.id_alergenu AS vybrane_id_alergenu_ucastnika\nFROM ucastnici_alergeny ua\nWHERE ua.id_ucastnika = idUcastnika\nORDER BY ua.id_alergenu",
-      "nacistVsechnyAlergeny": "SELECT a.id_alergenu AS id_alergenu, a.jmeno AS jmeno_alergenu\nFROM alergeny a\nORDER BY a.id_alergenu"
+      "nacistAlergenyUcastnika": "SELECT COALESCE((SELECT GROUP_CONCAT('<label class=\"volba-radek\"><input type=\"checkbox\" value=\"' || a.id_alergenu || '\"' || CASE WHEN ua.id_ucastnika IS NULL THEN '' ELSE ' checked' END || '> ' || a.jmeno || '</label>', '') FROM alergeny a LEFT JOIN ucastnici_alergeny ua ON ua.id_alergenu = a.id_alergenu AND ua.id_ucastnika = idUcastnika ORDER BY a.id_alergenu), '') AS moznosti_alergenu_edit_ucastnika"
     },
     "sql_click": {},
     "tags": [
@@ -1561,6 +1564,8 @@
     "sql": {},
     "sql_click": {
       "smazat-ucastnika-turnusy": "DELETE FROM turnusy_ucastnici WHERE id_ucastnika = idUcastnika",
+      "smazat-ucastnika-alergeny": "DELETE FROM ucastnici_alergeny WHERE id_ucastnika = idUcastnika",
+      "smazat-ucastnika-jidla": "DELETE FROM ucastnici_jidla WHERE id_ucastnika = idUcastnika",
       "smazat-ucastnika": "DELETE FROM ucastnici WHERE id_ucastnika = idUcastnika"
     },
     "tags": [
@@ -1582,7 +1587,7 @@
     "description": "Tlačítko pro uložení nového účastníka.",
     "html": "\n<button id=\"system-btn_ulozit_ucastnika\" class=\"btn-uspech\" stav_tlacitka>Uložit účastníka</button>\n",
     "css": "\n.btn-uspech { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_jmeno_validni = vstup_jmeno_ucastnika.trim().split(\" \").filter(Boolean).length === 2;\nconst je_validni_email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(vstup_email_ucastnika);\nconst je_cislo_validni = /^\\+?[0-9\\s]{9,20}$/.test(vstup_telefon_ucastnika);\nconst je_adresa_validni = /^\\S.+\\s+\\d+[a-zA-Z]?\\s*,\\s*\\S.+\\s*,\\s*\\d{3}\\s?\\d{2}$/.test(vstup_adresa_ucastnika.trim());\nconst je_vek_validni = Number(vstup_vek_ucastnika) >= 6 && Number(vstup_vek_ucastnika) <= 15;\nconst stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -1778,7 +1783,7 @@
     "description": "Tlačítko pro uložení nového turnusu.",
     "html": "\n<button id=\"system-btn_ulozit\" class=\"btn-uspech\" stav_tlacitka>Uložit turnus</button>\n",
     "css": "\n.btn-uspech { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_datum_od_validni = !isNaN(new Date(vstup_datum_od).getTime());\nconst je_datum_do_validni = !isNaN(new Date(vstup_datum_do).getTime());\nconst je_rozsah_dat_validni = new Date(vstup_datum_od).getTime() <= new Date(vstup_datum_do).getTime();\nconst je_kapacita_validni = Number(vstup_kapacita) > 0;\nconst stav_tlacitka = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -1826,7 +1831,7 @@
     "description": "Pole pro zadání koncového data turnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum do:</label>\n  <input type=\"date\" id=\"system-vstup_datum_do\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(vstup_datum_do).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_do_validni =\n    !isNaN(new Date(vstup_datum_do).getTime());\nconst je_rozsah_dat_validni =\n    je_datum_do_validni &&\n    typeof vstup_datum_od !== \"undefined\" &&\n    !isNaN(new Date(vstup_datum_od).getTime()) &&\n    new Date(vstup_datum_od).getTime() <= new Date(vstup_datum_do).getTime();\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_do_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {},
     "sql_click": {},
@@ -1849,7 +1854,7 @@
     "description": "Pole pro zadání počátečního data turnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum od:</label>\n  <input type=\"date\" id=\"system-vstup_datum_od\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_od_validni =\n    !isNaN(new Date(vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_od_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {},
     "sql_click": {},
@@ -1966,7 +1971,7 @@
     "description": "Pole pro zadání počátečního data turnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum od:</label>\n  <input type=\"date\" id=\"system-vstup_datum_od\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_od_validni =\n    !isNaN(new Date(vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_od_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {},
     "sql_click": {},
@@ -2014,7 +2019,7 @@
     "description": "Pole pro zadání koncového data turnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum do:</label>\n  <input type=\"date\" id=\"system-vstup_datum_do\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(vstup_datum_do).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_do_validni =\n    !isNaN(new Date(vstup_datum_do).getTime());\nconst je_rozsah_dat_validni =\n    je_datum_do_validni &&\n    typeof vstup_datum_od !== \"undefined\" &&\n    !isNaN(new Date(vstup_datum_od).getTime()) &&\n    new Date(vstup_datum_od).getTime() <= new Date(vstup_datum_do).getTime();\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_do_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {},
     "sql_click": {},
@@ -2066,6 +2071,8 @@
     "js_click": "",
     "sql": {},
     "sql_click": {
+      "smazat-turnus-ucastnici": "DELETE FROM turnusy_ucastnici WHERE id_turnusu = idTurnusu",
+      "smazat-turnus-vedouci": "DELETE FROM vedouci_turnusy WHERE id_turnusu = idTurnusu",
       "smazat-turnus": "DELETE FROM turnusy WHERE id_turnusu = idTurnusu"
     },
     "tags": [
@@ -2135,7 +2142,7 @@
     "description": "Pole pro úpravu počátečního data turnusu. Vyžaduje generalVariable: idTurnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum od:</label>\n  <input type=\"date\" id=\"system-edit_vstup_datum_od\" value=\"edit_vstup_datum_od\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(edit_vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_od_validni =\n    !isNaN(new Date(edit_vstup_datum_od).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_od_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {
       "nacistDatumOdTurnusu": "SELECT DATE(datum_od) AS edit_vstup_datum_od FROM turnusy WHERE id_turnusu = idTurnusu"
@@ -2161,7 +2168,7 @@
     "description": "Pole pro úpravu koncového data turnusu. Vyžaduje generalVariable: idTurnusu.",
     "html": "\n<div class=\"form-radek\">\n  <label>Datum do:</label>\n  <input type=\"date\" id=\"system-edit_vstup_datum_do\" value=\"edit_vstup_datum_do\" style=\"border: 4px solid barva_ramecku\" />\n</div>\n",
     "css": "\n.form-radek { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }\n.form-radek label { font-size: 13px; font-weight: 600; color: #374151; }\n.form-radek input { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; }\n",
-    "js": "const je_datum_validni =\n    !isNaN(new Date(edit_vstup_datum_do).getTime());\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
+    "js": "const je_datum_do_validni =\n    !isNaN(new Date(edit_vstup_datum_do).getTime());\nconst je_rozsah_dat_validni =\n    je_datum_do_validni &&\n    typeof edit_vstup_datum_od !== \"undefined\" &&\n    !isNaN(new Date(edit_vstup_datum_od).getTime()) &&\n    new Date(edit_vstup_datum_od).getTime() <= new Date(edit_vstup_datum_do).getTime();\n\nlet barva_ramecku = \"#FFFFFF\";\n\nif (je_datum_do_validni) {\n    barva_ramecku = \"#4aff5c\";\n} else {\n    barva_ramecku = \"#ff4f92\";\n}",
     "js_click": "",
     "sql": {
       "nacistDatumDoTurnusu": "SELECT DATE(datum_do) AS edit_vstup_datum_do FROM turnusy WHERE id_turnusu = idTurnusu"
@@ -2187,7 +2194,7 @@
     "description": "Tlačítko pro uložení změn existujícího turnusu. Vyžaduje generalVariable: idTurnusu.",
     "html": "\n<button id=\"system-edit_btn_ulozit\" class=\"btn-uspech\" stav_tlacitka>Upravit turnus</button>\n",
     "css": "\n.btn-uspech { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_datum_od_validni = !isNaN(new Date(edit_vstup_datum_od).getTime());\nconst je_datum_do_validni = !isNaN(new Date(edit_vstup_datum_do).getTime());\nconst je_rozsah_dat_validni = new Date(edit_vstup_datum_od).getTime() <= new Date(edit_vstup_datum_do).getTime();\nconst je_kapacita_validni = Number(edit_vstup_kapacita) > 0;\nconst stav_tlacitka = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -2264,7 +2271,7 @@
     "description": "Tlačítko pro uložení nového turnusu.",
     "html": "\n<button id=\"system-btn_ulozit\" class=\"btn-uspech\" stav_tlacitka>Uložit turnus</button>\n",
     "css": "\n.btn-uspech { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_datum_od_validni = !isNaN(new Date(vstup_datum_od).getTime());\nconst je_datum_do_validni = !isNaN(new Date(vstup_datum_do).getTime());\nconst je_rozsah_dat_validni = new Date(vstup_datum_od).getTime() <= new Date(vstup_datum_do).getTime();\nconst je_kapacita_validni = Number(vstup_kapacita) > 0;\nconst stav_tlacitka = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -2368,7 +2375,7 @@
     "description": "Tlačítko pro uložení změn existujícího vedoucího. Vyžaduje generalVariable: idVedouciho.",
     "html": "\n<button id=\"system-edit_btn_ulozit_vedouciho\" class=\"btn-uspech\" stav_tlacitka>Upravit vedoucího</button>\n",
     "css": "\n.btn-uspech { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_jmeno_validni = edit_vstup_jmeno_vedouciho.trim().split(\" \").filter(Boolean).length === 2;\nconst je_validni_email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(edit_vstup_email_vedouciho);\nconst je_cislo_validni = /^\\+?[0-9\\s]{9,20}$/.test(edit_vstup_telefon_vedouciho);\nconst je_adresa_validni = /^\\S.+\\s+\\d+[a-zA-Z]?\\s*,\\s*\\S.+\\s*,\\s*\\d{3}\\s?\\d{2}$/.test(edit_vstup_adresa_vedouciho.trim());\nconst je_vek_validni = Number(edit_vstup_vek_vedouciho) >= 18 && Number(edit_vstup_vek_vedouciho) <= 99;\nconst stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {
@@ -2615,6 +2622,8 @@
     "sql": {},
     "sql_click": {
       "smazat-vedouciho-turnusy": "DELETE FROM vedouci_turnusy WHERE id_vedouciho = idVedouciho",
+      "smazat-vedouciho-alergeny": "DELETE FROM vedouci_alergeny WHERE id_vedouciho = idVedouciho",
+      "smazat-vedouciho-jidla": "DELETE FROM jidla_vedouci WHERE id_vedouciho = idVedouciho",
       "smazat-vedouciho": "DELETE FROM vedouci WHERE id_vedouciho = idVedouciho"
     },
     "tags": [
@@ -2737,7 +2746,7 @@
     "description": "Tlačítko pro uložení nového vedoucího.",
     "html": "\n<button id=\"system-btn_ulozit_vedouciho\" class=\"btn-uspech\" stav_tlacitka>Uložit vedoucího</button>\n",
     "css": "\n.btn-uspech { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }\n.btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }\n",
-    "js": "const je_jmeno_validni = vstup_jmeno_vedouciho.trim().split(\" \").filter(Boolean).length === 2;\nconst je_validni_email = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(vstup_email_vedouciho);\nconst je_cislo_validni = /^\\+?[0-9\\s]{9,20}$/.test(vstup_telefon_vedouciho);\nconst je_adresa_validni = /^\\S.+\\s+\\d+[a-zA-Z]?\\s*,\\s*\\S.+\\s*,\\s*\\d{3}\\s?\\d{2}$/.test(vstup_adresa_vedouciho.trim());\nconst je_vek_validni = Number(vstup_vek_vedouciho) >= 18 && Number(vstup_vek_vedouciho) <= 99;\nconst stav_tlacitka = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni ? \"\" : \"disabled\";",
+    "js": "const je_validni = je_jmeno_validni && je_validni_email && je_cislo_validni && je_adresa_validni && je_vek_validni;\nconst stav_tlacitka = je_validni ? \"\" : \"disabled\";",
     "js_click": "",
     "sql": {},
     "sql_click": {

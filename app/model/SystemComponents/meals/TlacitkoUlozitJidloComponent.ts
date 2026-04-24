@@ -15,8 +15,8 @@ export const tlacitkoUlozitJidloKomponenta = new Component({
 .btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }
 `,
 
-  js: `const je_nazev_validni = vstup_nazev_jidla.trim().length > 0;
-const stav_tlacitka = je_nazev_validni ? "" : "disabled";`,
+  js: `const je_validni = je_nazev_validni;
+const stav_tlacitka = je_validni ? "" : "disabled";`,
   sql: {},
   sql_click: {
     vlozitJidlo: `INSERT INTO jidla (jmeno, doba_podavani) VALUES ('vstup_nazev_jidla', 'vstup_doba_podavani')`,

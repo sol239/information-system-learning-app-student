@@ -15,11 +15,8 @@ export const tlacitkoUlozitKomponenta = new Component({
 .btn-uspech:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.65; }
 `,
 
-  js: `const je_datum_od_validni = !isNaN(new Date(vstup_datum_od).getTime());
-const je_datum_do_validni = !isNaN(new Date(vstup_datum_do).getTime());
-const je_rozsah_dat_validni = new Date(vstup_datum_od).getTime() <= new Date(vstup_datum_do).getTime();
-const je_kapacita_validni = Number(vstup_kapacita) > 0;
-const stav_tlacitka = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni ? "" : "disabled";`,
+  js: `const je_validni = je_datum_od_validni && je_datum_do_validni && je_rozsah_dat_validni && je_kapacita_validni;
+const stav_tlacitka = je_validni ? "" : "disabled";`,
   sql: {},
   sql_click: {
     insertTurnus: `INSERT INTO turnusy (datum_od, datum_do, kapacita) VALUES (DATE('vstup_datum_od'), DATE('vstup_datum_do'), vstup_kapacita)`
