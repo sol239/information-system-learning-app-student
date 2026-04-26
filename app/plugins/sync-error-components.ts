@@ -18,6 +18,24 @@ export default defineNuxtPlugin((_nuxtApp) => {
         globalSettings.errorComponentIds = Array.from(ids)
     }
 
+    const syncSelectedComponents = () => {
+        if (!globalSettings.selectedTaskId) {
+            if (globalSettings.selectedComponents.size > 0) {
+                globalSettings.selectedComponents = new Set()
+            }
+            return
+        }
+
+        const task = systemsStore.selectedSystem?.tasks?.find(t => t.id === globalSettings.selectedTaskId)
+        if (task) {
+            globalSettings.selectedComponents = new Set((task.errorComponents ?? []).map(c => c.id))
+        } else {
+            if (globalSettings.selectedComponents.size > 0) {
+                globalSettings.selectedComponents = new Set()
+            }
+        }
+    }
+
     watch(
         () => [
             systemsStore.selectedSystemId,
@@ -27,6 +45,16 @@ export default defineNuxtPlugin((_nuxtApp) => {
             [...(globalSettings.solvedComponentIds ?? [])].map(id => String(id)),
         ] as const,
         sync,
+        { immediate: true }
+    )
+
+    watch(
+        () => [
+            globalSettings.selectedTaskId,
+            systemsStore.selectedSystemId,
+            (systemsStore.selectedSystem?.tasks?.find(t => t.id === globalSettings.selectedTaskId)?.errorComponents ?? []).map(c => String(c.id)).join(',')
+        ] as const,
+        syncSelectedComponents,
         { immediate: true }
     )
 })

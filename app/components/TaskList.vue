@@ -68,7 +68,8 @@
 
         <button
           v-else
-          class="flex flex-col gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer w-full"
+          class="flex flex-col gap-1.5 rounded-lg border p-3 text-left transition-colors cursor-pointer w-full"
+          :class="globalSettings.teacherMode && globalSettings.selectedTaskId === task.id ? 'border-red-500 ring-2 ring-red-500 bg-red-50 dark:border-red-500 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'"
           @click="openTask(task)"
         >
           <div class="flex items-start justify-between gap-2">

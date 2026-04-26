@@ -239,7 +239,6 @@ let persistSystemTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(selectedTask, (task) => {
   globalSettings.selectedTaskId = task?.id ?? null
-  globalSettings.selectedComponents = new Set((task?.errorComponents ?? []).map(c => c.id))
 })
 
 watch(() => globalSettings.selectedTaskId, (id) => {
