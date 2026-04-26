@@ -21,9 +21,49 @@ function generateSystemsManifest() {
   }
 }
 
+function shouldLoadPagesFromSystem() {
+  return String(process.env.LOAD_PAGES_FROM ?? 'system').trim().toLowerCase() !== 'directory'
+}
+
+function isStaticSystemContentPage(file?: string) {
+  if (!file) {
+    return false
+  }
+
+  const normalizedFile = file.split(path.sep).join('/')
+
+  return normalizedFile.includes('/app/pages/systems/[id]/')
+    && !normalizedFile.endsWith('/app/pages/systems/[id]/[...path].vue')
+    && !normalizedFile.endsWith('/app/pages/systems/[id]/database.vue')
+    && !normalizedFile.endsWith('/app/pages/systems/[id]/designer.vue')
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
+  hooks: {
+    'pages:extend'(pages) {
+      if (!shouldLoadPagesFromSystem()) {
+        return
+      }
+
+      function removeStaticSystemContentPages(routes: typeof pages) {
+        for (let index = routes.length - 1; index >= 0; index--) {
+          const route = routes[index]
+
+          if (route.children) {
+            removeStaticSystemContentPages(route.children)
+          }
+
+          if (isStaticSystemContentPage(route.file)) {
+            routes.splice(index, 1)
+          }
+        }
+      }
+
+      removeStaticSystemContentPages(pages)
+    },
+  },
   runtimeConfig: {
     public: {
       appMode: process.env.APP_MODE ?? '',

@@ -10,7 +10,7 @@ type PushFirstAvailablePageOptions = {
 export function useAvailableSystemPages() {
   const systemsStore = useSystemsStore()
   const globalSettings = useGlobalSettingsStore()
-  const { t } = useI18n()
+  const nuxtApp = useNuxtApp()
 
   const selectedTask = computed(() => {
     const selectedTaskId = globalSettings.selectedTaskId
@@ -30,7 +30,11 @@ export function useAvailableSystemPages() {
       return []
     }
 
-    return availableVisiblePages(system, task, t('database'))
+    return availableVisiblePages(system, task, databasePageName())
+  }
+
+  function databasePageName() {
+    return nuxtApp.$i18n?.t('database') ?? 'Database'
   }
 
   async function pushFirstAvailablePage(

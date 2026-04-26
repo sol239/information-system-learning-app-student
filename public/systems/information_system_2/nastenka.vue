@@ -7,25 +7,30 @@
             <ComponentWrapper :component="supervisorsStat" />
             <ComponentWrapper :component="mealsStat" />
         </div>
+        <USeparator />
+
+        <h2 class="text-2xl font-semibold">Statistiky</h2>
+        <div class="flex flex-row gap-4 flex-wrap">
+            <ComponentWrapper :component="minParticipantsPerSessionStat" />
+            <ComponentWrapper :component="maxParticipantsPerSessionStat" />
+            <ComponentWrapper :component="totalParticipantsInSessionsStat" />
+            <ComponentWrapper :component="maxParticipantAgeStat" />
+        </div>
     </div>
 </template>
 
-<script setup>
-const route = useRoute();
-const systemsStore = useSystemsStore();
-const systemId = route.params.id;
+<script setup lang="ts">
+import { computed } from 'vue';
+import ComponentWrapper from '~/components/ComponentWrapper.vue';
+const { systemsStore } = useSyncSystemId();
 
-systemsStore.selectedSystemId = systemId;
-
-if (await DatabaseWrapper.isDatabaseInitialized(systemsStore.selectedSystem?.database) === false) {
-    console.error("Initializing database for system " + systemId)
-} else {
-    console.log("Database for system " + systemId + " is already initialized")
-}
-
-const dashboardHeroCard = computed(() => systemsStore.getComponentById('system-hero-card'));
-const participantsStat = computed(() => systemsStore.getComponentById('stats-participants'));
-const sessionsStat = computed(() => systemsStore.getComponentById('stats-sessions'));
-const supervisorsStat = computed(() => systemsStore.getComponentById('stats-supervisors'));
-const mealsStat = computed(() => systemsStore.getComponentById('stats-meals'));
+const dashboardHeroCard = computed(() => systemsStore.getComponentById('hlavni-karta-systemu'));
+const participantsStat = computed(() => systemsStore.getComponentById('statistika-ucastniku'));
+const sessionsStat = computed(() => systemsStore.getComponentById('statistika-turnusu'));
+const supervisorsStat = computed(() => systemsStore.getComponentById('statistika-vedoucich'));
+const mealsStat = computed(() => systemsStore.getComponentById('statistika-jidel'));
+const minParticipantsPerSessionStat = computed(() => systemsStore.getComponentById('statistika-min-ucastniku-turnusu'));
+const maxParticipantsPerSessionStat = computed(() => systemsStore.getComponentById('statistika-max-ucastniku-turnusu'));
+const totalParticipantsInSessionsStat = computed(() => systemsStore.getComponentById('statistika-celkem-ucasti-turnusu'));
+const maxParticipantAgeStat = computed(() => systemsStore.getComponentById('statistika-max-vek-ucastnika'));
 </script>
