@@ -936,7 +936,8 @@ const finishTypeOptions = computed(() => [
   { label: t('task_finish_type_after_db_label'), value: FinishType.AFTER_DATABASE_UPDATE },
   { label: t('task_finish_type_select_options_label'), value: FinishType.SELECT_OPTIONS },
   { label: t('task_finish_type_correct_label'), value: FinishType.TYPE_CORRECT },
-  { label: t('task_finish_type_variable_constraint_label'), value: FinishType.VARIABLE_CONSTRAINT }
+  // Variable constraints are still supported for existing tasks, but hidden from the finish type menu for now.
+  // { label: t('task_finish_type_variable_constraint_label'), value: FinishType.VARIABLE_CONSTRAINT }
 ])
 
 const activityTypeOptions = computed(() => [
