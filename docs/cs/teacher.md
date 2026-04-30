@@ -1,141 +1,96 @@
 # Příručka pro učitele
 
-## Tvorba úkolů
+Tato příručka slouží k tomu, jak aplikaci používat, konfigurovat, spustit i nasadit, aby k ní měli přístup studenti.
 
-Úkoly se aktuálně vytvářejí přímo z assets/data/information_system_1/config.json souboru (popř. jiná číslovka id systému). V budoucnu bude možné je vytvářet přes webové rozhraní.
+### Technické informace o aplikaci
 
-Úkoly jsou v sekci "tasks"
+Jedná se o webovou aplikaci postavenou na frameworku Nuxt.js, který je založen na JavaScriptu a běží v prohlížeči uživatele. Aplikace je navržena tak, aby byla snadno použitelná pro učitele i studenty, a umožňuje přizpůsobení obsahu a funkcí podle potřeb výuky. 
 
-```json
-"tasks": [
-        {
-            "id": 1, ...
-        }
-        {
-            "id": 2, ...
-        },
-        ...
+## Jak aplikaci spustit
+
+Jedná se o webovou aplikaci, která běží přímo v prohlížeči uživatele (client-side aplikace [1]). Níže uvedu jak aplikaci spustit lokálně, ale i jak ji nasadit na server, aby k ní měli přístup studenti.
+
+### Lokální spuštění
+
+#### Technické požadavky:
+
+- Node.js (doporučuji nějakou novou verzi, např. 18+)
+- NPM (mělo by být součástí Node.js)
+- Git (pro klonování repozitáře)
+- Textový editor (doporučuji Visual Studio Code)
+
+#### 1. Naklonujte repozitář
+
+Klonování repozitáře je prostě stahnutí kódu z GitHubu (to je služba pro hostování kódu) do vašeho počítače. Otevřete terminál a spusťte:
+
+```bash
+git clone https://github.com/sol239/information-system-learning-app
 ```
 
-### Struktura úkolu
+Alternativně můžete repozitář stáhnout jako ZIP soubor a rozbalit ho na výše uvedené adrese.
 
-```json
-{
-    "id": 1,
-    "title": "Ukázkový úkol č. 1",
-    "description": "Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.",
-    "status": "pending",
-    "type": "repair",
-    "answer": "stats-participants-sql == SELECT COUNT(*) as count FROM účastníci && stats-meals-sql == SELECT COUNT(*) as count FROM jídla",
-    "elementClass": [],
-    "round": 1,
-    "is_editable": false,
-    "error-components": [
-        {
-            "id": "stats-participants",
-            "variables": {
-                "html": "",
-                "sql": "SELECT COUNT(*) as count FROM vedoucí",
-                "js": ""
-            },
-            "error-component-name": ""
-        },
-        {
-            "id": "stats-meals",
-            "variables": {
-                "html": "",
-                "sql": "SELECT COUNT(*) as count FROM turnusy",
-                "js": ""
-            },
-            "error-component-name": ""
-        }
-    ],
-    "feedback": "Správně jsi opravil/a SQL dotazy dvou komponent. Komponenta, která měla zobrazovat počet účastníku chybně zobrazovala počet vedoucích a komponenta, která měla zobrazovat počet jídel, zobrazovala počet turnusů. Opravil/a jsi to tak, že jsi změnil/a SQL dotazy na správné."
-},
+#### 2. Nainstalujte závislosti
+Přejděte do složky s projektem a nainstalujte potřebné knihovny:
+
+```bash
+cd information-system-learning-app
+npm install
 ```
-- `id` - unikátní identifikátor úkolu, něsmí se opakovat
-- `title` - název úkolu
-- `description` - popis úkolu, co má uživatel udělat
-- `status` - stav úkolu, může nabývat hodnot `pending`, `active`, `completed` - není potřeba měnit.
-- `type` - typ úkolu, může nabývat hodnot `repair`, `select` a v budoucnu i `select-options` a `select-type`.
-    - **repair** - uživatel má opravit chyby v komponentách, které jsou uvedeny v `error-components`
-    - **select** - uživatel má označit chybné komponenty, které jsou uvedeny v `error-components`
-    - **select-options** - uživatel má označit správnou odpověď z možností, které jsou uvedeny v `answer`
-    - **select-type** - uživatel má označit napsat správnou odpověď otázky, která je v zadání.
-- `answer` - správná odpověď na úkol - dynamicky se kontroluje podle typu úkolu
-    -  `"answer": "stats-participants-sql == SELECT COUNT(*) as count FROM účastníci && stats-meals-sql == SELECT COUNT(*) as count FROM jídla"` např. kontroluje zda sql dotazy jsou rovny výše uvedeným hodnotám,
-    - `"answer": "tbl-účastníci == jméno:Petr Novotný;alergeny:Lepek,Koryši"` - kontroluje zda tabulka účastníků obsahuje řádek s jménem "Petr Novotný" a alergeny "Lepek,Koryši"
-    - `"answer": "none"` - odpoveď je prázdná, stačí jen označit správné komponenty/opravit chyby
-- `elementClass` - třída prvku, na který se úkol vztahuje, aktuálně nepoužito, necháváme prázdné pole
-- `round` - kolo, ve kterém je úkol zadán, aktuálně nepoužito, necháváme hodnotu 1, tj,. všechny úkoly jsou v 1. kole
-- `is_editable` - zda je úkol editovatelný uživatelem, aktuálně nepoužito, necháváme hodnotu false
-- `error-components` - seznam komponent, které obsahují chyby
-    - "id": "supervisors-edit-allergens", - zde lze volit jména komponent, které se použícají v souboru `ComponentManager`
-    - "variables": {
-        - "html": "", - zde lze měnit HTML kód komponenty, aktuálně nepoužito, necháváme prázdné
-        - "sql": "SELECT COUNT(*) as count FROM alergeny", - zde lze měnit SQL dotaz komponenty, který uživatel opravuje
-        - "js": "" - zde lze měnit JavaScript kód komponenty, aktuálně nepoužito, necháváme prázdné
-      },
-    - "error-component-name": "" - není implementováno, necháváme prázdné
-    - pozn. kód který lze měnit - vytvářet do něj chyby jsou neprázdné proměnné v instancích v `ComponentManager`.
-- `feedback` - zpětná vazba pro uživatele, zobrazí se po splnění úkolu
+
+#### 3. Nastavte režim aplikace (režimy aplikace jsou popsané v sekci X.X.X)
+
+V souboru `.env` nastavte `NUXT_PUBLIC_APP_MODE` na `TEACHER` pokud chcete spustit učitelskou verzi aplikace, Jinak nastavte `STUDENT` pro studentskou verzi.
+
+Pozn. .env soubor neexistuje, takže ho musíte vytvořit. Můžete do něj zkopírovat obsah souboru `.env.example` a upravit podle potřeby. Tento soubor by měl být umístěn v kořenovém adresáři projektu.
+
+```env
+NUXT_PUBLIC_APP_MODE=TEACHER
+```
+
+
+#### 4. Spusťte vývojový server
+
+Tohle je krok, kdy se aplikace spustí a bude dostupná ve vašem prohlížeči, pouze pro vás (ne pro studenty). Spusťte:
+
+```bash
+npm run dev
+```
+
+Aplikace bude pravděpodobně dostupná na adrese `http://localhost:3000/information-system-learning-app`. Můžete ji otevřít v prohlížeči a začít s ní pracovat.
+Je možné, že port 3000 je již obsazený, v takovém případě se aplikace spustí na jiném portu (např. 3001) a v terminálu uvidíte zprávu, na jaké adrese je aplikace dostupná.
+
+![alt text](image.png)
 
 ---
 
-## Řešení ukázkových úkolů
+## Režimy aplikace
 
-### Ukázkový úkol č. 1
+Aplikace má dva režimy: učitelský (TEACHER) a studentský (STUDENT). Režim se nastavuje pomocí proměnné prostředí `NUXT_PUBLIC_APP_MODE` v souboru `.env`.
 
-**Zadání:** Zkontrolujte, zda se v nástěnce správně zobrazují jídla a účastníci. Pokud najdete nějakou chybu, tak chybu opravte.
+### Učitelský režim (TEACHER)
 
-**Řešení:**
+#### Nastavení
 
-- běžte do kolonky `Nástěnka` 
-- klikněte na zapnout úpravy v horním menu
-- klikněte na tužku u bubliny s `účastníci`
-- změňte SQL dotaz na `SELECT COUNT(*) as count FROM účastníci`
-- uložte změny
-- klikněte na tužku u bubliny s `jídla`
-- změňte SQL dotaz na `SELECT COUNT(*) as count FROM jídla` stejným způsobem
-- uložte změny
-- vyberte úkol č.1  v menu s úkoly a klikněte na vyhodnotit
-- poté se zobrazí zpětná vazba
+V souboru `.env` nastavte:
 
----
+```env
+NUXT_PUBLIC_APP_MODE=TEACHER
+```
 
-### Ukázkový úkol č. 2
+V tomto režimu máte přístup ke správě vašich systémů a úkolů. Můžete přidávat nové systémy, přidávat úkoly, upravovat je a mazat. Tento režim je určen pro vás jako učitele, abyste mohli připravit materiály pro své studenty.
 
-**Zadání:** Zkontrolujte, zda se v nástěnce správně zobrazují statistiky o počtu jídel. Pokud najdete nějakou chybu, tak vyberte komponentu, která je chybná.
+### Studentský režim (STUDENT)
 
-**Řešení:**
+#### Nastavení
 
-- běžte do kolonky `Nástěnka` 
-- klikněte na zapnout zvýraznění v horním menu
-- objeví se oranžové ráměčky okolo onačitelných komponent
-- označte bublinu s počtem vedoucích
-- vyberte úkol č.2  v menu s úkoly a klikněte na vyhodnotit
-- poté se zobrazí zpětná vazba
+V souboru `.env` nastavte:
 
----
+```env
+NUXT_PUBLIC_APP_MODE=STUDENT
+```
 
-### Ukázkový úkol č. 3
 
-**Zadání:** Upravte účastníka: Tereza Nováková, tak aby měla i třetí jméno Svobodová, tedy její celé jméno bude Tereza Svobodová Nováková.
+### Odkazy
 
-**Řešení:**
+1. https://www.cloudflare.com/learning/serverless/glossary/client-side-vs-server-side/
 
-- běžte do kolonky `Účastníci`
-- otevřete detail účastníka Tereza Nováková kliknutím na `Zobrazit detaily`
-- zapněte úpravy kliknutím a klikněte na tužku u pole s jménem
-- změňte `name.trim().split(' ').length == 2` na `name.trim().split(' ').length >= 2`
-- uložte změny
-- upravte jméno na `Tereza Svobodová Nováková`
-- uložte změny
-- vyberte úkol č.3  v menu s úkoly a klikněte na vyhodnotit
-- poté se zobrazí zpětná vazba
-
----
-
-## Poznámky
-
-Úprava JS kódu by šla obejít, například vracet jen true. Dynamická kontrola kódu zatím není implementována, to bude doděláno v rámci BP.
