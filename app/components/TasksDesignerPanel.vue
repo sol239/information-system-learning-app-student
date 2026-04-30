@@ -1,42 +1,22 @@
 <template>
   <div class="flex flex-col gap-4">
-    <UFormField>
-      <template #label>
-        <span>{{ t('task_level_count') }}</span>
-        <span class="ml-1 font-normal text-gray-500 dark:text-gray-400">
-          ({{ t('task_level_count_info') }})
-        </span>
-      </template>
-      <UInput
-        v-model.number="systemLevelCount"
-        type="number"
-        min="1"
-        class="w-[8rem] max-w-full"
-      />
-    </UFormField>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <UFormField>
+        <template #label>
+          <span>{{ t('task_level_count') }}</span>
+          <span class="ml-1 font-normal text-gray-500 dark:text-gray-400">
+            ({{ t('task_level_count_info') }})
+          </span>
+        </template>
+        <UInput
+          v-model.number="systemLevelCount"
+          type="number"
+          min="1"
+          class="w-[8rem] max-w-full"
+        />
+      </UFormField>
 
-    <div class="flex flex-wrap items-center gap-2">
-      <!--
-        <UButton
-          icon="i-lucide-download"
-          color="neutral"
-          variant="soft"
-          :disabled="!tasks.length"
-          @click="exportAllTasks"
-        >
-          {{ t('task_export_all') }}
-        </UButton>
-
-        <UButton
-          icon="i-lucide-upload"
-          color="neutral"
-          variant="soft"
-          @click="showImportAllModal = true"
-        >
-          {{ t('task_import_all') }}
-        </UButton>
-      -->
-
+      <div class="flex flex-wrap items-center justify-end gap-2">
         <ModernHoverPopover
           :title="previewStudentView ? t('task_preview_student_title') : t('task_preview_editor_title')"
           :description="previewStudentView ? t('task_preview_student_desc') : t('task_preview_editor_desc')"
@@ -60,41 +40,45 @@
         >
           {{ t('task_new_task') }}
         </UButton>
+      </div>
     </div>
 
-    <div class="flex flex-wrap gap-2">
-      <UBadge
-        v-for="task in tasks"
-        :key="task.id"
-        color="neutral"
-        :variant="selectedTask?.id === task.id ? 'solid' : 'subtle'"
-        class="flex items-center gap-2 px-3 py-1 transition"
-        @click="selectedTask = task"
-      >
-        <span class="cursor-pointer">
-          {{ task.title || t('task_untitled') }}
-        </span>
-        <HoverHint :text="t('task_remove_task_action')">
-          <UButton
-            icon="i-lucide-trash-2"
-            color="red"
-            variant="ghost"
-            size="xs"
-            class="shrink-0"
-            @click.stop="deleteTask(task.id)"
-          />
-        </HoverHint>
-      </UBadge>
-      <UBadge
-        as="button"
-        color="neutral"
-        variant="outline"
-        class="flex cursor-pointer items-center gap-1.5 border-dashed px-3 py-1 transition hover:bg-gray-50 dark:hover:bg-gray-800"
-        @click="showImportModal = true"
-      >
-        <UIcon name="i-lucide-file-json" class="h-3.5 w-3.5" />
-        {{ t('task_add_from_json') }}
-      </UBadge>
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('tasks') }}</span>
+      <div class="flex flex-wrap gap-2">
+        <UBadge
+          v-for="task in tasks"
+          :key="task.id"
+          color="neutral"
+          :variant="selectedTask?.id === task.id ? 'solid' : 'subtle'"
+          class="flex items-center gap-2 px-3 py-1 transition"
+          @click="selectedTask = task"
+        >
+          <span class="cursor-pointer">
+            {{ task.title || t('task_untitled') }}
+          </span>
+          <HoverHint :text="t('task_remove_task_action')">
+            <UButton
+              icon="i-lucide-trash-2"
+              color="red"
+              variant="ghost"
+              size="xs"
+              class="shrink-0"
+              @click.stop="deleteTask(task.id)"
+            />
+          </HoverHint>
+        </UBadge>
+        <UBadge
+          as="button"
+          color="neutral"
+          variant="outline"
+          class="flex cursor-pointer items-center gap-1.5 border-dashed px-3 py-1 transition hover:bg-gray-50 dark:hover:bg-gray-800"
+          @click="showImportModal = true"
+        >
+          <UIcon name="i-lucide-file-json" class="h-3.5 w-3.5" />
+          {{ t('task_add_from_json') }}
+        </UBadge>
+      </div>
     </div>
 
     <TaskStudentDetail
