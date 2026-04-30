@@ -17,6 +17,18 @@
 
     <!-- Task list view -->
     <div v-else class="flex flex-col p-4 gap-2">
+      <button
+        v-if="globalSettings.teacherMode"
+        type="button"
+        class="flex w-full items-center gap-3 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-3 text-left text-gray-600 transition-colors hover:border-gray-400 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+        @click="createTaskAndOpenDesigner"
+      >
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white text-gray-500 shadow-sm dark:bg-gray-900 dark:text-gray-400">
+          <UIcon name="i-lucide-plus" class="h-4 w-4" />
+        </span>
+        <span class="min-w-0 font-medium text-sm">{{ t('task_create_task') }}</span>
+      </button>
+
       <div v-if="!tasks.length" class="flex flex-col items-center py-8 text-center gap-2">
         <UIcon name="i-lucide-clipboard-list" class="w-10 h-10 text-gray-300 dark:text-gray-600" />
         <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('task_list_empty') }}</p>
@@ -102,7 +114,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useSystemsStore } from '~/stores/systemsStore'
-import type { Task } from '~/model/Task/Task'
+import { Task } from '~/model/Task/Task'
+import type { GUID } from '~/model/GUID'
 import { isTaskDone, isTaskLevelLocked } from '~/utils/taskLevels'
 import { systemPageRouteFromPath, systemVisiblePages, taskAllowsPage } from '~/utils/taskPageVisibility'
 
@@ -157,6 +170,26 @@ async function openTask(task: Task) {
   globalSettings.selectedTaskId = task.id
   selectedTask.value = task
   await pushFirstAvailablePage(task)
+}
+
+async function createTaskAndOpenDesigner() {
+  const system = systemsStore.selectedSystem
+  const systemId = systemsStore.selectedSystemId
+  if (!system || !systemId) {
+    return
+  }
+
+  const task = new Task(crypto.randomUUID() as GUID, 'New Task', '')
+  system.tasks.push(task)
+  globalSettings.selectedTaskId = task.id
+  await systemsStore.updateSystem(system)
+  await navigateTo({
+    path: `/systems/${systemId}/designer`,
+    query: {
+      backTo: route.fullPath,
+      taskId: task.id,
+    },
+  })
 }
 
 function closeTask() {
