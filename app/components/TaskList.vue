@@ -42,6 +42,15 @@
           </span>
           <div class="flex-1 border-t border-gray-300 dark:border-gray-700"></div>
         </div>
+        <UAlert
+          v-if="isFirstTaskOfLevel(index, task) && levelHasVisiblePagesConflict(task.round)"
+          color="red"
+          variant="subtle"
+          icon="i-lucide-alert-triangle"
+          :title="t('task_level_visible_pages_mismatch_title')"
+          :description="t('task_level_visible_pages_mismatch_description')"
+          class="mb-1"
+        />
 
         <ModernHoverPopover
           v-if="isTaskLocked(task)"
@@ -79,11 +88,15 @@
           </button>
         </ModernHoverPopover>
 
-        <button
+        <div
           v-else
+          role="button"
+          tabindex="0"
           class="flex flex-col gap-1.5 rounded-lg border p-3 text-left transition-colors cursor-pointer w-full"
-          :class="globalSettings.teacherMode && globalSettings.selectedTaskId === task.id ? 'border-red-500 ring-2 ring-red-500 bg-red-50 dark:border-red-500 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'"
+          :class="globalSettings.teacherMode && globalSettings.selectedTaskId === task.id ? 'border-sky-300 bg-sky-50/80 ring-2 ring-sky-200 shadow-sm shadow-sky-100 dark:border-cyan-700 dark:bg-cyan-950/35 dark:ring-cyan-800/70 dark:shadow-none' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'"
           @click="openTask(task)"
+          @keydown.enter="openTask(task)"
+          @keydown.space.prevent="openTask(task)"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="flex min-w-0 flex-col gap-1">
@@ -104,8 +117,24 @@
             >
               <UIcon v-if="isTaskDone(task)" name="i-lucide-check" class="h-3 w-3 text-white" />
             </span>
+            <ModernHoverPopover
+              v-if="globalSettings.teacherMode"
+              :title="t('task_remove_task_action')"
+              :description="t('task_remove_task_description')"
+              icon="i-lucide-trash-2"
+              class="mt-0.5 shrink-0"
+            >
+              <UButton
+                icon="i-lucide-trash-2"
+                color="red"
+                variant="ghost"
+                size="xs"
+                :aria-label="t('task_remove_task_action')"
+                @click.stop="deleteTask(task.id)"
+              />
+            </ModernHoverPopover>
           </div>
-        </button>
+        </div>
       </template>
     </div>
   </div>
@@ -116,7 +145,7 @@ import { computed, ref } from 'vue'
 import { useSystemsStore } from '~/stores/systemsStore'
 import { Task } from '~/model/Task/Task'
 import type { GUID } from '~/model/GUID'
-import { isTaskDone, isTaskLevelLocked } from '~/utils/taskLevels'
+import { inconsistentVisiblePageLevels, isTaskDone, isTaskLevelLocked } from '~/utils/taskLevels'
 import { systemPageRouteFromPath, systemVisiblePages, taskAllowsPage } from '~/utils/taskPageVisibility'
 
 const { t } = useI18n()
@@ -144,9 +173,29 @@ const currentSystemPage = computed(() =>
 )
 
 const tasks = computed(() =>
-  (systemsStore.selectedSystem?.tasks ?? []).filter(task => isTaskVisibleOnCurrentPage(task))
+  (systemsStore.selectedSystem?.tasks ?? [])
+    .map((task, index) => ({ task, index }))
+    .filter(({ task }) => isTaskVisibleOnCurrentPage(task))
+    .sort((a, b) => {
+      const levelDiff = normalizeTaskRound(a.task.round) - normalizeTaskRound(b.task.round)
+      return levelDiff || a.index - b.index
+    })
+    .map(({ task }) => task)
 )
 const showTaskCompletion = computed(() => !globalSettings.teacherMode)
+const levelsWithVisiblePagesConflict = computed(() => {
+  const system = systemsStore.selectedSystem
+  if (!system) {
+    return new Set<number>()
+  }
+
+  return new Set(inconsistentVisiblePageLevels(system.tasks, systemVisiblePages(system)))
+})
+
+function normalizeTaskRound(round: unknown): number {
+  const parsed = Number(round)
+  return Number.isFinite(parsed) ? parsed : 1
+}
 
 function isTaskVisibleOnCurrentPage(task: Task): boolean {
   if (!currentSystemPage.value) {
@@ -154,6 +203,14 @@ function isTaskVisibleOnCurrentPage(task: Task): boolean {
   }
 
   return taskAllowsPage(task, currentSystemPageRoute.value)
+}
+
+function isFirstTaskOfLevel(index: number, task: Task): boolean {
+  return index === 0 || normalizeTaskRound(task.round) !== normalizeTaskRound(tasks.value[index - 1]?.round)
+}
+
+function levelHasVisiblePagesConflict(round: unknown): boolean {
+  return globalSettings.teacherMode && levelsWithVisiblePagesConflict.value.has(normalizeTaskRound(round))
 }
 
 async function openTask(task: Task) {
@@ -190,6 +247,26 @@ async function createTaskAndOpenDesigner() {
       taskId: task.id,
     },
   })
+}
+
+async function deleteTask(taskId: GUID) {
+  const system = systemsStore.selectedSystem
+  if (!system?.tasks) {
+    return
+  }
+
+  system.tasks = system.tasks.filter(task => task.id !== taskId)
+
+  if (globalSettings.selectedTaskId === taskId) {
+    globalSettings.selectedTaskId = null
+  }
+
+  if (selectedTask.value?.id === taskId) {
+    selectedTask.value = null
+  }
+
+  system.defaultTasks = system.tasks.map(task => Task.fromJSON(JSON.parse(JSON.stringify(task))))
+  await systemsStore.updateSystem(system)
 }
 
 function closeTask() {

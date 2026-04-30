@@ -2,7 +2,7 @@
     <div class="w-full sticky top-0 z-[11000] bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-[100vw] px-4 mx-auto">
             <!-- Main navbar container -->
-            <div class="flex flex-wrap items-center justify-between gap-4 py-2">
+            <div class="flex flex-wrap items-center gap-4 py-2">
 
                 <!-- Left Section: Navigation Menu -->
                 <nav
@@ -40,6 +40,37 @@
                     </template>
                 </nav>
 
+                <div class="ml-auto flex items-center">
+                    <NuxtLink
+                        v-if="isPageAvailable(DATABASE_PAGE_ROUTE)"
+                        :to="databaseTo"
+                        class="flex items-center gap-2 rounded-lg border border-gray-200/70 bg-gray-100/50 px-3 py-2 text-sm font-medium transition-all duration-200 dark:border-gray-700/60 dark:bg-gray-800/50"
+                        :class="[
+                            $route.path === databaseTo
+                                ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200/60 dark:bg-gray-700 dark:text-white dark:ring-gray-600/60'
+                                : 'text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700/60 dark:hover:text-white'
+                        ]"
+                    >
+                        <UIcon name="i-heroicons-table-cells" class="h-5 w-5" />
+                        <span>{{ t('database') }}</span>
+                    </NuxtLink>
+
+                    <ModernHoverPopover
+                        v-else
+                        :title="t('task_page_unavailable_title')"
+                        :description="t('task_page_unavailable_description')"
+                        icon="i-heroicons-table-cells"
+                    >
+                        <button
+                            type="button"
+                            class="flex cursor-not-allowed items-center gap-2 rounded-lg border border-gray-200/70 bg-gray-100/50 px-3 py-2 text-sm font-medium text-gray-400 opacity-70 dark:border-gray-700/60 dark:bg-gray-800/50 dark:text-gray-500"
+                            :aria-label="`${t('database')}: ${t('task_page_unavailable_description')}`"
+                        >
+                            <UIcon name="i-heroicons-table-cells" class="h-5 w-5" />
+                            <span>{{ t('database') }}</span>
+                        </button>
+                    </ModernHoverPopover>
+                </div>
             </div>
         </div>
     </div>
@@ -59,6 +90,7 @@ const globalSettingsStore = useGlobalSettingsStore()
 /* 3. Context hooks */
 const { t, locale } = useI18n()
 const route = useRoute()
+const databaseTo = computed(() => `/systems/${systemsStore.selectedSystemId}${DATABASE_PAGE_ROUTE}`)
 
 /* 8. Local state (ref, reactive) */
 const tasksPopoverOpen = ref(false)

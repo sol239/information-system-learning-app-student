@@ -79,8 +79,8 @@ function openDesignerFromSidebar() {
       <!-- Right column: toolbar + task list (desktop only) -->
       <div
         ref="rightPanelRef"
-        class="hidden lg:flex flex-shrink-0 flex-col overflow-hidden"
-        :style="{ width: rightPanelWidth === null ? '35%' : rightPanelWidth + 'px', backgroundColor: 'rgb(254, 242, 242)' }"
+        class="task-sidebar-shell hidden lg:flex flex-shrink-0 flex-col overflow-hidden"
+        :style="{ width: rightPanelWidth === null ? '35%' : rightPanelWidth + 'px' }"
       >
         <!-- Toolbar -->
         <div class="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex flex-wrap gap-1">
@@ -115,7 +115,7 @@ function openDesignerFromSidebar() {
       <!-- Mobile/tablet slideover (bottom) -->
       <USlideover v-model:open="mobileTasksOpen" side="bottom" class="lg:hidden">
         <template #content>
-          <div class="flex flex-col h-full overflow-hidden">
+          <div class="task-sidebar-shell flex flex-col h-full overflow-hidden">
             <!-- Toolbar -->
             <div class="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex flex-wrap gap-1 items-center justify-between">
               <SystemToolbar />
@@ -190,9 +190,21 @@ function openDesignerFromSidebar() {
   background: #6366f110;
 }
 
+.task-sidebar-shell {
+  background:
+    radial-gradient(circle at 88% 92%, rgba(186, 230, 253, 0.72), transparent 34%),
+    linear-gradient(135deg, #fffaf0 0%, #f2fbf6 32%, #eef7ff 64%, #f8fbff 100%);
+}
+
 @media (prefers-color-scheme: dark) {
   .divider {
     border-color: #374151;
+  }
+
+  .task-sidebar-shell {
+    background:
+      radial-gradient(circle at 88% 92%, rgba(14, 116, 144, 0.28), transparent 34%),
+      linear-gradient(135deg, #1f2433 0%, #122d2a 32%, #102238 64%, #0f172a 100%);
   }
 }
 

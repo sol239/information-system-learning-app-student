@@ -40,6 +40,7 @@
         >
           {{ t('task_new_task') }}
         </UButton>
+
       </div>
     </div>
 

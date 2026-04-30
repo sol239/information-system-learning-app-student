@@ -70,29 +70,6 @@
             </template>
         </UPopover>
 
-        <UButton v-if="isDatabaseAvailable" icon="i-heroicons-table-cells" variant="outline" color="neutral"
-            @click="navigateTo(`/systems/${systemsStore.selectedSystemId}/database`)" size="md">
-            <span class="mobile-hidden">{{ t('database') }}</span>
-        </UButton>
-        <ModernHoverPopover
-            v-else
-            :title="t('task_page_unavailable_title')"
-            :description="t('task_page_unavailable_description')"
-            icon="i-lucide-lock"
-        >
-            <UButton
-                icon="i-lucide-lock"
-                variant="outline"
-                color="neutral"
-                size="md"
-                class="cursor-not-allowed opacity-70"
-                :aria-label="`${t('database')}: ${t('task_page_unavailable_description')}`"
-                @click.prevent
-            >
-                <span class="mobile-hidden">{{ t('database') }}</span>
-            </UButton>
-        </ModernHoverPopover>
-
         <div v-if="!globalSettings.teacherMode" class="flex items-center gap-2">
             <!-- Score badge moved to task sidebar header -->
             <!-- <UBadge color="red" variant="subtle" size="lg" class="font-bold px-3">
@@ -168,7 +145,6 @@ import SettingsDrawer from '~/components/SettingsDrawer.vue'
 import StudentComponent from '~/components/StudentComponent.vue'
 import { IndexedDbHandler } from '~/utils/IndexedDbHandler'
 import { OperationResultType } from '~/utils/OperationResultType'
-import { DATABASE_PAGE_ROUTE, systemAllowsPageForTaskContext } from '~/utils/taskPageVisibility'
 import { Task } from '~/model/Task/Task'
 import { Component } from '~/model/Component'
 
@@ -185,21 +161,6 @@ const resetPopoverOpen = ref(false)
 const exitPopoverOpen = ref(false)
 const studentDrawerOpen = ref(false)
 const taskPopoverOpen = ref(false)
-
-const selectedTask = computed(() => {
-    const selectedTaskId = globalSettings.selectedTaskId
-    if (!selectedTaskId) {
-        return null
-    }
-
-    return systemsStore.selectedSystem?.tasks?.find(task => task.id === selectedTaskId) ?? null
-})
-
-const isDatabaseAvailable = computed(() => {
-    const system = systemsStore.selectedSystem
-    return system ? systemAllowsPageForTaskContext(system, selectedTask.value, DATABASE_PAGE_ROUTE) : true
-})
-
 
 async function printTableData() {
 

@@ -453,6 +453,7 @@
     "task_new_task": "New Task",
     "task_create_task": "Create Task",
     "task_remove_task_action": "Remove task",
+    "task_remove_task_description": "Deletes this task from the system.",
     "task_untitled": "Untitled Task",
     "task_import_title": "Add Task from JSON",
     "task_import_description": "Paste a JSON task serialization below or upload a file.",
