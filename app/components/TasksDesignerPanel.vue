@@ -100,6 +100,7 @@
     <TaskStudentDetail
       v-if="previewStudentView"
       :task="selectedTask"
+      readonly
     />
     <TaskDetail
       v-else

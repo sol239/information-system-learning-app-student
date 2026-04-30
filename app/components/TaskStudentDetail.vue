@@ -58,14 +58,16 @@
             :key="`act-opt-${index}`"
             class="flex items-center gap-3 rounded-lg border px-3 py-2 select-none transition-colors"
             :class="[
-              props.task.activity?.isCompleted
+              isReadonly || props.task.activity?.isCompleted
                 ? 'cursor-not-allowed opacity-60'
                 : 'cursor-pointer',
               selectedActivityOptionIndices.includes(index)
                 ? 'border-sky-400 bg-sky-50 dark:border-sky-600 dark:bg-sky-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                : isReadonly
+                  ? 'border-gray-200 dark:border-gray-700'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
-            @click="!props.task.activity?.isCompleted && toggleActivityOption(index)"
+            @click="!isReadonly && !props.task.activity?.isCompleted && toggleActivityOption(index)"
           >
             <div
               class="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors"
@@ -105,7 +107,7 @@
             color="primary"
             variant="solid"
             icon="i-lucide-check-circle"
-            :disabled="props.task.activity?.isCompleted === true"
+            :disabled="isReadonly || props.task.activity?.isCompleted === true"
             @click="evaluateActivity"
           >
             {{ t('evaluate') }}
@@ -174,14 +176,16 @@
             :key="`fin-opt-${index}`"
             class="flex items-center gap-3 rounded-lg border px-3 py-2 select-none transition-colors"
             :class="[
-              props.task.finish?.isComplete || isFinishLocked
+              isReadonly || props.task.finish?.isComplete || isFinishLocked
                 ? 'cursor-not-allowed opacity-60'
                 : 'cursor-pointer',
               selectedFinishOptionIndices.includes(index)
                 ? 'border-sky-400 bg-sky-50 dark:border-sky-600 dark:bg-sky-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                : isReadonly
+                  ? 'border-gray-200 dark:border-gray-700'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
-            @click="!props.task.finish?.isComplete && !isFinishLocked && toggleFinishOption(index)"
+            @click="!isReadonly && !props.task.finish?.isComplete && !isFinishLocked && toggleFinishOption(index)"
           >
             <div
               class="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors"
@@ -199,7 +203,7 @@
           v-if="props.task.finishType === FinishType.TYPE_CORRECT"
           v-model="typeCorrectAnswer"
           :placeholder="t('task_your_answer')"
-          :disabled="props.task.finish?.isComplete || isFinishLocked"
+          :disabled="isReadonly || props.task.finish?.isComplete || isFinishLocked"
           class="w-full"
         />
 
@@ -208,7 +212,7 @@
             color="primary"
             variant="solid"
             icon="i-lucide-check-circle"
-            :disabled="props.task.finish?.isComplete === true || isFinishLocked"
+            :disabled="isReadonly || props.task.finish?.isComplete === true || isFinishLocked"
             @click="evaluateFinish"
           >
             {{ t('evaluate') }}
@@ -264,7 +268,9 @@ const { systemInputVariables } = useSystemInputVariables()
 
 const props = defineProps<{
   task: Task | null
+  readonly?: boolean
 }>()
+const isReadonly = computed(() => props.readonly === true)
 
 const selectedActivityOptionIndices = ref<number[]>([])
 const selectedFinishOptionIndices = ref<number[]>([])
@@ -284,18 +290,24 @@ watch(
 )
 
 function toggleActivityOption(index: number) {
+  if (isReadonly.value) return
+
   const idx = selectedActivityOptionIndices.value.indexOf(index)
   if (idx === -1) selectedActivityOptionIndices.value.push(index)
   else selectedActivityOptionIndices.value.splice(idx, 1)
 }
 
 function toggleFinishOption(index: number) {
+  if (isReadonly.value) return
+
   const idx = selectedFinishOptionIndices.value.indexOf(index)
   if (idx === -1) selectedFinishOptionIndices.value.push(index)
   else selectedFinishOptionIndices.value.splice(idx, 1)
 }
 
 function evaluateActivity() {
+  if (isReadonly.value) return
+
   const task = props.task
   if (!task?.activity) return
 
@@ -356,6 +368,8 @@ function evaluateActivity() {
 }
 
 async function evaluateFinish() {
+  if (isReadonly.value) return
+
   const task = props.task
   if (!task?.finish) return
 
