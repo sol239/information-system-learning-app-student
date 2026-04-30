@@ -219,6 +219,11 @@ async function openTask(task: Task) {
   }
 
   if (globalSettings.teacherMode) {
+    if (globalSettings.selectedTaskId === task.id) {
+      globalSettings.selectedTaskId = null
+      return
+    }
+
     globalSettings.selectedTaskId = task.id
     await pushFirstAvailablePage(task)
     return

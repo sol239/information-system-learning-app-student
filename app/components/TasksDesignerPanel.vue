@@ -91,7 +91,7 @@
           color="neutral"
           :variant="selectedTask?.id === task.id ? 'solid' : 'subtle'"
           class="flex items-center gap-2 px-3 py-1 transition"
-          @click="selectedTask = task"
+          @click="toggleSelectedTask(task)"
         >
           <span class="cursor-pointer">
             {{ task.title || t('task_untitled') }}
@@ -351,6 +351,10 @@ const createTask = async () => {
   selectedTask.value = newTask
 
   await persistSystemNow(system)
+}
+
+function toggleSelectedTask(task: Task) {
+  selectedTask.value = selectedTask.value?.id === task.id ? null : task
 }
 
 const handleTaskUpdate = (updatedTask: Task) => {

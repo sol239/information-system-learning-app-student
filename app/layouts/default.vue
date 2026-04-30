@@ -83,7 +83,7 @@ function openDesignerFromSidebar() {
         :style="{ width: rightPanelWidth === null ? '35%' : rightPanelWidth + 'px' }"
       >
         <!-- Toolbar -->
-        <div class="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex flex-wrap gap-1">
+        <div class="flex-shrink-0 overflow-x-auto border-b border-gray-200 px-3 py-2 dark:border-gray-800">
           <SystemToolbar />
         </div>
 
@@ -117,9 +117,9 @@ function openDesignerFromSidebar() {
         <template #content>
           <div class="task-sidebar-shell flex flex-col h-full overflow-hidden">
             <!-- Toolbar -->
-            <div class="flex-shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex flex-wrap gap-1 items-center justify-between">
-              <SystemToolbar />
-              <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" @click="mobileTasksOpen = false" />
+            <div class="flex flex-shrink-0 flex-nowrap items-center gap-2 overflow-x-auto border-b border-gray-200 px-3 py-2 dark:border-gray-800">
+              <SystemToolbar class="min-w-0 flex-1" />
+              <UButton icon="i-lucide-x" color="neutral" variant="ghost" size="sm" class="shrink-0" @click="mobileTasksOpen = false" />
             </div>
 
             <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">

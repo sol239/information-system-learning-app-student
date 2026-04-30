@@ -50,11 +50,7 @@ export function systemAllowsPageForTaskContext(
     return true
   }
 
-  if (task) {
-    return taskAllowsPage(task, pageRoute)
-  }
-
-  return currentLevelAllowsPage(system, pageRoute)
+  return task ? taskAllowsPage(task, pageRoute) : true
 }
 
 export function availableVisiblePages(
