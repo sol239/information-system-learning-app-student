@@ -5,20 +5,54 @@
         </UButton>
 
         <template #body>
-            <UFileUpload v-model="selectedFile" accept=".zip" :label="t('upload_system_zip')" icon="i-lucide-upload"
-                class="w-full min-h-48" />
-            <div v-if="systemPreview" class="mt-4 space-y-1">
-                <p class="font-semibold text-lg">{{ systemPreview.name }}</p>
-                <p class="text-sm text-muted">{{ systemPreview.description }}</p>
+            <div class="space-y-4">
+                <!-- ZIP Upload Section -->
+                <div>
+                    <p class="mb-2 font-medium">{{ t('upload_from_zip') ?? 'Upload from ZIP' }}</p>
+                    <UFileUpload v-model="selectedFile" accept=".zip" :label="t('upload_system_zip')" icon="i-lucide-upload"
+                        class="w-full" />
+                    <div v-if="systemPreview" class="mt-4 space-y-1">
+                        <p class="font-semibold text-lg">{{ systemPreview.name }}</p>
+                        <p class="text-sm text-muted">{{ systemPreview.description }}</p>
+                    </div>
+                </div>
+
+                <UDivider :label="t('or') ?? 'OR'" />
+
+                <!-- Preloaded Suggestions Section -->
+                <div>
+                    <p class="mb-2 font-medium">{{ t('choose_from_suggestions') ?? 'Choose from suggestions' }}</p>
+                    <div v-if="loadingPreloaded" class="flex justify-center p-4">
+                        <UIcon name="i-lucide-loader-2" class="w-6 h-6 animate-spin text-gray-500" />
+                    </div>
+                    <div v-else-if="preloadedSystems.length === 0" class="text-sm text-gray-500">
+                        {{ t('no_suggestions_available') ?? 'No suggestions available.' }}
+                    </div>
+                    <div v-else class="space-y-2 max-h-64 overflow-y-auto pr-2">
+                        <div 
+                            v-for="sys in preloadedSystems" 
+                            :key="sys.id"
+                            role="button"
+                            tabindex="0"
+                            class="p-3 border rounded-lg cursor-pointer transition-colors"
+                            :class="selectedPreloadedSystem?.id === sys.id ? 'border-teacher-500 bg-teacher-50/50' : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'"
+                            @click="selectPreloadedSystem(sys)"
+                        >
+                            <p class="font-semibold text-sm">{{ sys.name }}</p>
+                            <p class="text-xs text-gray-500 line-clamp-1">{{ sys.description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <UAlert v-if="systemAlreadyExists" color="red" icon="i-lucide-alert-triangle"
+                    :title="t('system_already_exists')" class="mt-3" />
             </div>
-            <UAlert v-if="systemAlreadyExists" color="red" icon="i-lucide-alert-triangle"
-                :title="t('system_already_exists')" class="mt-3" />
         </template>
 
         <template #footer="{ close }">
-            <UButton color="teacher" icon="i-lucide-upload" :disabled="!selectedFile || systemAlreadyExists"
+            <UButton color="teacher" icon="i-lucide-chevron-right" :disabled="(!selectedFile && !selectedPreloadedSystem) || systemAlreadyExists"
                 :loading="loading" @click="onUpload(close)">
-                {{ t('upload_system') }}
+                {{ t('add_system') ?? 'Add System' }}
             </UButton>
             <UButton color="neutral" variant="outline" @click="close">{{ t('cancel') }}</UButton>
         </template>
@@ -27,15 +61,22 @@
 
 <script setup lang="ts">
 /* 1. Imports */
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { SystemZipLoader } from '~/utils/SystemZipLoader'
 import { InformationSystem } from '~/model/InformationSystem'
 import { useSystemsStore } from '~/stores/systemsStore'
 import { getPageLoadSource } from '~/utils/pageLoadSource'
+import { usePreloadedSystems } from '~/composables/usePreloadedSystems'
 
 /* 3. Context hooks */
 const { t } = useI18n()
 const systemsStore = useSystemsStore()
+const {
+  systems: preloadedSystemsResult,
+  loading: loadingPreloaded,
+  errors: preloadedErrors,
+  load: loadPreloadedSystemsList,
+} = usePreloadedSystems()
 
 /* 8. Local state */
 const selectedFile = ref<File | null>(null)
@@ -43,9 +84,21 @@ const loader = ref<SystemZipLoader | null>(null)
 const loading = ref(false)
 const systemPreview = ref<{ name: string; description: string } | null>(null)
 const systemAlreadyExists = ref(false)
+const preloadedSystems = ref<InformationSystem[]>([])
+const selectedPreloadedSystem = ref<InformationSystem | null>(null)
+
+/* Lifecycle */
+onMounted(async () => {
+    await loadPreloadedSystemsList()
+    preloadedSystems.value = preloadedSystemsResult.value
+})
 
 /* 10. Watchers */
 watch(selectedFile, async (file) => {
+    if (file) {
+        selectedPreloadedSystem.value = null
+    }
+    
     if (!file) {
         loader.value = null
         systemPreview.value = null
@@ -74,14 +127,55 @@ watch(selectedFile, async (file) => {
 })
 
 /* 9. Methods */
+function selectPreloadedSystem(sys: InformationSystem) {
+    selectedPreloadedSystem.value = sys
+    selectedFile.value = null
+    loader.value = null
+    systemPreview.value = null
+    systemAlreadyExists.value = false
+}
+
+function resolveCollision(sys: InformationSystem) {
+    let newId = sys.id
+    let newName = sys.name
+    let counter = 1
+    
+    while(systemsStore.systems.some(s => s.id === newId || s.name === newName)) {
+        newId = `${sys.id}_${counter}`
+        newName = `${sys.name} (${counter})`
+        counter++
+    }
+    
+    return { newId, newName }
+}
+
 /**
  * Handles the upload of the selected ZIP file.
  * @param close The function to close the modal after upload is complete.
  */
 async function onUpload(close: () => void) {
-    if (!selectedFile.value || !loader.value) return
     loading.value = true
     try {
+        if (selectedPreloadedSystem.value) {
+            const sysToClone = selectedPreloadedSystem.value
+
+            // Clone JSON using serialization to avoid reference issues
+            const sysJson = JSON.parse(JSON.stringify(sysToClone))
+            const newSys = InformationSystem.fromJSON(sysJson)
+            
+            const resolved = resolveCollision(newSys)
+            newSys.id = resolved.newId
+            newSys.name = resolved.newName
+
+            await systemsStore.addSystem(newSys)
+            
+            selectedPreloadedSystem.value = null
+            close()
+            return
+        }
+        
+        if (!selectedFile.value || !loader.value) return
+        
         const filesContents: Record<string, string> = {
             'config.json': loader.value.jsonConfigFileContent ?? '',
             'system_components.json': loader.value.jsonComponentsContent ?? '',

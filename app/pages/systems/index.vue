@@ -24,6 +24,7 @@
                 {{ t("manage_your_systems_description") }}
               </p>
 
+              <!--
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-800 lg:min-w-[420px] lg:max-w-[620px] lg:flex-1">
                   <div class="flex flex-col">
@@ -44,6 +45,10 @@
                 <div class="flex flex-wrap gap-4 lg:justify-end">
                   <UploadSystemZipModal />
                 </div>
+              </div>
+              -->
+              <div class="flex flex-wrap gap-4 lg:justify-end">
+                <UploadSystemZipModal />
               </div>
             </div>
           </div>
@@ -112,17 +117,6 @@
                 @click.stop="navigateToSystem(system.id)"
               >
                 {{ t("enter_system") }}
-              </UButton>
-
-              <UButton
-                v-if="globalSettingsStore.teacherMode"
-                icon="i-lucide-list-todo"
-                color="teacher"
-                variant="soft"
-                class="w-full"
-                @click.stop="navigateToDesigner(system.id)"
-              >
-                {{ t("go_to_designer") }}
               </UButton>
             </div>
           </div>

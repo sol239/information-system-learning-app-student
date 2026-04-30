@@ -126,7 +126,7 @@ const selectedTask = computed(() => {
 
     return systemsStore.selectedSystem?.tasks?.find(task => task.id === taskId) ?? null
 })
-const canExecuteQuery = computed(() => Boolean(selectedTask.value?.canExecuteQuery))
+const canExecuteQuery = computed(() => !selectedTask.value || Boolean(selectedTask.value.canExecuteQuery))
 
 watch(query, async (newQuery) => {
     if (!newQuery || newQuery.trim() === '') {
