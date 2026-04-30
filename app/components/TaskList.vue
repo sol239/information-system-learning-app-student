@@ -147,7 +147,16 @@ const { t } = useI18n()
 const systemsStore = useSystemsStore()
 const globalSettings = useGlobalSettingsStore()
 const route = useRoute()
-const selectedTask = ref<Task | null>(null)
+
+const selectedTask = computed(() => {
+  if (globalSettings.teacherMode) return null
+  
+  const taskId = globalSettings.selectedTaskId
+  if (!taskId) return null
+  
+  return systemsStore.selectedSystem?.tasks?.find(task => task.id === taskId) ?? null
+})
+
 const currentRound = computed(() => systemsStore.selectedSystem?.currentRound ?? 1)
 const { pushFirstAvailablePage } = useAvailableSystemPages()
 
@@ -202,7 +211,6 @@ async function openTask(task: Task) {
   }
 
   globalSettings.selectedTaskId = task.id
-  selectedTask.value = task
   await pushFirstAvailablePage(task)
 }
 
@@ -238,17 +246,13 @@ async function deleteTask(taskId: GUID) {
     globalSettings.selectedTaskId = null
   }
 
-  if (selectedTask.value?.id === taskId) {
-    selectedTask.value = null
-  }
-
   system.defaultTasks = system.tasks.map(task => Task.fromJSON(JSON.parse(JSON.stringify(task))))
   await systemsStore.updateSystem(system)
 }
 
 function closeTask() {
-  selectedTask.value = null
   globalSettings.selectedTaskId = null
+  pushFirstAvailablePage(null)
 }
 
 function isTaskLocked(task: Task): boolean {
