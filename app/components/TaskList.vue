@@ -68,9 +68,6 @@
             <div class="flex items-start justify-between gap-2">
               <div class="flex min-w-0 flex-col gap-1">
                 <span class="font-medium text-sm text-gray-900 dark:text-white leading-snug">{{ task.title }}</span>
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                  {{ t('task_level') }} {{ task.round }}
-                </span>
               </div>
               <span
                 v-if="showTaskCompletion"
@@ -101,9 +98,6 @@
           <div class="flex items-start justify-between gap-2">
             <div class="flex min-w-0 flex-col gap-1">
               <span class="font-medium text-sm text-gray-900 dark:text-white leading-snug">{{ task.title }}</span>
-              <span v-if="!globalSettings.teacherMode" class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                {{ t('task_level') }} {{ task.round }}
-              </span>
             </div>
             <span
               v-if="showTaskCompletion"
@@ -157,25 +151,10 @@ const selectedTask = ref<Task | null>(null)
 const currentRound = computed(() => systemsStore.selectedSystem?.currentRound ?? 1)
 const { pushFirstAvailablePage } = useAvailableSystemPages()
 
-const currentSystemPageRoute = computed(() => {
-  const systemId = systemsStore.selectedSystemId
-
-  if (!systemId) {
-    return route.path
-  }
-
-  return systemPageRouteFromPath(route.path, systemId)
-})
-const currentSystemPage = computed(() =>
-  systemsStore.selectedSystem
-    ? systemVisiblePages(systemsStore.selectedSystem).find(page => page.route === currentSystemPageRoute.value) ?? null
-    : null
-)
 
 const tasks = computed(() =>
   (systemsStore.selectedSystem?.tasks ?? [])
     .map((task, index) => ({ task, index }))
-    .filter(({ task }) => isTaskVisibleOnCurrentPage(task))
     .sort((a, b) => {
       const levelDiff = normalizeTaskRound(a.task.round) - normalizeTaskRound(b.task.round)
       return levelDiff || a.index - b.index
@@ -197,17 +176,6 @@ function normalizeTaskRound(round: unknown): number {
   return Number.isFinite(parsed) ? parsed : 1
 }
 
-function isTaskVisibleOnCurrentPage(task: Task): boolean {
-  if (globalSettings.teacherMode) {
-    return true
-  }
-
-  if (!currentSystemPage.value) {
-    return true
-  }
-
-  return taskAllowsPage(task, currentSystemPageRoute.value)
-}
 
 function isFirstTaskOfLevel(index: number, task: Task): boolean {
   return index === 0 || normalizeTaskRound(task.round) !== normalizeTaskRound(tasks.value[index - 1]?.round)

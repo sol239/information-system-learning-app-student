@@ -40,12 +40,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   title?: string
   description?: string
   icon?: string
+  disabled?: boolean
 }>(), {
-  icon: 'i-heroicons-information-circle'
+  icon: 'i-heroicons-information-circle',
+  disabled: false
 })
 
 const triggerRef = ref<HTMLElement | null>(null)
@@ -68,6 +70,7 @@ const panelStyle = computed(() => ({
 }))
 
 async function showPopover() {
+  if (props.disabled) return
   isOpen.value = true
   await nextTick()
   updatePosition()

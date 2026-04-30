@@ -18,7 +18,7 @@
     "go_back_to_system": "Go back to system",
     "download_system": "Download system",
     "download": "Download",
-    "download_system_description": "Downloads the complete system serialization as a ZIP that can be placed in public/systems.",
+    "download_system_description": "Downloads the entire system, including the current state of the database, all components and tasks",
     "download_system_missing": "The system is not loaded.",
     "task_designer": "Task Designer",
     "task_designer_description": "Design and build tasks for your information systems.",
@@ -340,7 +340,7 @@
     "task_activity_select_options": "Select Options",
     "task_activity_select_options_info": "The student must select the correct answer from the options",
     "task_activity_type_info": "Activity type descriptions",
-    "task_substitute_notice": "After activity completion, the error components will be automatically replaced with the originals.",
+    "task_substitute_notice": "After completing the activity, faulty components will be automatically replaced with the correct ones.",
     "task_finish": "Finish",
     "task_finish_immediate": "Finish",
     "task_finish_after_db": "Finish after database update",
@@ -377,7 +377,8 @@
     "task_level_tasks": "Tasks in this level",
     "task_level_no_tasks": "There are no tasks in this level.",
     "task_points_reward": "Points Reward",
-    "task_points_reward_info": "How many points the student receives for completing the task",    "task_export_component_title": "Export Component",
+    "task_points_reward_info": "How many points the student receives for completing the task",
+    "task_export_component_title": "Export Component",
     "task_export_component_desc": "Click to copy the JSON definition of this component to the clipboard for backup or transfer.",
     "task_edit_component_title": "Edit Component Body",
     "task_edit_component_desc": "Opens the editor to modify the code (HTML, SQL, JS) of the selected component.",
@@ -511,5 +512,7 @@
     "system_name": "System Name",
     "system_description": "Description",
     "system_already_exists": "A system with this ID already exists",
-    "or": "OR"
+    "or": "OR",
+    "task_activity_not_completed_title": "Activity Not Completed",
+    "task_activity_not_completed_description": "You must successfully complete the task's activity first before you can evaluate and finish the task."
 }

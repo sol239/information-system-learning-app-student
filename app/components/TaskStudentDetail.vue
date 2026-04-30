@@ -136,10 +136,17 @@
       </div>
 
       <!-- Finish section -->
-      <div
-        class="rounded-xl border border-gray-200 p-4 dark:border-gray-800 space-y-3 transition-opacity"
-        :class="isFinishLocked ? 'cursor-not-allowed opacity-50' : ''"
+      <ModernHoverPopover
+        :disabled="globalSettings.teacherMode || !isFinishLocked || !!props.task.finish?.isComplete || !!isReadonly"
+        :title="t('task_activity_not_completed_title')"
+        :description="t('task_activity_not_completed_description')"
+        icon="i-lucide-lock"
+        class="block w-full"
       >
+        <div
+          class="rounded-xl border border-gray-200 p-4 dark:border-gray-800 space-y-3 transition-opacity w-full"
+          :class="isFinishLocked ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''"
+        >
         <div class="flex items-center justify-between gap-2">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('task_finish') }}</p>
@@ -239,6 +246,7 @@
           </UBadge>
         </div>
       </div>
+      </ModernHoverPopover>
 
       <!-- Feedback -->
       <div v-if="props.task.completed && props.task.feedback" class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">

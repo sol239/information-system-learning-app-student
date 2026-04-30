@@ -2,6 +2,7 @@
   <div class="max-w-5xl mx-auto py-12 px-4 sm:px-6">
     <div class="grid grid-cols-1 gap-8">
       <!-- Header Section -->
+      <EnvDebugButton />
       <UCard class="border-t-4 border-teacher-500 shadow-lg dark:bg-gray-900/50">
         <div class="flex flex-col md:flex-row items-start gap-6">
           <div class="flex-1">

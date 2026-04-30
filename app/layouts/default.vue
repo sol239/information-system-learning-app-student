@@ -56,7 +56,6 @@ function openDesignerFromSidebar() {
 
 <template>
   <div class="default-layout flex flex-col overflow-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-
     <!-- System route: 2-column layout (desktop) / single column (mobile) -->
     <div v-if="showSystemChrome" class="default-main flex flex-col lg:flex-row overflow-hidden" :class="{ 'select-none': isDragging }">
 

@@ -13,7 +13,7 @@
     "go_back_to_system": "Zpět do systému",
     "download_system": "Stáhnout systém",
     "download": "Stáhnout",
-    "download_system_description": "Stáhne kompletní serializaci systému jako ZIP použitelný po vložení do public/systems.",
+    "download_system_description": "Stáhne celý systém, včetně aktuálního stavu databáze, všech component a úkolů",
     "download_system_missing": "Systém není načtený.",
     "task_designer": "Návrhář úkolů",
     "task_designer_description": "Navrhujte a vytvářejte úkoly pro vaše informační systémy.",
@@ -345,7 +345,7 @@
     "task_activity_select_options": "Výběr možnosti",
     "task_activity_select_options_info": "Student musí vybrat správnou odpověď z možností",
     "task_activity_type_info": "Popis typů aktivit",
-    "task_substitute_notice": "Po dokončení aktivity budou chybové komponenty automaticky nahrazeny původními.",
+    "task_substitute_notice": "Po dokončení aktivity budou chybné komponenty nahrazeny automaticky správnými.",
     "task_finish": "Dokončení",
     "task_finish_immediate": "Dokončení",
     "task_finish_after_db": "Dokončení po aktualizaci databáze",
@@ -517,5 +517,7 @@
     "system_name": "Název systému",
     "system_description": "Popis",
     "system_already_exists": "Systém s tímto ID již existuje",
-    "or": "NEBO"
+    "or": "NEBO",
+    "task_activity_not_completed_title": "Aktivita není dokončena",
+    "task_activity_not_completed_description": "Nejprve musíte úspěšně dokončit aktivitu úkolu, abyste mohli úkol vyhodnotit a dokončit."
 }

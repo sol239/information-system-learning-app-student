@@ -46,11 +46,18 @@ export function systemAllowsPageForTaskContext(
   task: Task | null | undefined,
   pageRoute: string
 ): boolean {
-  if (useGlobalSettingsStore().bypassPageVisibility) {
+  const globalSettings = useGlobalSettingsStore()
+
+  if (globalSettings.bypassPageVisibility || globalSettings.teacherMode) {
     return true
   }
 
-  return task ? taskAllowsPage(task, pageRoute) : true
+  if (task) {
+    return taskAllowsPage(task, pageRoute)
+  }
+
+  // No task selected in student mode: restrict to pages allowed by the current level
+  return currentLevelAllowsPage(system, pageRoute)
 }
 
 export function availableVisiblePages(
@@ -66,7 +73,7 @@ export function firstTaskAllowedPage(system: InformationSystem, task: Task | nul
   return availableVisiblePages(system, task)[0] ?? null
 }
 
-function currentLevelAllowsPage(system: InformationSystem, pageRoute: string): boolean {
+export function currentLevelAllowsPage(system: InformationSystem, pageRoute: string): boolean {
   const tasks = system.tasks ?? []
 
   if (!tasks.length || tasks.every(isTaskDone)) {
