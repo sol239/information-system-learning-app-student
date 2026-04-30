@@ -79,7 +79,7 @@
                   >
                     {{ system.name }}
                   </h3>
-                  <p class="text-sm text-gray-500">{{ t("information_system") }}</p>
+                  <p class="text-sm text-gray-500">{{ system.id }} • {{ t("information_system") }}</p>
                 </div>
               </div>
               <div class="flex items-center gap-3">
@@ -87,6 +87,14 @@
                                     :icon="dbReadyMap[system.id] ? 'i-lucide-database' : 'i-lucide-database'">
                                     {{ dbReadyMap[system.id] ? t('db_ready') : t('db_not_ready') }}
                                 </UBadge> -->
+                <UButton
+                  v-if="globalSettingsStore.teacherMode"
+                  icon="i-lucide-pencil"
+                  color="blue"
+                  variant="ghost"
+                  size="md"
+                  @click.stop="openEditModal(system)"
+                />
                 <UButton
                   icon="i-lucide-trash-2"
                   color="red"
@@ -108,6 +116,7 @@
             </p>
 
             <!-- Actions -->
+            <!-- 
             <div class="pt-4 flex flex-col sm:flex-row gap-3">
               <UButton
                 icon="i-lucide-arrow-right"
@@ -119,10 +128,44 @@
                 {{ t("enter_system") }}
               </UButton>
             </div>
+            -->
           </div>
         </UCard>
       </div>
     </div>
+
+    <!-- Edit System Modal -->
+    <UModal v-model="isEditModalOpen" :title="t('edit_system')">
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold">{{ t('edit_system') }}</h3>
+            <UButton color="neutral" variant="ghost" icon="i-lucide-x" @click="isEditModalOpen = false" />
+          </div>
+        </template>
+
+        <div class="space-y-4">
+          <UFormGroup :label="t('system_id')" name="id">
+            <UInput v-model="editForm.id" />
+          </UFormGroup>
+          
+          <UFormGroup :label="t('system_name')" name="name">
+            <UInput v-model="editForm.name" />
+          </UFormGroup>
+          
+          <UFormGroup :label="t('system_description')" name="description">
+            <UTextarea v-model="editForm.description" :rows="4" />
+          </UFormGroup>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton color="neutral" variant="outline" @click="isEditModalOpen = false">{{ t('cancel') }}</UButton>
+            <UButton color="teacher" @click="saveSystemEdit">{{ t('save') }}</UButton>
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
@@ -157,6 +200,15 @@ const {
   errors: preloadErrors,
   load: loadPreloaded,
 } = usePreloadedSystems();
+
+/* Edit Modal State */
+const isEditModalOpen = ref(false);
+const editForm = reactive({
+  oldId: "",
+  id: "",
+  name: "",
+  description: "",
+});
 
 /* 5. Lifecycle */
 onMounted(async () => {
@@ -244,6 +296,38 @@ async function navigateToDesigner(id: string) {
 
 async function deleteSystem(id: string) {
   await systemsStore.deleteSystemById(id);
+}
+
+function openEditModal(system: InformationSystem) {
+  editForm.oldId = system.id;
+  editForm.id = system.id;
+  editForm.name = system.name;
+  editForm.description = system.description;
+  isEditModalOpen.value = true;
+}
+
+async function saveSystemEdit() {
+  const system = systemsStore.getSystemById(editForm.oldId);
+  if (!system) return;
+
+  // Clone to avoid direct mutation issues or we can simply update the store object
+  const sysJson = JSON.parse(JSON.stringify(system));
+  const newSys = InformationSystem.fromJSON(sysJson);
+
+  newSys.id = editForm.id;
+  newSys.name = editForm.name;
+  newSys.description = editForm.description;
+
+  if (editForm.oldId !== editForm.id) {
+    // If ID changed, we might need to delete old and add new or update id carefully
+    await systemsStore.deleteSystemById(editForm.oldId);
+    await systemsStore.addSystem(newSys);
+  } else {
+    // If ID didn't change, just update
+    await systemsStore.updateSystem(newSys);
+  }
+  
+  isEditModalOpen.value = false;
 }
 
 function completedTasksCount(system: InformationSystem): number {
