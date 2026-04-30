@@ -52,6 +52,7 @@
                 </span>
               </div>
               <span
+                v-if="showTaskCompletion"
                 role="checkbox"
                 :aria-checked="isTaskDone(task)"
                 :aria-label="t('task_completed')"
@@ -80,6 +81,7 @@
               </span>
             </div>
             <span
+              v-if="showTaskCompletion"
               role="checkbox"
               :aria-checked="isTaskDone(task)"
               :aria-label="t('task_completed')"
@@ -131,6 +133,7 @@ const currentSystemPage = computed(() =>
 const tasks = computed(() =>
   (systemsStore.selectedSystem?.tasks ?? []).filter(task => isTaskVisibleOnCurrentPage(task))
 )
+const showTaskCompletion = computed(() => !globalSettings.teacherMode)
 
 function isTaskVisibleOnCurrentPage(task: Task): boolean {
   if (!currentSystemPage.value) {
