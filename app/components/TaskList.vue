@@ -158,7 +158,6 @@ const selectedTask = computed(() => {
 })
 
 const currentRound = computed(() => systemsStore.selectedSystem?.currentRound ?? 1)
-const { pushFirstAvailablePage } = useAvailableSystemPages()
 
 
 const tasks = computed(() =>
@@ -206,12 +205,10 @@ async function openTask(task: Task) {
     }
 
     globalSettings.selectedTaskId = task.id
-    await pushFirstAvailablePage(task)
     return
   }
 
   globalSettings.selectedTaskId = task.id
-  await pushFirstAvailablePage(task)
 }
 
 async function createTaskAndOpenDesigner() {
@@ -252,7 +249,6 @@ async function deleteTask(taskId: GUID) {
 
 function closeTask() {
   globalSettings.selectedTaskId = null
-  pushFirstAvailablePage(null)
 }
 
 function isTaskLocked(task: Task): boolean {
