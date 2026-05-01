@@ -10,10 +10,6 @@ import type { GUID } from "~/model/GUID"
 export const useGlobalSettingsStore = defineStore('globalSettings', () => {
     const runtimeConfig = useRuntimeConfig()
 
-    function isTeacherAppMode(appMode: unknown): boolean {
-        return String(appMode ?? '').trim().toUpperCase() === 'TEACHER'
-    }
-  
     /**
      * Langauage which is used across the application, but each system can have its own language settings. This is used for the global settings, which are not system specific.
      * When a system is created it uses this language as the default language, but it can be changed later on.
@@ -33,7 +29,8 @@ export const useGlobalSettingsStore = defineStore('globalSettings', () => {
         new CsLanguage()
     ]
 
-    const teacherMode: Ref<boolean> = ref(String(runtimeConfig.public.appMode ?? '').trim().toUpperCase() === 'TEACHER')
+    const teacherModeEnv: Ref<boolean> = ref(String(runtimeConfig.public.appMode ?? '').trim().toUpperCase() === 'TEACHER')
+    let teacherMode: Ref<boolean> = ref(teacherModeEnv.value)
     const teacherHighlightEnabled: Ref<boolean> = ref(true)
     const loadSystemsFromPublicFolder: Ref<boolean> = ref(true)
     const bypassPageVisibility: Ref<boolean> = ref(false)
@@ -49,14 +46,19 @@ export const useGlobalSettingsStore = defineStore('globalSettings', () => {
         }
     }
 
-    function syncTeacherModeFromRuntimeConfig() {
-        teacherMode.value = isTeacherAppMode(runtimeConfig.public.appMode)
+    function toggleTeacherMode() {
+        if (!teacherModeEnv.value) {
+            return
+        }
+
+        teacherMode.value = !teacherMode.value
     }
 
     return {
         globalLanguage,
         taskMenuDisplayedAsSidebar,
         languages,
+        teacherModeEnv,
         teacherMode,
         teacherHighlightEnabled,
         loadSystemsFromPublicFolder,
@@ -67,7 +69,7 @@ export const useGlobalSettingsStore = defineStore('globalSettings', () => {
         solvedComponentIds,
         deletedPreloadedSystemIds,
         markPreloadedSystemAsDeleted,
-        syncTeacherModeFromRuntimeConfig
+        toggleTeacherMode
     }
 
 }, {

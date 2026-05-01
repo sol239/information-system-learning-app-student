@@ -68,6 +68,12 @@ export default defineNuxtConfig({
       singleSystem: process.env.NUXT_PUBLIC_SINGLE_SYSTEM ?? 'true',
       loadComponentsFrom: process.env.NUXT_PUBLIC_LOAD_COMPONENTS_FROM ?? 'system',
       loadPagesFrom,
+      htmlAvailable: process.env.NUXT_PUBLIC_HTML_AVAILABLE ?? 'true',
+      cssAvailable: process.env.NUXT_PUBLIC_CSS_AVAILABLE ?? 'true',
+      jsAvailable: process.env.NUXT_PUBLIC_JS_AVAILABLE ?? 'true',
+      sqlAvailable: process.env.NUXT_PUBLIC_SQL_AVAILABLE ?? 'true',
+      jsClickAvailable: process.env.NUXT_PUBLIC_JS_CLICK_AVAILABLE ?? 'false',
+      sqlClickAvailable: process.env.NUXT_PUBLIC_SQL_CLICK_AVAILABLE ?? 'true',
     },
   },
   colorMode: {

@@ -186,6 +186,17 @@
       <span class="mobile-hidden">{{ $t("leave_system") }}</span>
     </UButton>
 
+    <UButton
+      v-if="globalSettings.teacherModeEnv"
+      :icon="globalSettings.teacherMode ? 'i-lucide-graduation-cap' : 'i-lucide-pencil-ruler'"
+      color="teacher"
+      variant="subtle"
+      size="md"
+      @click="versionSwitchModalOpen = true"
+    >
+      <span class="mobile-hidden">{{ t("change_version") }}</span>
+    </UButton>
+
     <UModal
       v-model:open="refreshSystemModalOpen"
       :title="t('refresh_system_modal_title')"
@@ -268,6 +279,32 @@
         </div>
       </template>
     </UModal>
+
+    <UModal
+      v-model:open="versionSwitchModalOpen"
+      :title="t('change_version')"
+      :ui="{ content: 'w-[420px]' }"
+    >
+      <template #body>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ t("change_version_modal_description") }}
+        </p>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton color="neutral" variant="ghost" @click="versionSwitchModalOpen = false">
+            {{ t("cancel") }}
+          </UButton>
+          <UButton
+            color="teacher"
+            :icon="globalSettings.teacherMode ? 'i-lucide-graduation-cap' : 'i-lucide-pencil-ruler'"
+            @click="changeVersion"
+          >
+            {{ globalSettings.teacherMode ? t("switch_to_student_version") : t("switch_to_teacher_version") }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
@@ -294,6 +331,7 @@ const exitPopoverOpen = ref(false);
 const studentDrawerOpen = ref(false);
 const taskPopoverOpen = ref(false);
 const refreshSystemModalOpen = ref(false);
+const versionSwitchModalOpen = ref(false);
 
 async function printTableData() {}
 
@@ -442,6 +480,11 @@ async function leaveSystem() {
   // await SystemReset.refreshComponentsCore();
   // await SystemReset.refreshDatabaseCore();
   // await SystemReset.refreshTasksCore();
+}
+
+function changeVersion() {
+  globalSettings.toggleTeacherMode();
+  versionSwitchModalOpen.value = false;
 }
 
 async function leaveAndSave() {

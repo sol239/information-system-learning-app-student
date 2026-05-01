@@ -14,7 +14,22 @@
           {{ correct ? t("correct_badge") : t("incorrect_badge") }}
         </UBadge>
       </div>
-      <div class="header-actions flex items-center justify-end gap-2"></div>
+      <div class="header-actions flex items-center justify-end gap-2">
+        <ModernHoverPopover
+          v-if="infoDescription"
+          :title="infoTitle || label || language"
+          :description="infoDescription"
+          icon="i-lucide-info"
+        >
+          <UButton
+            icon="i-lucide-info"
+            color="neutral"
+            variant="ghost"
+            size="xs"
+            :aria-label="t('show_info')"
+          />
+        </ModernHoverPopover>
+      </div>
     </div>
 
     <div class="editor-container" :style="{ height: height }">
@@ -32,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 import { VueMonacoEditor } from "@guolao/vue-monaco-editor";
 import { useI18n } from "vue-i18n";
 
@@ -56,7 +71,11 @@ interface Props {
   correct?: boolean;
   /** When set, this text is prepended to the editor as read-only injected variable constants */
   protectedPrefix?: string;
+  /** Value used to decide whether this editor has diverged from its original content */
+  originalCode?: string;
   sizeMultiplier?: number;
+  infoTitle?: string;
+  infoDescription?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -65,8 +84,9 @@ const props = withDefaults(defineProps<Props>(), {
   sizeMultiplier: 0.7,
 });
 
-const emit = defineEmits(["update:code", "change"]);
+const emit = defineEmits(["update:code", "change", "isEdited"]);
 const instance = getCurrentInstance();
+const initialCode = ref(props.code || "");
 const showCorrectBadge = computed(() => {
   const vnodeProps = instance?.vnode.props ?? {};
   const hasCorrectProp =
@@ -86,6 +106,10 @@ const showCorrectBadge = computed(() => {
 const colorMode = useColorMode();
 const isDark = computed(() => colorMode.value === "dark");
 const monacoTheme = computed(() => (isDark.value ? "vs-dark" : "vs-light"));
+const comparisonCode = computed(() => props.originalCode ?? initialCode.value);
+const isEdited = computed(() => (props.code || "") !== (comparisonCode.value || ""));
+
+watch(isEdited, (value) => emit("isEdited", value), { immediate: true });
 
 // --- Protected prefix support ---
 

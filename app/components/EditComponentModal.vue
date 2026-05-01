@@ -12,12 +12,21 @@
       <div class="flex items-center gap-2">
         <span>{{ t("edit_component") }}</span>
         <UBadge color="neutral" variant="subtle" size="sm" class="font-mono">{{
-          props.component.id
+          props.component.name || props.component.id
         }}</UBadge>
-        <UButton @click="handleSave" color="sky" :disabled="!isFormValid">{{
-          t("save_changes")
-        }}</UButton>
       </div>
+    </template>
+
+    <template #actions>
+      <UButton
+        class="ml-auto me-10"
+        @click="handleSave"
+        color="sky"
+        :variant="isFormEdited ? 'solid' : 'subtle'"
+        :disabled="!isFormValid"
+      >
+        {{ t("save_changes") }}
+      </UButton>
     </template>
 
     <template #body>
@@ -27,13 +36,14 @@
         :component="props.component"
         :variables="props.variables"
         @validation-change="isFormValid = $event"
+        @edit-change="isFormEdited = $event"
       />
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Component as SystemComponent } from "~/model/Component";
 import { ComponentVariables } from "~/model/ComponentVariables";
 import EditComponentBody from "./EditComponentBody.vue";
@@ -65,6 +75,14 @@ const bodyRef = ref<InstanceType<typeof EditComponentBody> | null>(null);
 
 // Controls whether the save button is disabled
 const isFormValid = ref(true);
+const isFormEdited = ref(false);
+
+watch(isOpen, (open) => {
+  if (open) {
+    isFormValid.value = true;
+    isFormEdited.value = false;
+  }
+});
 
 function handleSave() {
   if (!bodyRef.value) return;

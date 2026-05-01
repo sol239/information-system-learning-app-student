@@ -215,12 +215,6 @@ function openDesignerFromSidebar() {
   .divider {
     border-color: #374151;
   }
-
-  .task-sidebar-shell {
-    background:
-      radial-gradient(circle at 88% 92%, rgba(14, 116, 144, 0.28), transparent 34%),
-      linear-gradient(135deg, #1f2433 0%, #122d2a 32%, #102238 64%, #0f172a 100%);
-  }
 }
 
 @media (max-width: 768px) {

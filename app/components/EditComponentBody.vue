@@ -1,36 +1,62 @@
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex items-center gap-2 justify-end -mt-2">
-      <UButton icon="i-lucide-minus" color="neutral" variant="ghost" @click="sizeMultiplier -= 0.05" />
+      <UTooltip :text="t('decrease_font')" :ui="{ content: 'z-[10050]' }">
+        <UButton icon="i-lucide-minus" color="neutral" variant="ghost" @click="sizeMultiplier -= 0.05" />
+      </UTooltip>
       <span class="text-xs text-gray-500 font-medium w-10 text-center">{{ Math.round(sizeMultiplier * 100) }}%</span>
-      <UButton icon="i-lucide-plus" color="neutral" variant="ghost" @click="sizeMultiplier += 0.05" />
+      <UTooltip :text="t('increase_font')" :ui="{ content: 'z-[10050]' }">
+        <UButton icon="i-lucide-plus" color="neutral" variant="ghost" @click="sizeMultiplier += 0.05" />
+      </UTooltip>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 w-full">
-      <CodeBlock v-model:code="editedHtml" language="html" label="HTML" height="400px" :correct="undefined"
-        :size-multiplier="sizeMultiplier" />
-      <CodeBlock v-model:code="editedCss" language="css" label="CSS" height="400px" :correct="undefined"
-        :size-multiplier="sizeMultiplier" />
-      <CodeBlock v-model:code="editedJs" language="typescript" label="JS" height="400px" :correct="undefined"
-        :protected-prefix="jsVarsHeader || undefined" :size-multiplier="sizeMultiplier" />
-      <div class="flex flex-col gap-2">
+      <CodeBlock v-if="htmlAvailable" v-model:code="editedHtml" language="html" label="HTML" height="400px" :correct="undefined"
+        :info-title="t('html_block_info_title')" :info-description="t('html_block_info_description')"
+        :size-multiplier="sizeMultiplier" @isEdited="setCodeBlockEdited('html', $event)" />
+      <CodeBlock v-if="cssAvailable" v-model:code="editedCss" language="css" label="CSS" height="400px" :correct="undefined"
+        :info-title="t('css_block_info_title')" :info-description="t('css_block_info_description')"
+        :size-multiplier="sizeMultiplier" @isEdited="setCodeBlockEdited('css', $event)" />
+      <CodeBlock v-if="jsAvailable" v-model:code="editedJs" language="typescript" label="JS" height="400px" :correct="undefined"
+        :info-title="t('js_block_info_title')" :info-description="t('js_block_info_description')"
+        :protected-prefix="jsVarsHeader || undefined" :size-multiplier="sizeMultiplier"
+        @isEdited="setCodeBlockEdited('js', $event)" />
+      <div v-if="sqlAvailable" class="flex flex-col gap-2">
         <div class="flex flex-row gap-2 w-full items-center">
           <USelect id="query-select" v-model="selectedSqlQuery" :items="sqlQueryNames" :placeholder="t('select_sql_query')"
-            class="flex-1" :disabled="Object.keys(sqlRecord).length === 1" :ui="selectOverlayUi" />
-          <UBadge color="neutral" variant="subtle" size="md">{{ sqlQueryNames.length }}</UBadge>
-          <UButton icon="i-lucide-plus" @click="addQuery" size="md" class="aspect-square shrink-0" />
-          <UButton icon="i-lucide-minus" @click="removeQuery" size="md" color="red" variant="subtle"
-            class="aspect-square shrink-0" :disabled="sqlQueryNames.length <= 1" />
+            size="xs" class="flex-1" :disabled="Object.keys(sqlRecord).length === 1" :ui="selectOverlayUi" />
+          <div class="flex gap-1">
+            <UTooltip :text="t('add_sql_query')" :ui="{ content: 'z-[10050]' }">
+              <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addQuery" />
+            </UTooltip>
+            <UTooltip :text="t('remove_sql_query')" :ui="{ content: 'z-[10050]' }">
+              <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeQuery"
+                :disabled="sqlQueryNames.length <= 1" />
+            </UTooltip>
+          </div>
         </div>
         <CodeBlock v-model:code="editedSql" language="sql" label="SQL" height="400px" :correct="isEditedSqlValid"
-          :size-multiplier="sizeMultiplier" />
+          :info-title="t('sql_block_info_title')" :info-description="t('sql_block_info_description')"
+          :size-multiplier="sizeMultiplier" :original-code="originalSqlRecord[selectedSqlQuery] || ''"
+          @isEdited="setCodeBlockEdited('sql', $event)" />
       </div>
     </div>
 
-    <USeparator :label="t('click_actions')" />
+    <div v-if="clickActionsAvailable" class="flex items-center gap-2">
+      <USeparator class="flex-1" />
+      <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('click_actions') }}</span>
+      <ModernHoverPopover
+        :title="t('click_actions_info_title')"
+        :description="t('click_actions_info_description')"
+        icon="i-lucide-info"
+      >
+        <UButton icon="i-lucide-info" color="neutral" variant="ghost" size="xs" :aria-label="t('show_info')" />
+      </ModernHoverPopover>
+      <USeparator class="flex-1" />
+    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
-      <div class="flex flex-col gap-2">
+    <div v-if="clickActionsAvailable" class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+      <div v-if="jsClickAvailable" class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ t('js_click_action') }}</span>
           <UButton v-if="!editedJsClick" icon="i-lucide-plus" size="xs" variant="ghost" :label="t('add_action')"
@@ -39,7 +65,9 @@
         </div>
 
         <CodeBlock v-if="editedJsClick" v-model:code="editedJsClick" language="typescript" height="200px"
-          label="JS Click" :correct="undefined" :size-multiplier="sizeMultiplier" />
+          label="JS Click" :correct="undefined"
+          :info-title="t('js_click_block_info_title')" :info-description="t('js_click_block_info_description')"
+          :size-multiplier="sizeMultiplier" @isEdited="setCodeBlockEdited('jsClick', $event)" />
         <div v-else
           class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
           <UIcon name="i-lucide-mouse-pointer-2" class="w-5 h-5 text-gray-400" />
@@ -47,22 +75,28 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-2">
+      <div v-if="sqlClickAvailable" class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">{{ t('sql_click_actions') }}</span>
           <USelect v-if="sqlClickQueryNames.length > 0" v-model="selectedSqlClickQuery" :items="sqlClickQueryNames"
             placeholder="Select SQL click query" size="xs" class="flex-1"
             :disabled="sqlClickQueryNames.length <= 1" :ui="selectOverlayUi" />
           <div class="flex gap-1">
-            <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addClickQuery" />
-            <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeClickQuery"
-              :disabled="sqlClickQueryNames.length === 0" />
+            <UTooltip :text="t('add_sql_click_query')" :ui="{ content: 'z-[10050]' }">
+              <UButton icon="i-lucide-plus" size="xs" variant="ghost" @click="addClickQuery" />
+            </UTooltip>
+            <UTooltip :text="t('remove_sql_click_query')" :ui="{ content: 'z-[10050]' }">
+              <UButton icon="i-lucide-trash-2" size="xs" variant="ghost" color="red" @click="removeClickQuery"
+                :disabled="sqlClickQueryNames.length === 0" />
+            </UTooltip>
           </div>
         </div>
 
         <div v-if="sqlClickQueryNames.length > 0" class="flex flex-col gap-2">
           <CodeBlock v-model:code="editedSqlClick" language="sql" height="200px" label="SQL Click"
-            :size-multiplier="sizeMultiplier" />
+            :info-title="t('sql_click_block_info_title')" :info-description="t('sql_click_block_info_description')"
+            :size-multiplier="sizeMultiplier" :original-code="originalSqlClickRecord[selectedSqlClickQuery] || ''"
+            @isEdited="setCodeBlockEdited('sqlClick', $event)" />
         </div>
         <div v-else
           class="flex flex-row items-center gap-2 py-4 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
@@ -74,32 +108,61 @@
 
     <USeparator />
 
-    <div v-if="generalVariableNames.length > 0" class="mt-2 text-left">
-      <p class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">{{ t('available_general_variables') }}</p>
-      <div class="flex flex-wrap gap-2 text-left">
-        <div v-for="name in generalVariableNames" :key="name" class="general-var-card text-left">
-          <span class="general-var-name">{{ name }}</span>
-          <span class="general-var-value">{{ formatVariablesPreview(name, localVariables.generalVariables) }}</span>
+    <div class="flex flex-wrap items-start gap-4">
+      <div v-if="generalVariableNames.length > 0" class="text-left">
+        <div class="mb-2 flex items-center gap-1">
+          <p class="text-xs text-left font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{{ t('available_general_variables') }}</p>
+          <ModernHoverPopover
+            :title="t('available_general_variables')"
+            :description="t('general_variables_info_description')"
+            icon="i-lucide-info"
+          >
+            <UButton icon="i-lucide-info" color="neutral" variant="ghost" size="xs" :aria-label="t('show_info')" />
+          </ModernHoverPopover>
+        </div>
+        <div class="flex flex-wrap gap-2 text-left">
+          <div v-for="name in generalVariableNames" :key="name" class="general-var-card text-left">
+            <span class="general-var-name">{{ name }}</span>
+            <span class="general-var-value">{{ formatVariablesPreview(name, localVariables.generalVariables) }}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="sqlVariableNames.length > 0" class="mt-2">
-      <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">{{ t('available_sql_variables') }}</p>
-      <div class="flex flex-wrap gap-2">
-        <div v-for="name in sqlVariableNames" :key="name" class="sql-var-card">
-          <span class="sql-var-name">{{ name }}</span>
-          <span class="sql-var-value">{{ formatVariablesPreview(name, localVariables.sqlVariables) }}</span>
+      <div v-if="sqlVariableNames.length > 0">
+        <div class="mb-2 flex items-center gap-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">{{ t('available_sql_variables') }}</p>
+          <ModernHoverPopover
+            :title="t('available_sql_variables')"
+            :description="t('sql_variables_info_description')"
+            icon="i-lucide-info"
+          >
+            <UButton icon="i-lucide-info" color="neutral" variant="ghost" size="xs" :aria-label="t('show_info')" />
+          </ModernHoverPopover>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div v-for="name in sqlVariableNames" :key="name" class="sql-var-card">
+            <span class="sql-var-name">{{ name }}</span>
+            <span class="sql-var-value">{{ formatVariablesPreview(name, localVariables.sqlVariables) }}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="jsVariableNames.length > 0" class="mt-2">
-      <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">{{ t('available_js_variables') }}</p>
-      <div class="flex flex-wrap gap-2">
-        <div v-for="name in jsVariableNames" :key="name" class="js-var-card">
-          <span class="js-var-name">{{ name }}</span>
-          <span class="js-var-value">{{ formatVariablesPreview(name, localVariables.jsVariables) }}</span>
+      <div v-if="jsVariableNames.length > 0">
+        <div class="mb-2 flex items-center gap-1">
+          <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{{ t('available_js_variables') }}</p>
+          <ModernHoverPopover
+            :title="t('available_js_variables')"
+            :description="t('js_variables_info_description')"
+            icon="i-lucide-info"
+          >
+            <UButton icon="i-lucide-info" color="neutral" variant="ghost" size="xs" :aria-label="t('show_info')" />
+          </ModernHoverPopover>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div v-for="name in jsVariableNames" :key="name" class="js-var-card">
+            <span class="js-var-name">{{ name }}</span>
+            <span class="js-var-value">{{ formatVariablesPreview(name, localVariables.jsVariables) }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -109,7 +172,7 @@
 
 <script setup lang="ts">
 import type { QueryExecResult } from 'sql.js';
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, watch, computed, onMounted, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { SqlHandler } from '~/core/SqlHandler';
 import { JsHandler } from '~/core/JsHandler';
@@ -130,10 +193,20 @@ const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'validation-change', isValid: boolean): void;
+  (e: 'edit-change', isEdited: boolean): void;
 }>();
 
 const systemsStore = useSystemsStore();
 const db = computed(() => systemsStore.selectedSystem?.database ?? undefined);
+const runtimeConfig = useRuntimeConfig();
+const isPublicFlagEnabled = (value: unknown, fallback: boolean) => String(value ?? fallback).trim().toLowerCase() === 'true';
+const htmlAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.htmlAvailable, true));
+const cssAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.cssAvailable, true));
+const jsAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.jsAvailable, true));
+const sqlAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.sqlAvailable, true));
+const jsClickAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.jsClickAvailable, false));
+const sqlClickAvailable = computed(() => isPublicFlagEnabled(runtimeConfig.public.sqlClickAvailable, true));
+const clickActionsAvailable = computed(() => jsClickAvailable.value || sqlClickAvailable.value);
 
 // Form state
 const editedHtml = ref(props.component.html);
@@ -154,6 +227,9 @@ const selectOverlayUi = {
 const localVariables = ref<ComponentVariables>(new ComponentVariables());
 const sqlRecord = ref<Record<string, string>>({ ...(props.component.sql ?? {}) });
 const sqlClickRecord = ref<Record<string, string>>({ ...(props.component.sql_click ?? {}) });
+const originalSqlRecord = { ...(props.component.sql ?? {}) };
+const originalSqlClickRecord = { ...(props.component.sql_click ?? {}) };
+const codeBlockEdited = reactive<Record<string, boolean>>({});
 
 // Computed
 const sqlQueryNames = computed(() => Object.keys(sqlRecord.value));
@@ -161,6 +237,23 @@ const sqlClickQueryNames = computed(() => Object.keys(sqlClickRecord.value));
 const sqlVariableNames = computed(() => localVariables.value.sqlVariables.map(v => v.name));
 const jsVariableNames = computed(() => localVariables.value.jsVariables.map(v => v.name));
 const generalVariableNames = computed(() => localVariables.value.generalVariables.map(v => v.name));
+const recordsEqual = (first: Record<string, string>, second: Record<string, string>) => {
+  const firstKeys = Object.keys(first).sort();
+  const secondKeys = Object.keys(second).sort();
+
+  if (firstKeys.length !== secondKeys.length) return false;
+
+  return firstKeys.every((key, index) => key === secondKeys[index] && (first[key] || '') === (second[key] || ''));
+};
+const isBodyEdited = computed(() => {
+  return Object.values(codeBlockEdited).some(Boolean)
+    || editedHtml.value !== props.component.html
+    || editedCss.value !== props.component.css
+    || editedJs.value !== props.component.js
+    || (editedJsClick.value || '') !== (props.component.js_click || '')
+    || !recordsEqual(sqlRecord.value, originalSqlRecord)
+    || !recordsEqual(sqlClickRecord.value, originalSqlClickRecord);
+});
 
 const jsVarsHeader = computed<string>(() => {
   const vars = [...(localVariables.value.generalVariables ?? []), ...(localVariables.value.sqlVariables ?? [])];
@@ -176,6 +269,7 @@ const jsVarsHeader = computed<string>(() => {
 
 // Watch validity and let parent wrapper know
 watch(isEditedSqlValid, (valid) => emit('validation-change', valid), { immediate: true });
+watch(isBodyEdited, (edited) => emit('edit-change', edited), { immediate: true });
 
 // Setup Initial state on mount
 onMounted(() => {
@@ -225,6 +319,10 @@ watch(editedSql, async (newSql) => {
   const replacedSql = SqlHandler.ReplaceSqlForVariablesInRecord(localVariables.value, sqlRecord.value);
   await populateSqlVariables(replacedSql);
 });
+watch(editedSqlClick, (newSql) => {
+  if (!selectedSqlClickQuery.value) return;
+  sqlClickRecord.value[selectedSqlClickQuery.value] = newSql;
+});
 
 // Query switching
 watch(selectedSqlQuery, (newQuery) => editedSql.value = sqlRecord.value[newQuery] || '');
@@ -244,6 +342,10 @@ function addQuery() {
   const newQueryName = `query${Object.keys(sqlRecord.value).length + 1}`;
   sqlRecord.value[newQueryName] = '';
   selectedSqlQuery.value = newQueryName;
+}
+
+function setCodeBlockEdited(block: string, edited: boolean) {
+  codeBlockEdited[block] = edited;
 }
 
 function removeQuery() {

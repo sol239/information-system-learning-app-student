@@ -18,8 +18,6 @@ const { prepareSystem } = usePrepareSystem();
 const { pushFirstAvailablePage } = useAvailableSystemPages();
 
 onMounted(async () => {
-  globalSettingsStore.syncTeacherModeFromRuntimeConfig();
-
   if (globalSettingsStore.teacherMode) {
     await navigateTo('/systems', { replace: true });
     return;
