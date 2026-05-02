@@ -19,9 +19,13 @@ jobs:
       - name: Use repository app mode variable when configured
         env:
           REPOSITORY_APP_MODE: ${{ vars.NUXT_PUBLIC_APP_MODE }}
+          REPOSITORY_BASE_URL: ${{ vars.NUXT_APP_BASE_URL }}
         run: |
           if [ -n "$REPOSITORY_APP_MODE" ]; then
             echo "NUXT_PUBLIC_APP_MODE=$REPOSITORY_APP_MODE" >> "$GITHUB_ENV"
+          fi
+          if [ -n "$REPOSITORY_BASE_URL" ]; then
+            echo "NUXT_APP_BASE_URL=$REPOSITORY_BASE_URL" >> "$GITHUB_ENV"
           fi
       - run: npx nuxt build --preset github_pages
       - name: Upload artifact

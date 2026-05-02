@@ -111,9 +111,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: false
   },
   app: {
-    // locally:
-    // baseURL: './'
-    baseURL: '/information-system-learning-app', 
+    baseURL: process.env.NUXT_APP_BASE_URL ?? '/information-system-learning-app',
   },
   ui: {
     theme: {
